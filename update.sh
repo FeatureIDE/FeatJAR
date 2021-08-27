@@ -41,6 +41,9 @@ fi
 git-update util
 git-update formula
 git-update formula-analysis
+git-update formula-analysis-javasmt
+git-update pc-extraction
+git-update FeatureCoPP
 git-update evaluation
 
 git-update evaluation-mig
