@@ -62,11 +62,11 @@
 		<resources>
 			<!-- Include all normal resources -->
 			<resource>
-				<directory>src/main/resources</directory>
+				<directory>${project.basedir}/src/main/resources</directory>
 			</resource>
 			<!-- License files -->
 			<resource>
-				<directory></directory>
+				<directory>${project.basedir}</directory>
 				<includes>
 					<include>COPYING</include>
 					<include>COPYING.LESSER</include>
