@@ -15,16 +15,24 @@ if [ "$PREREQUISITE_FAILED" -eq "1" ]; then
     exit 1;
 fi
 
-update-all() {
+add-ssh-key() {
+    if [ -z "$LOCAL_SSHKEY_SAVED" ]; then
+        eval $(ssh-agent) && ssh-add && LOCAL_SSHKEY_SAVED=1 && export LOCAL_SSHKEY_SAVED;
+    fi
+}
+
+pull-all() {
+    add-ssh-key
     git pull --recurse-submodules -j8
 }
 
 push-all() {
+    add-ssh-key
     git push --recurse-submodules=on-demand
 }
 
 build-all() {
-    update-all
+    pull-all
     mvn clean install
 }
 
@@ -35,7 +43,7 @@ while getopts ":bupcr" o; do
         r) mvn clean ;;
         c) mvn install ;;
         b) build-all ;;
-        u) update-all ;;
+        u) pull-all ;;
         p) push-all ;;
         *) usage ;;
     esac
