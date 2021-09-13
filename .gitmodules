@@ -28,3 +28,6 @@
 [submodule "pc-extraction"]
 	path = pc-extraction
 	url = git@github.com:skrieter/pc-extraction.git
+[submodule "formula-analysis-sharpsat"]
+	path = formula-analysis-sharpsat
+	url = git@github.com:skrieter/formula-analysis-sharpsat.git

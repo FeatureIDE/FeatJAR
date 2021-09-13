@@ -13,9 +13,9 @@
 		<module>formula</module>
 		<module>formula-analysis</module>
 		<module>formula-analysis-javasmt</module>
+		<!-- <module>formula-analysis-sharpsat</module> -->
 		<module>FeatureCoPP</module>
 		<module>pc-extraction</module>
-
 		<module>evaluation</module>
 		<module>evaluation-mig</module>
 		<module>evaluation-pc-sampling</module>
