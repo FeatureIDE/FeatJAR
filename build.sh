@@ -20,7 +20,8 @@ update-all() {
 }
 
 push-all() {
-    git push --recurse-submodules=on-demand
+    git submodule foreach 'git push origin master || true'
+    git push origin master
 }
 
 build-all() {
