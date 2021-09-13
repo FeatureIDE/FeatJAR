@@ -23,21 +23,17 @@ push-all() {
     git push --recurse-submodules=on-demand
 }
 
-compile-all() {
+build-all() {
+    update-all
     mvn clean install
 }
 
-build-all() {
-    update-all
-    compile-all
-}
-
-usage() { echo "Usage: $0 [-b] [-u] [-p]" 1>&2; exit 1; }
+usage() { echo "Usage: $0 [-b] [-u] [-p] [-c] [-r]" 1>&2; exit 1; }
 
 while getopts ":bupcr" o; do
     case "${o}" in
         r) mvn clean ;;
-        c) compile-all ;;
+        c) mvn install ;;
         b) build-all ;;
         u) update-all ;;
         p) push-all ;;
