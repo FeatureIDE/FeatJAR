@@ -5,7 +5,7 @@
 Assumes Bash, Git, Maven, and Ant to be installed.
 
 ```
-git clone https://github.com/skrieter/spldev.git
+git clone --recurse-submodules -j8 https://github.com/skrieter/spldev.git
 cd spldev
 ./build.sh
 ```

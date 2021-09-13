@@ -19,7 +19,8 @@
 		<module>evaluation</module>
 		<module>evaluation-mig</module>
 		<module>evaluation-pc-sampling</module>
-		<module>evaluation-sampling-metrics</module>
+		<!--<module>evaluation-sampling-metrics</module>-->
+		<module>evaluation-tseytin</module>
 	</modules>
 
 	<licenses>
