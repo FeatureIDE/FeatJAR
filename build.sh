@@ -23,13 +23,13 @@ add-ssh-key() {
 
 pull-all() {
     add-ssh-key
-    git submodule foreach 'git pull origin master || true'
+    git submodule foreach 'git pull origin master || true && echo ""'
     git pull origin master
 }
 
 push-all() {
     add-ssh-key
-    git submodule foreach 'git push origin master || true'
+    git submodule foreach 'git push origin master || true && echo ""'
     git push origin master
 }
 
