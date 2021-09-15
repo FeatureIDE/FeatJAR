@@ -23,7 +23,8 @@ add-ssh-key() {
 
 pull-all() {
     add-ssh-key
-    git pull --recurse-submodules -j8
+    git submodule foreach 'git pull origin master || true'
+    git pull origin master
 }
 
 push-all() {
