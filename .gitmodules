@@ -33,4 +33,7 @@
 	url = git@github.com:skrieter/formula-analysis-sharpsat.git
 [submodule "sharpsat-native"]
 	path = sharpsat-native
-	url = ./sharpsat-native
+	url = git@github.com:skrieter/sharpsat-native.git
+[submodule "javasmt-native"]
+	path = javasmt-native
+	url = git@github.com:skrieter/javasmt-native.git
