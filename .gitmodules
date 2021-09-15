@@ -31,3 +31,6 @@
 [submodule "formula-analysis-sharpsat"]
 	path = formula-analysis-sharpsat
 	url = git@github.com:skrieter/formula-analysis-sharpsat.git
+[submodule "sharpsat-native"]
+	path = sharpsat-native
+	url = ./sharpsat-native
