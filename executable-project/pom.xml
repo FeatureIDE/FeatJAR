@@ -10,7 +10,7 @@
 
 	<artifactId>executable-project</artifactId>
 	<packaging>pom</packaging>
-	
+
 	<modules>
 		<module>../evaluation-mig</module>
 		<module>../evaluation-pc-sampling</module>
@@ -30,17 +30,6 @@
 				<artifactId>maven-dependency-plugin</artifactId>
 				<executions>
 					<execution>
-						<id>copy-dependencies</id>
-						<phase>validate</phase>
-						<goals>
-							<goal>copy-dependencies</goal>
-						</goals>
-						<configuration>
-							<outputDirectory>libs</outputDirectory>
-							<excludeTypes>jar,unix.tar.gz,win.tar.gz,mac.tar.gz</excludeTypes>
-						</configuration>
-					</execution>
-					<execution>
 						<id>unpack-dependencies</id>
 						<phase>validate</phase>
 						<goals>
@@ -48,7 +37,7 @@
 						</goals>
 						<configuration>
 							<outputDirectory>libs</outputDirectory>
-							<includeTypes>unix.tar.gz,win.tar.gz,mac.tar.gz</includeTypes>
+							<includeTypes>tar.gz</includeTypes>
 						</configuration>
 					</execution>
 				</executions>

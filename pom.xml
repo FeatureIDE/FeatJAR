@@ -13,6 +13,7 @@
 		<module>util</module>
 		<module>formula</module>
 		<module>formula-analysis</module>
+		<module>javasmt-native</module>
 		<module>formula-analysis-javasmt</module>
 		<module>sharpsat-native</module>
 		<module>formula-analysis-sharpsat</module>
