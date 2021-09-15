@@ -14,7 +14,7 @@
 		<module>formula</module>
 		<module>formula-analysis</module>
 		<module>formula-analysis-javasmt</module>
-		<module>formula-analysis-sharpsat-native</module>
+		<module>sharpsat-native</module>
 		<module>formula-analysis-sharpsat</module>
 		<module>FeatureCoPP</module>
 		<module>pc-extraction</module>
