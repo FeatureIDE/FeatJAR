@@ -134,6 +134,23 @@
 				<version>3.2.0</version>
 			</plugin>
 
+			<!-- Formatter -->
+			<plugin>
+				<groupId>net.revelc.code.formatter</groupId>
+				<artifactId>formatter-maven-plugin</artifactId>
+				<version>2.16.0</version>
+				<executions>
+					<execution>
+						<goals>
+							<goal>format</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<configFile>${project.basedir}/../formatter.xml</configFile>
+				</configuration>
+			</plugin>
+
 		</plugins>
 	</build>
 </project>
