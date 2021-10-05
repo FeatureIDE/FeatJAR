@@ -20,6 +20,9 @@
 		<module>FeatureCoPP</module>
 		<module>pc-extraction</module>
 		<module>evaluation</module>
+		<module>evaluation-tseytin</module>
+<!--		<module>evaluation-mig</module>-->
+<!--		<module>evaluation-pc-sampling</module>-->
 	</modules>
 
 	<licenses>
@@ -91,7 +94,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
-				<version>3.2.0</version>
+				<version>3.3.1</version>
 				<configuration>
 					<source>11</source>
 					<detectJavaApiLink>false</detectJavaApiLink>
@@ -150,7 +153,6 @@
 					<configFile>${project.basedir}/../formatter.xml</configFile>
 				</configuration>
 			</plugin>
-
 		</plugins>
 	</build>
 </project>
