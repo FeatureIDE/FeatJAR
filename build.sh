@@ -2,17 +2,17 @@
 # To control the built/pushed/pulled modules, (un)comment them in build.cfg.
 MODULES="$(cat build.cfg | grep -E "^[^#]")"
 
-pushd () {
+pushd() {
     command pushd "$@" > /dev/null
 }
 
-popd () {
+popd() {
     command popd "$@" > /dev/null
 }
 
 # Pull projects from GitHub
 pull() {
-    if [ -d "$1" ]; then
+    if [ -d $1/.git ]; then
         pushd $1
         echo 'Pulling '$1
         git pull origin master -q
@@ -26,7 +26,7 @@ pull() {
     else
         # try to clone with SSH, alternatively with HTTPS
         echo 'Cloning '$1
-        git clone git@github.com:skrieter/$1.git -q
+        git clone --recurse-submodules -j8 git@github.com:skrieter/$1.git -q
         if [[ "$?" -ne 0 ]] ; then
             git clone https://github.com/skrieter/$1.git -q
             if [[ "$?" -ne 0 ]] ; then
@@ -38,7 +38,7 @@ pull() {
 
 # Push projects to GitHub
 push() {
-    if [ -d "$1" ]; then
+    if [ -d $1/.git ]; then
         pushd $1
         echo 'Pushing '$1
         git push origin master -q
