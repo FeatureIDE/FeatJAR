@@ -21,8 +21,8 @@
 		<module>pc-extraction</module>
 		<module>evaluation</module>
 		<module>evaluation-tseytin</module>
-<!--		<module>evaluation-mig</module>-->
-<!--		<module>evaluation-pc-sampling</module>-->
+		<!--<module>evaluation-mig</module>-->
+		<!--<module>evaluation-pc-sampling</module>-->
 	</modules>
 
 	<licenses>
