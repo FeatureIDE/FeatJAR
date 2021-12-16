@@ -23,6 +23,7 @@
 		<module>evaluation-tseytin</module>
 		<!--<module>evaluation-mig</module>-->
 		<!--<module>evaluation-pc-sampling</module>-->
+		<module>cli</module>
 	</modules>
 
 	<licenses>
