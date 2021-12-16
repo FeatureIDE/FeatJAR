@@ -101,6 +101,13 @@ compile-all() {
     mvn clean install
 }
 
+commit-all() {
+    for module in $MODULES; do
+        git -C $module add -A
+        git -C $module commit -m "$MSG"
+    done
+}
+
 build-all() {
     pull-all
     compile-all
@@ -108,12 +115,13 @@ build-all() {
 
 usage() { echo "Usage: $0 [-b] [-u] [-p] [-c] [-r]" 1>&2; exit 1; }
 
-while getopts ":bupcr" o; do
+while getopts ":bupcrm" o; do
     case "${o}" in
         c) compile-all ;;
         b) build-all ;;
         u) pull-all ;;
         p) push-all ;;
+        m) commit-all ;;
         *) usage ;;
     esac
 done
