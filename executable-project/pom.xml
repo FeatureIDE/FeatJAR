@@ -64,7 +64,7 @@
 									<resource>extensions.xml</resource>
 								</transformer>
 								<transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-									<mainClass>org.spldev.cli.CLI</mainClass>
+									<mainClass>org.spldev.util.cli.CLI</mainClass>
 								</transformer>
 							</transformers>
 						</configuration>
