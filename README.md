@@ -14,3 +14,8 @@ cd spldev
 ```
 
 You can add/remove built projects in build.cfg.
+
+To skip unit tests, run:
+```
+mvn install -DskipTests=true
+```
