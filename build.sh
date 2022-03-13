@@ -12,7 +12,7 @@ popd() {
 
 # Pull projects from GitHub
 pull() {
-    if [ -d $1/.git ]; then
+    if [ -d $1/.git ] || [ -L $1 ]; then
         pushd $1
         echo 'Pulling '$1
         git pull origin master -q
