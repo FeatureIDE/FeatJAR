@@ -1,6 +1,9 @@
 #! /bin/bash
 # To control the built/pushed/pulled modules, (un)comment them in build.cfg.
-MODULES="$(cat build.cfg | grep -E "^[^#]")"
+MODULES=("$(cat build.cfg | grep -oP "^[^#]\S*")")
+MODULES=($MODULES)
+USERS="$(cat build.cfg | grep -oP "^[^#]\S+\s+\K\S+")"
+USERS=($USERS)
 
 pushd() {
     command pushd "$@" > /dev/null
@@ -14,7 +17,7 @@ popd() {
 pull() {
     if [ -d $1/.git ] || [ -L $1 ]; then
         pushd $1
-        echo 'Pulling '$1
+        echo 'Pulling '$1' from github.com:'$2
         git pull origin master -q
         if [[ "$?" -ne 0 ]] ; then
             >&2 echo
@@ -25,10 +28,10 @@ pull() {
         popd
     else
         # try to clone with SSH, alternatively with HTTPS
-        echo 'Cloning '$1
-        git clone --recurse-submodules -j8 git@github.com:skrieter/$1.git -q
+        echo 'Cloning '$1' from github.com:'$2
+        git clone --recurse-submodules -j8 git@github.com:$2/$1.git -q
         if [[ "$?" -ne 0 ]] ; then
-            git clone https://github.com/skrieter/$1.git -q
+            git clone https://github.com/$2/$1.git -q
             if [[ "$?" -ne 0 ]] ; then
                 >&2 echo 'Error during cloning of '$1; exit -1
             fi
@@ -48,6 +51,18 @@ push() {
             >&2 echo
             git status
         fi
+        popd
+    else
+        >&2 echo 'Repo '$1' does not exist'
+    fi
+}
+
+status() {
+    if [ -d $1/.git ]; then
+        pushd $1
+        echo 'Status of '$1
+        git status -bs | sed 's/^/  /'
+        echo ''
         popd
     else
         >&2 echo 'Repo '$1' does not exist'
@@ -76,8 +91,8 @@ add-ssh-key() {
 
 pull-all() {
     add-ssh-key
-    for module in $MODULES; do
-        pull $module
+    for i in "${!MODULES[@]}"; do
+        pull "${MODULES[i]}" "${USERS[i]}"
     done
     echo "Pulling root"
     git pull origin master -q
@@ -85,24 +100,32 @@ pull-all() {
 
 push-all() {
     add-ssh-key
-    for module in $MODULES; do
+    for module in "${MODULES[@]}"; do
         push $module
     done
     echo "Pushing root"
     git push origin master -q
 }
 
+status-all() {
+    for module in "${MODULES[@]}"; do
+        status $module
+    done
+    echo 'Status of root'
+    git status -bs | sed 's/^/  /'
+}
+
 compile-all() {
     sed -i -E "s#<!--<module>(.*?)</module>-->#<module>\1</module>#" pom.xml
     sed -i -E "s#<module>(.*?)</module>#<!--<module>\1</module>-->#" pom.xml
-    for module in $MODULES; do
+    for module in "${MODULES[@]}"; do
         sed -i "s#<!--<module>$module</module>-->#<module>$module</module>#" pom.xml
     done
     mvn clean install
 }
 
 commit-all() {
-    for module in $MODULES; do
+    for module in "${MODULES[@]}"; do
         git -C $module add -A
         git -C $module commit -m "$MSG"
     done
@@ -113,14 +136,15 @@ build-all() {
     compile-all
 }
 
-usage() { echo "Usage: $0 [-b] [-u] [-p] [-c] [-r]" 1>&2; exit 1; }
+usage() { echo "Usage: $0 [-b] [-u] [-p] [-s] [-c] [-r]" 1>&2; exit 1; }
 
-while getopts ":bupcrm" o; do
+while getopts ":bupscrm" o; do
     case "${o}" in
         c) compile-all ;;
         b) build-all ;;
         u) pull-all ;;
         p) push-all ;;
+        s) status-all ;;
         m) commit-all ;;
         *) usage ;;
     esac
