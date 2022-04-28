@@ -19,3 +19,8 @@ To skip unit tests, run:
 ```
 mvn install -DskipTests=true
 ```
+
+To compile sharpSAT, make sure libgmp is installed, e.g. on Fedora:
+```
+sudo dnf install gmp-devel
+```
