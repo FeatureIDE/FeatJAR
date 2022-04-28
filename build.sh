@@ -124,6 +124,10 @@ compile-all() {
     mvn clean install
 }
 
+compile-all-fast() {
+	mvn -T 1C install -Dmaven.test.skip -DskipTests -Dmaven.javadoc.skip=true	
+}
+
 commit-all() {
     for module in "${MODULES[@]}"; do
         git -C $module add -A
@@ -136,11 +140,12 @@ build-all() {
     compile-all
 }
 
-usage() { echo "Usage: $0 [-b] [-u] [-p] [-s] [-c] [-r]" 1>&2; exit 1; }
+usage() { echo "Usage: $0 [-b] [-u] [-p] [-s] [-c] [-f] [-r]" 1>&2; exit 1; }
 
-while getopts ":bupscrm" o; do
+while getopts ":bupscfrm" o; do
     case "${o}" in
         c) compile-all ;;
+        f) compile-all-fast ;;
         b) build-all ;;
         u) pull-all ;;
         p) push-all ;;
