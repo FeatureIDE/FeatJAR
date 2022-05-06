@@ -24,3 +24,7 @@ To compile sharpSAT, make sure libgmp is installed, e.g. on Fedora:
 ```
 sudo dnf install gmp-devel
 ```
+or on Ubuntu/WSL:
+```
+sudo apt install libgmp-dev
+```
