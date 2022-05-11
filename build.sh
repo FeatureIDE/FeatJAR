@@ -1,5 +1,23 @@
 #! /bin/bash
+
+# Check if maven and ant are installed
+PREREQUISITE_FAILED=0
+if [ -z "$JAVA_HOME" ]; then
+    >&2 echo 'Set JAVA_HOME first!'
+    PREREQUISITE_FAILED=1
+fi
+git --version 1>/dev/null 2>/dev/null || { >&2 echo 'Install Git first!' ; PREREQUISITE_FAILED=1; } 
+mvn --version 1>/dev/null 2>/dev/null || { >&2 echo 'Install Maven first!' ; PREREQUISITE_FAILED=1; } 
+ant -version 1>/dev/null 2>/dev/null || { >&2 echo 'Install Ant first!' ; PREREQUISITE_FAILED=1; } 
+if [ "$PREREQUISITE_FAILED" -eq "1" ]; then
+    >&2 echo 'Fail!'
+    exit 1;
+fi
+
 # To control the built/pushed/pulled modules, (un)comment them in build.cfg.
+if [ ! -f build.cfg ] ; then
+	cp build.template.cfg build.cfg && echo "Created default build.cfg (edit if necessary)"
+fi
 MODULES=("$(cat build.cfg | grep -oP "^[^#]\S*")")
 MODULES=($MODULES)
 USERS="$(cat build.cfg | grep -oP "^[^#]\S+\s+\K\S+")"
@@ -69,19 +87,6 @@ status() {
     fi
 }
 
-# Check if maven and ant are installed
-PREREQUISITE_FAILED=0
-if [ -z "$JAVA_HOME" ]; then
-    >&2 echo 'Set JAVA_HOME first!'
-    PREREQUISITE_FAILED=1
-fi
-git --version 1>/dev/null 2>/dev/null || { >&2 echo 'Install Git first!' ; PREREQUISITE_FAILED=1; } 
-mvn --version 1>/dev/null 2>/dev/null || { >&2 echo 'Install Maven first!' ; PREREQUISITE_FAILED=1; } 
-ant -version 1>/dev/null 2>/dev/null || { >&2 echo 'Install Ant first!' ; PREREQUISITE_FAILED=1; } 
-if [ "$PREREQUISITE_FAILED" -eq "1" ]; then
-    >&2 echo 'Fail!'
-    exit 1;
-fi
 
 add-ssh-key() {
     if [ -z "$LOCAL_SSHKEY_SAVED" ] && ssh-agent --version 1>/dev/null 2>/dev/null; then
@@ -136,6 +141,7 @@ commit-all() {
 }
 
 build-all() {
+	init
     pull-all
     compile-all
 }

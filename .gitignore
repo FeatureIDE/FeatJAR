@@ -1,3 +1,5 @@
 .project
 .idea
+.settings/
 target/
+build.cfg
