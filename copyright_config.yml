@@ -1,9 +1,7 @@
-license:
-  name: lgpl
-  version: 3
-program:
-  name: 
-  description: 
-  authors: 
-  url: 
-  year: 
+license_name: lgpl
+license_version: 3
+name:
+description:
+authors: SPLDev Team
+url:
+year: 2021-2022
