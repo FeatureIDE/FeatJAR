@@ -1,6 +1,6 @@
 ## spldev root project
 
-### Getting started (Ubuntu)
+### Getting started (Ubuntu/WSL)
 
 ```
 # install dependencies (libgmp required for sharpSAT)
