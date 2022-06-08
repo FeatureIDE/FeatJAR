@@ -1,30 +1,17 @@
 ## spldev root project
 
-### Getting started
-
-Assumes Bash, Git, Maven, and Ant to be installed.
+### Getting started (Ubuntu)
 
 ```
+# install dependencies (libgmp required for sharpSAT)
+sudo apt update
+sudo apt install git default-jre maven ant libgmp-dev
+
 # without push access
 git clone https://github.com/skrieter/spldev.git
 # with push access
 git clone git@github.com:skrieter/spldev.git
+
 cd spldev
 ./build.sh
-```
-
-You can add/remove built projects in build.cfg.
-
-To skip unit tests, run:
-```
-mvn install -DskipTests=true
-```
-
-To compile sharpSAT, make sure libgmp is installed, e.g. on Fedora:
-```
-sudo dnf install gmp-devel
-```
-or on Ubuntu/WSL:
-```
-sudo apt install libgmp-dev
 ```
