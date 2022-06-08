@@ -5,7 +5,8 @@
 ```
 # install dependencies (libgmp required for sharpSAT)
 sudo apt update
-sudo apt install git default-jre maven ant libgmp-dev
+sudo apt install openjdk-11-jdk maven ant libgmp-dev
+export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
 
 # without push access
 git clone https://github.com/skrieter/spldev.git
