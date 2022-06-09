@@ -1,6 +1,0 @@
-[submodule "formula-analysis-sat4j"]
-	path = formula-analysis-sat4j
-	url = ./formula-analysis-sat4j
-[submodule "formula-analysis-sat4j-sharpsat"]
-	path = formula-analysis-sat4j-sharpsat
-	url = ./formula-analysis-sat4j-sharpsat
