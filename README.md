@@ -23,11 +23,17 @@ cd spldev
 # USAGE
 
 # test whether a feature model is void
-java -jar cli/target/cli-1.0-SNAPSHOT-combined.jar analyze -i cli/src/test/resources/testFeatureModels/car.xml -a void
+java -jar cli/target/cli-1.0-SNAPSHOT-combined.jar analyze \
+  -i cli/src/test/resources/testFeatureModels/car.xml -a void
 
 # convert a feature model into CNF
-java -jar cli/target/cli-1.0-SNAPSHOT-combined.jar convert -i cli/src/test/resources/testFeatureModels/car.xml -f dimacs -cnf -o car.dimacs
+java -jar cli/target/cli-1.0-SNAPSHOT-combined.jar convert \
+  -i cli/src/test/resources/testFeatureModels/car.xml -f dimacs -cnf -o car.dimacs
 
 # convert a feature model and analyze it by means of pipes
-cat cli/src/test/resources/testFeatureModels/car.xml | java -jar cli/target/cli-1.0-SNAPSHOT-combined.jar convert -f dimacs -cnf | tail -n +2 | java -jar cli/target/cli-1.0-SNAPSHOT-combined.jar analyze -i "<stdin:dimacs>" -a cardinality
+cat cli/src/test/resources/testFeatureModels/car.xml | \
+  java -jar cli/target/cli-1.0-SNAPSHOT-combined.jar convert -f dimacs -cnf | \
+  tail -n +2 | \
+  java -jar cli/target/cli-1.0-SNAPSHOT-combined.jar analyze \
+  -i "<stdin:dimacs>" -a cardinality
 ```
