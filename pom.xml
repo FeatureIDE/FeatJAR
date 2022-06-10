@@ -20,6 +20,7 @@
 		<module>FeatureCoPP</module>
 		<module>pc-extraction</module>
 		<module>evaluation</module>
+		<module>fm</module>
 		<!--<module>evaluation-cnf</module>-->
 		<!--<module>evaluation-mig</module>-->
 		<!--<module>evaluation-pc-sampling</module>-->
