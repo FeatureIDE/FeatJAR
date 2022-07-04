@@ -21,6 +21,8 @@
 		<!--<module>pc-extraction</module>-->
 		<!--<module>evaluation</module>-->
 		<module>model</module>
+		<module>uvl</module>
+		<module>uvl-parser</module>
 		<!--<module>formula-analysis-sat4j-sharpsat</module>-->
 		<!--<module>evaluation-cnf</module>-->
 		<!--<module>evaluation-mig</module>-->
