@@ -20,7 +20,7 @@
 		<!--<module>FeatureCoPP</module>-->
 		<!--<module>pc-extraction</module>-->
 		<!--<module>evaluation</module>-->
-		<module>featuremodel</module>
+		<module>model</module>
 		<!--<module>formula-analysis-sat4j-sharpsat</module>-->
 		<!--<module>evaluation-cnf</module>-->
 		<!--<module>evaluation-mig</module>-->
