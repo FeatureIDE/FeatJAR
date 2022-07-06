@@ -12,7 +12,7 @@
 	<modules>
 		<module>util</module>
 		<module>formula</module>
-		<module>formula-analysis-sat4j</module>
+<!--		<module>formula-analysis-sat4j</module>-->
 		<!--<module>javasmt-native</module>-->
 		<!--<module>formula-analysis-javasmt</module>-->
 		<!--<module>sharpsat-native</module>-->
