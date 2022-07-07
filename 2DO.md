@@ -9,6 +9,7 @@
   * Start with "Arbitrary Modification Operation"
   
 * Formats with multiple files
+  * UVL
 
 * Feature Modeling Support
   * Feature Model
@@ -31,10 +32,6 @@
 * Test cases
 
 * Javadoc
-
-* CLI Functions
-  * Implement more CLI functions
-  * Move all CLI functionality to new project
 
 * https://microsoft.github.io/language-server-protocol/ ??
 * logic NG as backend?

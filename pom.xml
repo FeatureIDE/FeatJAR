@@ -12,18 +12,22 @@
 	<modules>
 		<module>util</module>
 		<module>formula</module>
-		<module>formula-analysis-sat4j</module>
-		<module>javasmt-native</module>
-		<module>formula-analysis-javasmt</module>
-		<module>sharpsat-native</module>
-		<module>formula-analysis-sharpsat</module>
-		<module>FeatureCoPP</module>
-		<module>pc-extraction</module>
-		<module>evaluation</module>
+		<!--<module>formula-analysis-sat4j</module>-->
+		<!--<module>javasmt-native</module>-->
+		<!--<module>formula-analysis-javasmt</module>-->
+		<!--<module>sharpsat-native</module>-->
+		<!--<module>formula-analysis-sharpsat</module>-->
+		<!--<module>FeatureCoPP</module>-->
+		<!--<module>pc-extraction</module>-->
+		<!--<module>evaluation</module>-->
+		<module>model</module>
+		<!--<module>uvl</module>-->
+		<!--<module>uvl-parser</module>-->
+		<!--<module>formula-analysis-sat4j-sharpsat</module>-->
 		<!--<module>evaluation-cnf</module>-->
 		<!--<module>evaluation-mig</module>-->
 		<!--<module>evaluation-pc-sampling</module>-->
-		<module>cli</module>
+		<!--<module>cli</module>-->
 	</modules>
 
 	<licenses>

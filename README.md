@@ -1,30 +1,39 @@
 ## spldev root project
 
-### Getting started
+This is the root project for the new FeatureIDE architecture, report feedback to sebastian.krieter@ovgu.de.
 
-Assumes Bash, Git, Maven, and Ant to be installed.
+To get started on Ubuntu or WSL, run:
 
 ```
-# without push access
-git clone https://github.com/skrieter/spldev.git
-# with push access
-git clone git@github.com:skrieter/spldev.git
+# SETUP
+
+# install dependencies (libgmp required for sharpSAT)
+sudo apt update
+sudo apt install openjdk-11-jdk maven ant libgmp-dev
+export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
+
+# clone root project
+git clone https://github.com/skrieter/spldev.git # without push access
+git clone git@github.com:skrieter/spldev.git # with push access
+
+# clone and build default modules
 cd spldev
 ./build.sh
-```
 
-You can add/remove built projects in build.cfg.
+# USAGE
 
-To skip unit tests, run:
-```
-mvn install -DskipTests=true
-```
+# test whether a feature model is void
+java -jar cli/target/cli-1.0-SNAPSHOT-combined.jar analyze \
+  -i cli/src/test/resources/testFeatureModels/car.xml -a void
 
-To compile sharpSAT, make sure libgmp is installed, e.g. on Fedora:
-```
-sudo dnf install gmp-devel
-```
-or on Ubuntu/WSL:
-```
-sudo apt install libgmp-dev
+# convert a feature model into CNF
+java -jar cli/target/cli-1.0-SNAPSHOT-combined.jar convert \
+  -i cli/src/test/resources/testFeatureModels/car.xml -f dimacs -cnf -o car.dimacs
+
+# convert a feature model and analyze it by means of pipes
+cat cli/src/test/resources/testFeatureModels/car.xml | \
+  java -jar cli/target/cli-1.0-SNAPSHOT-combined.jar convert -f dimacs -cnf | \
+  tail -n +2 | \
+  java -jar cli/target/cli-1.0-SNAPSHOT-combined.jar analyze \
+  -i "<stdin:dimacs>" -a cardinality
 ```
