@@ -19,6 +19,7 @@ git clone git@github.com:FeatJAR/FeatJAR.git # with push access
 # build default modules
 cd FeatJAR
 make
+# if tests fail, try "make inst", which skips tests
 
 # USAGE
 

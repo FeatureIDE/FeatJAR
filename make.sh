@@ -17,7 +17,7 @@ mvn --version 1>/dev/null 2>/dev/null || {
 }
 
 foreach-module() {
-    if [ ! -z $MODULES ]; then
+    if [ ! -z "$MODULES" ]; then
         while read -r line; do
             name=$(echo $line | cut -d' ' -f1)
             main=$(echo $line | cut -d' ' -f2)
