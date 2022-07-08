@@ -9,19 +9,6 @@
 	<packaging>pom</packaging>
 
 	<modules>
-		<module>cli</module>
-		<module>evaluation</module>
-		<module>formula</module>
-		<module>formula-analysis-javasmt</module>
-		<module>formula-analysis-sat4j</module>
-		<module>formula-analysis-sat4j-sharpsat</module>
-		<module>formula-analysis-sharpsat</module>
-		<module>model</module>
-		<module>native-javasmt</module>
-		<module>native-sharpsat</module>
-		<module>util</module>
-		<module>uvl</module>
-		<module>uvl-parser</module>
 	</modules>
 
 	<licenses>

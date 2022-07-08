@@ -84,11 +84,19 @@ push-module() {
 
 pom() {
     {
-        cat pom.xml | sed "/<modules>/q"
+        cat pom.template.xml | sed "/<modules>/q"
         foreach-module pom-module
-        tac pom.xml | sed "/<\/modules>/q" | tac
-    } >_pom.xml
-    mv _pom.xml pom.xml
+        tac pom.template.xml | sed "/<\/modules>/q" | tac
+    } >pom.xml
+}
+
+status() {
+    if [ -z $1 ]; then
+        foreach-module status-module
+        status-module .
+    else
+        status-module $1
+    fi
 }
 
 clone() {
@@ -151,6 +159,7 @@ default() {
 usage() {
     echo "Usage: $0 [-h] [command[:module] ...]" 1>&2
     echo "Commands:"
+    echo "  pom                 Generate Maven POM for root project"
     echo "  status[:module]     Print status of module"
     echo "  clone[:module]      Clone module"
     echo "  pull[:module]       Pull module"
