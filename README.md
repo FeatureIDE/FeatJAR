@@ -1,24 +1,24 @@
-## spldev root project
+# FeatJAR
 
-This is the root project for the new FeatureIDE architecture, report feedback to sebastian.krieter@ovgu.de.
+This is the root project for FeatJAR.
+Please report feedback to sebastian.krieter@uni-ulm.de or kuiter@ovgu.de.
 
-To get started on Ubuntu or WSL, run:
+To get started on Ubuntu (via WSL on Windows), run:
 
 ```
 # SETUP
 
-# install dependencies (libgmp required for sharpSAT)
+# install dependencies (build-essential and libgmp required for sharpSAT)
 sudo apt update
-sudo apt install openjdk-11-jdk maven ant libgmp-dev
-export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
+sudo apt install openjdk-11-jdk git maven ant build-essential libgmp-dev
 
 # clone root project
-git clone https://github.com/skrieter/spldev.git # without push access
-git clone git@github.com:skrieter/spldev.git # with push access
+git clone https://github.com/FeatJAR/FeatJAR.git # without push access
+git clone git@github.com:FeatJAR/FeatJAR.git # with push access
 
-# clone and build default modules
-cd spldev
-./build.sh
+# build default modules
+cd FeatJAR
+make
 
 # USAGE
 

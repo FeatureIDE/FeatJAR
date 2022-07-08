@@ -1,6 +1,11 @@
-.project
-.idea
-.settings/
+bin/
 target/
-build.cfg
-de.ovgu.featureide.fm.core
+.settings/
+.idea/
+.project
+*.iml
+.classpath
+*.jar
+modules.cfg
+*/
+!executable-project/
