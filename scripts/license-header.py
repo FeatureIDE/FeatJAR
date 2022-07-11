@@ -60,7 +60,7 @@ def modify_source_files(src_path, copyright_text):
 				file_path = dir_path + "/" + file_name
 				print(file_path)
 				lines = read_file(file_path)
-				#write_java_file(file_path, lines, copyright_text)
+				write_java_file(file_path, lines, copyright_text)
 
 
 def read_file(file_name):
