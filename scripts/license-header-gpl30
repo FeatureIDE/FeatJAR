@@ -1,12 +1,12 @@
 -----------------------------------------------------------------------------
 {program} - {description}
-Copyright (C) {year}  {authors}
+Copyright (C) {year} {author}
 
 This file is part of {program}.
 
 {program} is free software: you can redistribute it and/or modify it
 under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version {version} of the License,
+the Free Software Foundation, either version 3.0 of the License,
 or (at your option) any later version.
 
 {program} is distributed in the hope that it will be useful,
@@ -15,7 +15,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 See the GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with {program}.  If not, see <https://www.gnu.org/licenses/>.
+along with {program}. If not, see <https://www.gnu.org/licenses/>.
 
 See <{url}> for further information.
 -----------------------------------------------------------------------------

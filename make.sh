@@ -156,7 +156,7 @@ default() {
     install
 }
 
-usage() {
+help() {
     echo "Usage: $0 [-h] [command[:module] ...]" 1>&2
     echo "Commands:"
     echo "  pom                 Generate Maven POM for root project"
@@ -181,7 +181,7 @@ fi
 
 while getopts ":h" o; do
     case "${o}" in
-    h) usage ;;
+    h) help ;;
     esac
 done
 shift $((OPTIND - 1))

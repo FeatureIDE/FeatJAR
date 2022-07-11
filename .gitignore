@@ -10,3 +10,4 @@ modules.cfg
 pom.xml
 */
 !executable-project/
+!scripts/
