@@ -1,5 +1,6 @@
 # This script adds a license header to all Java source files.
 # The required information is read from the Maven POM file and Git.
+# Prerequisite: sudo apt install python3 python3-pip && python3 -mpip install GitPython
 
 import sys
 import os
@@ -7,7 +8,7 @@ import time
 from pathlib import Path
 import yaml
 import xml.etree.ElementTree as xml
-import git # python3 -mpip install GitPython
+import git
 
 root_path = Path(os.path.dirname(os.path.realpath(sys.argv[0])) + "/..")
 

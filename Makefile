@@ -1,3 +1,3 @@
 .DEFAULT_GOAL := default
 .DEFAULT:
-	./make.sh $@
+	scripts/make.sh $@
