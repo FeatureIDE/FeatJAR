@@ -24,8 +24,8 @@
 		</license>
 	</licenses>
 
-	<groupId>org.spldev</groupId>
-	<artifactId>spldev</artifactId>
+	<groupId>de.featjar</groupId>
+	<artifactId>featjar</artifactId>
 	<version>1.0-SNAPSHOT</version>
 	<packaging>pom</packaging>
 

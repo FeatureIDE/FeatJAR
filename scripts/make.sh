@@ -131,7 +131,7 @@ clean() {
     else
         module=$1
     fi
-    mvn clean $module
+    mvn clean -f $module
 }
 
 install() {
