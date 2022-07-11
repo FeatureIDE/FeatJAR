@@ -41,7 +41,7 @@ def pom_value(root, name):
 
 
 def create_copyright_text(information):
-	with open(str(root_path) + "/scripts/license-header-" + information['license'], "r") as f:
+	with open(str(root_path) + "/scripts/license-header-" + information['license'] + ".txt", "r") as f:
 		copyright_text = f.read()
 		copyright_text = copyright_text.format(
 			program = information['name'],
