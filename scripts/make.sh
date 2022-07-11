@@ -152,6 +152,10 @@ inst() {
     mvn -T 1C install -Dmaven.test.skip -DskipTests -Dmaven.javadoc.skip=true -f $module
 }
 
+license-header() {
+    python3 scripts/license-header.py $1
+}
+
 default() {
     install
 }
@@ -159,14 +163,15 @@ default() {
 help() {
     echo "Usage: $0 [-h] [command[:module] ...]" 1>&2
     echo "Commands:"
-    echo "  pom                 Generate Maven POM for root project"
-    echo "  status[:module]     Print status of module"
-    echo "  clone[:module]      Clone module"
-    echo "  pull[:module]       Pull module"
-    echo "  push[:module]       Push module"
-    echo "  clean[:module]      Clean build artifacts with Maven"
-    echo "  install[:module]    Build module with Maven"
-    echo "  inst[:module]       Build module with Maven, skipping tests and documentation"
+    echo "  pom                           Generate Maven POM for root project"
+    echo "  status[:module]               Print status of module"
+    echo "  clone[:module]                Clone module"
+    echo "  pull[:module]                 Pull module"
+    echo "  push[:module]                 Push module"
+    echo "  clean[:module]                Clean build artifacts with Maven"
+    echo "  install[:module]              Build module with Maven"
+    echo "  inst[:module]                 Build module with Maven, skipping tests and documentation"
+    echo "  license-header[:module]       Write license headers for a module's Java source files"
     echo "If no module is passed, a command applies to all enabled modules."
     echo "By default, \"install\" is invoked."
     echo "Also, \"clone\" and \"pom\" are always invoked."

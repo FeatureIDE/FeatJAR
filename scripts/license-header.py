@@ -1,6 +1,7 @@
-# This script adds a license header to all Java source files.
+# This script adds or updates the license header on all Java source files in all or a given Maven module.
 # The required information is read from the Maven POM file and Git.
 # Prerequisite: sudo apt install python3 python3-pip && python3 -mpip install GitPython
+# Usage: python3 scripts/license-header.py [<module>]
 
 import sys
 import os
@@ -13,7 +14,6 @@ import git
 root_path = Path(os.path.dirname(os.path.realpath(sys.argv[0])) + "/..")
 
 def add_license_header_to_project(project_path):
-	print(str(project_path))
 	pom_path = project_path.joinpath("pom.xml")
 	src_path = project_path.joinpath("src")
 	information = {}
@@ -58,7 +58,7 @@ def modify_source_files(src_path, copyright_text):
 		for file_name in file_names:
 			if str(file_name).endswith(".java"):
 				file_path = dir_path + "/" + file_name
-				print(file_path)
+				print("Writing license header for " + str(Path(file_path).relative_to(root_path)))
 				lines = read_file(file_path)
 				write_java_file(file_path, lines, copyright_text)
 
@@ -84,6 +84,9 @@ def write_java_file(file_name, original_lines, copyright_text):
 				f.write(line)
 
 
-dirs =[d for d in root_path.iterdir() if d.is_dir() and d.joinpath("pom.xml").exists() and d.joinpath('src').exists()]
+if len(sys.argv) > 1:
+	dirs = [root_path.joinpath(sys.argv[1])]
+else:
+	dirs = [d for d in root_path.iterdir() if d.is_dir() and d.joinpath("pom.xml").exists() and d.joinpath('src').exists()]
 for d in dirs:
 	add_license_header_to_project(d)

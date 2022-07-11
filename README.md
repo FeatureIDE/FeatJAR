@@ -8,9 +8,10 @@ To get started on Ubuntu (via WSL on Windows), run:
 ```
 # SETUP
 
-# install dependencies (build-essential and libgmp required for sharpSAT)
+# install dependencies
 sudo apt update
-sudo apt install openjdk-11-jdk git maven ant build-essential libgmp-dev
+sudo apt install openjdk-11-jdk git maven ant build-essential
+sudo apt install libgmp-dev # for building sharpSAT
 
 # clone root project
 git clone https://github.com/FeatJAR/FeatJAR.git # without push access
