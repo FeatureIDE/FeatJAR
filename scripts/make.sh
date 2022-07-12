@@ -100,11 +100,7 @@ status() {
 }
 
 clone() {
-    if [ -z $1 ]; then
-        foreach-module clone-module
-    else
-        clone-module $1
-    fi
+    foreach-module clone-module
 }
 
 pull() {
@@ -163,9 +159,10 @@ default() {
 help() {
     echo "Usage: $0 [-h] [command[:module] ...]" 1>&2
     echo "Commands:"
+    echo "  help                          Show script usage"
+    echo "  clone                         Clone all enabled modules"
     echo "  pom                           Generate Maven POM for root project"
     echo "  status[:module]               Print status of module"
-    echo "  clone[:module]                Clone module"
     echo "  pull[:module]                 Pull module"
     echo "  push[:module]                 Push module"
     echo "  clean[:module]                Clean build artifacts with Maven"
@@ -186,7 +183,7 @@ fi
 
 while getopts ":h" o; do
     case "${o}" in
-    h) help ;;
+    *) help ;;
     esac
 done
 shift $((OPTIND - 1))
