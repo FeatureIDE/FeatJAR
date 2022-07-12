@@ -42,7 +42,7 @@ make
 ### Cross-compiling
 
 To compile Linux binaries on Windows using [WSL](https://docs.microsoft.com/en-us/windows/wsl/install), simply follow the instructions for Ubuntu in a `wsl` shell.
-This produces JAR files equivalent to the ones created in MinGW.
+This produces JAR files equivalent to the ones created in MinGW and can be used interchangeably (except for the `native-*` modules).
 
 ## Example usage
 
