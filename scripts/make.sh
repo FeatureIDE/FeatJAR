@@ -152,6 +152,15 @@ i() {
     inst $1
 }
 
+format() {
+    if [ -z $1 ]; then
+        module=.
+    else
+        module=$1
+    fi
+    mvn formatter:format -fn -f $module
+}
+
 license-header() {
     python3 scripts/license-header.py $1
 }
@@ -172,6 +181,7 @@ help() {
     echo "  clean[:module]                Clean build artifacts with Maven"
     echo "  install[:module]              Build module with Maven"
     echo "  inst[:module]                 Build module with Maven, skipping tests and documentation"
+    echo "  format[:module]               Format a module's Java source files"
     echo "  license-header[:module]       Write license headers for a module's Java source files"
     echo "If no module is passed, a command applies to all enabled modules (as specified in modules.cfg)."
     echo "By default, \"install\" is invoked."
