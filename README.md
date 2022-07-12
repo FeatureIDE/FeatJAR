@@ -3,27 +3,29 @@
 This is the root project for FeatJAR.
 Please report feedback to sebastian.krieter@uni-ulm.de or kuiter@ovgu.de.
 
-To get started on Ubuntu (via WSL on Windows), run:
+## Build on Ubuntu
 
 ```
-# SETUP
-
 # install dependencies
 sudo apt update
-sudo apt install openjdk-11-jdk git maven ant build-essential
-sudo apt install libgmp-dev # for building sharpSAT
+sudo apt install openjdk-11-jdk git maven ant build-essential libgmp-dev
 
 # clone root project
-git clone https://github.com/FeatJAR/FeatJAR.git # without push access
-git clone git@github.com:FeatJAR/FeatJAR.git # with push access
+git clone https://github.com/FeatJAR/FeatJAR.git && cd FeatJAR
 
-# build default modules
-cd FeatJAR
-make # build and test
-make inst # build without tests
+# build default modules (run "make help" for more information)
+make 
+```
 
-# USAGE
+## Build on Windows
 
+```
+...
+```
+
+## Usage
+
+```
 # test whether a feature model is void
 java -jar cli/target/cli-1.0-SNAPSHOT-combined.jar analyze \
   -i cli/src/test/resources/testFeatureModels/car.xml -a void
