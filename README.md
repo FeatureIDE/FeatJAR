@@ -20,7 +20,15 @@ git clone https://github.com/FeatJAR/FeatJAR.git && cd FeatJAR
 make
 ```
 
-### Windows
+### Windows (WSL)
+
+The recommended way to build on Windows is to use [WSL](https://docs.microsoft.com/en-us/windows/wsl/install).
+After installing WSL, simply follow the instructions for Ubuntu in a `wsl` shell.
+For most modules, the assembled JAR files do not differ to *Windows (native)* below; however, for the `native-*` modules, Linux binaries will be compiled.
+   
+### Windows (native)
+
+If Windows binaries are required, the build process is a little more involved.
 
 * As a prerequisite, install JDK 11, Git, and Maven, for example with [Chocolatey](https://chocolatey.org/install):
   ```
@@ -38,11 +46,6 @@ make
    git clone https://github.com/FeatJAR/FeatJAR.git && cd FeatJAR
    make
    ```
-
-### Cross-compiling
-
-To compile Linux binaries on Windows using [WSL](https://docs.microsoft.com/en-us/windows/wsl/install), simply follow the instructions for Ubuntu in a `wsl` shell.
-This produces JAR files equivalent to the ones created in MinGW and can be used interchangeably (except for the `native-*` modules).
 
 ## Example usage
 
