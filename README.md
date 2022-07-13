@@ -20,6 +20,8 @@ git clone https://github.com/FeatJAR/FeatJAR.git && cd FeatJAR
 make
 ```
 
+Installation on other Linux distributions works analogously.
+
 ### Windows (WSL)
 
 The recommended way to build on Windows is to use [WSL](https://docs.microsoft.com/en-us/windows/wsl/install).
@@ -46,6 +48,10 @@ If Windows binaries are required, the build process is a little more involved.
    git clone https://github.com/FeatJAR/FeatJAR.git && cd FeatJAR
    make
    ```
+   
+### macOS
+
+`todo`
 
 ## Example usage
 
