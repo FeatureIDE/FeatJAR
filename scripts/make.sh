@@ -121,44 +121,32 @@ push() {
     fi
 }
 
-clean() {
+maven-args() {
     if [ -z $1 ]; then
         module=.
+        args=
     else
         module=$1
+        shift
+        args=$@
     fi
-    mvn clean -f $module
+    echo -f $module $args
+}
+
+clean() {
+    mvn clean $(maven-args "$@")
 }
 
 install() {
-    if [ -z $1 ]; then
-        module=.
-    else
-        module=$1
-    fi
-    mvn install -f $module
+    mvn install $(maven-args "$@")
 }
 
 inst() {
-    if [ -z $1 ]; then
-        module=.
-    else
-        module=$1
-    fi
-    mvn -T 1C install -Dmaven.test.skip -DskipTests -Dmaven.javadoc.skip=true -f $module
-}
-
-i() {
-    inst $1
+    mvn -T 1C install -Dmaven.test.skip -DskipTests -Dmaven.javadoc.skip=true $(maven-args "$@")
 }
 
 format() {
-    if [ -z $1 ]; then
-        module=.
-    else
-        module=$1
-    fi
-    mvn formatter:format -fn -f $module
+    mvn formatter:format -fn $(maven-args "$@")
 }
 
 license-header() {
