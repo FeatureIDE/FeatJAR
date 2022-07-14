@@ -158,7 +158,7 @@ default() {
 }
 
 help() {
-    echo "Usage: $0 [-h] [command[:module] ...]" 1>&2
+    echo "Usage: $0 [-h] [command[:module][:arg...] ...]" 1>&2
     echo "Commands:"
     echo "  help                          Show script usage"
     echo "  clone                         Clone all enabled modules"
@@ -166,10 +166,10 @@ help() {
     echo "  status[:module]               Print status of module"
     echo "  pull[:module]                 Pull module"
     echo "  push[:module]                 Push module"
-    echo "  clean[:module]                Clean build artifacts with Maven"
-    echo "  install[:module]              Build module with Maven"
-    echo "  inst[:module]                 Build module with Maven, skipping tests and documentation"
-    echo "  format[:module]               Format a module's Java source files"
+    echo "  clean[:module][:arg...]       Clean build artifacts"
+    echo "  install[:module][:arg...]     Build module"
+    echo "  inst[:module][:arg...]        Build module, skipping tests and documentation"
+    echo "  format[:module][:arg...]      Format a module's Java source files"
     echo "  license-header[:module]       Write license headers for a module's Java source files"
     echo "If no module is passed, a command applies to all enabled modules (as specified in modules.cfg)."
     echo "By default, \"install\" is invoked."
