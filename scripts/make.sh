@@ -139,35 +139,32 @@ push() {
     fi
 }
 
-clean() {
+maven-args() {
     if [ -z $1 ]; then
         module=.
+        args=
     else
         module=$1
+        shift
+        args=$@
     fi
-    mvn clean -f $module
+    echo -f $module $args
+}
+
+clean() {
+    mvn clean $(maven-args "$@")
 }
 
 install() {
-    if [ -z $1 ]; then
-        module=.
-    else
-        module=$1
-    fi
-    mvn install -f $module
+    mvn install $(maven-args "$@")
 }
 
 inst() {
-    if [ -z $1 ]; then
-        module=.
-    else
-        module=$1
-    fi
-    mvn -T 1C install -Dmaven.test.skip -DskipTests -Dmaven.javadoc.skip=true -f $module
+    mvn -T 1C install -Dmaven.test.skip -DskipTests -Dmaven.javadoc.skip=true $(maven-args "$@")
 }
 
-i() {
-    inst $1
+format() {
+    mvn formatter:format -fn $(maven-args "$@")
 }
 
 license-header() {
@@ -179,7 +176,7 @@ default() {
 }
 
 help() {
-    echo "Usage: $0 [-h] [command[:module] ...]" 1>&2
+    echo "Usage: $0 [-h] [command[:module][:arg...] ...]" 1>&2
     echo "Commands:"
     echo "  help                          Show script usage"
     echo "  clone                         Clone all enabled modules"
@@ -188,9 +185,10 @@ help() {
     echo "  diff[:module]                 Print diff of module"
     echo "  pull[:module]                 Pull module"
     echo "  push[:module]                 Push module"
-    echo "  clean[:module]                Clean build artifacts with Maven"
-    echo "  install[:module]              Build module with Maven"
-    echo "  inst[:module]                 Build module with Maven, skipping tests and documentation"
+    echo "  clean[:module][:arg...]       Clean build artifacts"
+    echo "  install[:module][:arg...]     Build module"
+    echo "  inst[:module][:arg...]        Build module, skipping tests and documentation"
+    echo "  format[:module][:arg...]      Format a module's Java source files"
     echo "  license-header[:module]       Write license headers for a module's Java source files"
     echo "If no module is passed, a command applies to all enabled modules (as specified in modules.cfg)."
     echo "By default, \"install\" is invoked."
