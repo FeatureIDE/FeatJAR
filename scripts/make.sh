@@ -40,6 +40,15 @@ status-module() {
     fi
 }
 
+diff-module() {
+    if [ -d $1/.git ] || [ -L $1 ]; then
+        echo "Diff of module $1"
+        git -C $1 diff
+    else
+        echo >&2 "ERROR: Module $1 does not exist"
+    fi
+}
+
 clone-module() {
     if [ ! -d $1/.git ] && [ ! -L $1 ]; then
         echo "Cloning module $1 from remote $2"
@@ -96,6 +105,15 @@ status() {
         status-module .
     else
         status-module $1
+    fi
+}
+
+diff() {
+    if [ -z $1 ]; then
+        foreach-module diff-module
+        diff-module .
+    else
+        diff-module $1
     fi
 }
 
@@ -167,6 +185,7 @@ help() {
     echo "  clone                         Clone all enabled modules"
     echo "  pom                           Generate Maven POM for root project"
     echo "  status[:module]               Print status of module"
+    echo "  diff[:module]                 Print diff of module"
     echo "  pull[:module]                 Pull module"
     echo "  push[:module]                 Push module"
     echo "  clean[:module]                Clean build artifacts with Maven"
