@@ -26,7 +26,7 @@ Installation on other Linux distributions works analogously.
 
 The recommended way to build on Windows is to use [WSL](https://docs.microsoft.com/en-us/windows/wsl/install).
 After installing WSL, simply follow the instructions for Ubuntu in a `wsl` shell.
-For most modules, the assembled JAR files do not differ to *Windows (native)* below; however, for the `native-*` modules, Linux binaries will be compiled.
+For most modules, the assembled JAR files do not differ to *Windows (MinGW)* below; however, for the `native-*` modules, Linux binaries will be compiled.
    
 ### Windows (MinGW)
 
