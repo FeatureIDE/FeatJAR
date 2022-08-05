@@ -101,7 +101,7 @@ In addition to the repositories under the [FeatJAR](https://github.com/FeatJAR) 
 FeatJAR development team:
 
 * [Thomas Thüm](https://www.uni-ulm.de/in/sp/team/thuem/) (University of Ulm, Germany)
-* [Sebastian Krieter](https://www.dbse.ovgu.de/Mitarbeiter/Externe+Doktoranden/Sebastian+Krieter.html) (Harz University of Applied Sciences, Germany)
+* [Sebastian Krieter](https://www.uni-ulm.de/in/sp/team/sebastian-krieter/) (University of Ulm, Germany)
 * [Elias Kuiter](https://www.dbse.ovgu.de/Mitarbeiter/Elias+Kuiter.html) (University of Magdeburg, Germany)
 
 Further contributors and former project members:
