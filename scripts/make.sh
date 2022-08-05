@@ -21,8 +21,8 @@ foreach-module() {
         while read -r line; do
             name=$(echo $line | cut -d' ' -f1)
             main=$(echo $line | cut -d' ' -f2)
-            fallback=$(echo $line | cut -d' ' -f3)
-            $1 $name $main $fallback
+            commit=$(echo $line | cut -d' ' -f3)
+            $1 $name $main $commit
         done <<<"$MODULES"
     fi
 }
@@ -54,13 +54,13 @@ clone-module() {
         echo "Cloning module $1 from remote $2"
         git clone --recurse-submodules -j8 $2 -q
         if [[ "$?" -ne 0 ]]; then
-            echo "Cloning module $1 from fallback remote $2"
-            git clone --recurse-submodules -j8 $3 -q
-            if [[ "$?" -ne 0 ]]; then
-                echo >&2 "ERROR: Could not clone module $1"
-                exit 1
-            fi
+            echo >&2 "ERROR: Could not clone module $1"
+            exit 1
         fi
+      if [ ! -z $3 ]; then
+        echo "Checking out $3 in module $1"
+        git -C $1 checkout $3
+      fi
     fi
 }
 

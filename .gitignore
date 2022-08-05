@@ -6,8 +6,8 @@ target/
 *.iml
 .classpath
 *.jar
-modules.cfg
-pom.xml
+/modules.cfg
+/pom.xml
 */
-!executable-project/
+!executable-module/
 !scripts/

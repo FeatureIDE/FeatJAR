@@ -5,8 +5,12 @@ Please report feedback to sebastian.krieter@uni-ulm.de or kuiter@ovgu.de.
 
 ## Build instructions
 
-Most modules run on the JVM and are therefore platform-independent.
-However, the `native-*` modules (e.g., solvers) require a compilation step targeted to a specific platform.
+General remarks:
+
+* Choose which modules to build by editing `modules.cfg` (copying `modules.template.cfg`, if necessary).
+* Most modules run on the JVM and are therefore platform-independent.
+  However, the `native-*` modules (e.g., solvers) require a compilation step targeted to a specific platform.
+* For developers, we recommend to run `git config --global url.ssh://git@github.com/.insteadOf https://github.com/` beforehand to push/pull repositories over SSH instead of HTTPS. 
 
 ### Ubuntu
 
@@ -52,6 +56,19 @@ If Windows binaries are required, the build process is a little more involved.
 ### macOS
 
 `todo`
+
+### Docker
+
+To build FeatJAR inside a Docker container (compiling Linux binaries), install [Docker](https://docs.docker.com/get-docker/) on a 64-bit Linux 5.x system or [WSL 2](https://docs.microsoft.com/de-de/windows/wsl/install).
+Then run the following in a shell:
+
+```
+git clone https://github.com/FeatJAR/FeatJAR.git && cd FeatJAR
+docker compose run featjar
+```
+
+This does not make use of the local Maven repository, so creates a clean build on each `run`.
+To build a Docker *image* including FeatJAR (e.g., for reproducing evaluations), have a look at TODO.
 
 ## Example usage
 
