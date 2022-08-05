@@ -11,3 +11,6 @@ target/
 */
 !executable-module/
 !scripts/
+!.mvn
+.mvn/*
+!.mvn/.gitkeep

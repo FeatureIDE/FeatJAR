@@ -149,7 +149,7 @@
 					</execution>
 				</executions>
 				<configuration>
-					<configFile>${project.basedir}/../scripts/eclipse-formatter-profile.xml</configFile>
+					<configFile>${maven.multiModuleProjectDirectory}/scripts/eclipse-formatter-profile.xml</configFile>
 				</configuration>
 			</plugin>
 		</plugins>
