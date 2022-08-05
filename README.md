@@ -74,17 +74,17 @@ To build a Docker *image* including FeatJAR (e.g., for reproducing evaluations),
 
 ```
 # test whether a feature model is void
-java -jar cli/target/cli-1.0-SNAPSHOT-combined.jar analyze \
+java -jar cli/target/cli-1.0-SNAPSHOT-all.jar analyze \
   -i cli/src/test/resources/testFeatureModels/car.xml -a void
 
 # convert a feature model into CNF
-java -jar cli/target/cli-1.0-SNAPSHOT-combined.jar convert \
+java -jar cli/target/cli-1.0-SNAPSHOT-all.jar convert \
   -i cli/src/test/resources/testFeatureModels/car.xml -f dimacs -cnf -o car.dimacs
 
 # convert a feature model and analyze it by means of pipes
 cat cli/src/test/resources/testFeatureModels/car.xml | \
-  java -jar cli/target/cli-1.0-SNAPSHOT-combined.jar convert -f dimacs -cnf | \
+  java -jar cli/target/cli-1.0-SNAPSHOT-all.jar convert -f dimacs -cnf | \
   tail -n +2 | \
-  java -jar cli/target/cli-1.0-SNAPSHOT-combined.jar analyze \
+  java -jar cli/target/cli-1.0-SNAPSHOT-all.jar analyze \
   -i "<stdin:dimacs>" -a cardinality
 ```

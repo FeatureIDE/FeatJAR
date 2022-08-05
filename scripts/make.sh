@@ -171,6 +171,30 @@ license-header() {
     python3 scripts/license-header.py $1
 }
 
+docker() {
+    if [ -z $1 ]; then
+        echo >&2 "ERROR: No module supplied"
+        exit 1
+    else
+        module=$1
+        module_prefix=$(echo $module | cut -d/ -f1)
+        {
+            cat scripts/Dockerfile.template | sed "/{MODULES}/q" | head -n-1
+            DOCKER_MODULES=$(cat modules.cfg | grep -v "^[# ]" | grep -v "^$module_prefix" | grep -v -e '^$')
+            echo "RUN echo \\"
+            while read -r line; do
+                name=$(echo $line | cut -d' ' -f1)
+                main=$(echo $line | cut -d' ' -f2)
+                echo "  && echo $name $main $(git -C $name rev-parse HEAD) >> modules.cfg \\"
+            done <<<"$DOCKER_MODULES"
+            echo "  && echo"
+            tac scripts/Dockerfile.template | sed "/{MODULES}/q" | tac | tail -n+2
+        } >$module/Dockerfile
+        sed -i "s#{MODULE}#$module#" $module/Dockerfile
+        sed -i "s#{COMMIT}#$(git rev-parse HEAD)#" $module/Dockerfile
+    fi
+}
+
 default() {
     install
 }

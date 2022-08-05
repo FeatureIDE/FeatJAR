@@ -13,7 +13,7 @@
 
 	<properties>
 		<jar.internal.name>${project.artifactId}-${project.version}</jar.internal.name>
-		<jar.final.name>${jar.internal.name}-combined</jar.final.name>
+		<jar.final.name>${jar.internal.name}-all</jar.final.name>
 	</properties>
 
 	<build>
