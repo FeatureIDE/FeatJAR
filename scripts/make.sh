@@ -189,6 +189,9 @@ docker() {
             done <<<"$DOCKER_MODULES"
             echo "  && echo"
             tac scripts/Dockerfile.template | sed "/{MODULES}/q" | tac | tail -n+2
+            if [ -f $module/*-all.jar ]; then
+                echo ENTRYPOINT [\"java\", \"-jar\", \"$(ls $module/*-all.jar)\"]
+            fi
         } >$module/Dockerfile
         sed -i "s#{MODULE}#$module#" $module/Dockerfile
         sed -i "s#{COMMIT}#$(git rev-parse HEAD)#" $module/Dockerfile
@@ -204,7 +207,7 @@ help() {
     echo "Commands:"
     echo "  help                          Show script usage"
     echo "  clone                         Clone all enabled modules"
-    echo "  pom                           Generate Maven POM for root project"
+    echo "  pom                           Generate Maven POM for root module"
     echo "  status[:module]               Print status of module"
     echo "  diff[:module]                 Print diff of module"
     echo "  pull[:module]                 Pull module"
@@ -214,6 +217,7 @@ help() {
     echo "  inst[:module][:arg...]        Build module, skipping tests and documentation"
     echo "  format[:module][:arg...]      Format a module's Java source files"
     echo "  license-header[:module]       Write license headers for a module's Java source files"
+    echo "  docker[:module]               Generate Dockerfile for module"
     echo "If no module is passed, a command applies to all enabled modules (as specified in modules.cfg)."
     echo "By default, \"install\" is invoked."
     echo "Also, \"clone\" and \"pom\" are always invoked."
