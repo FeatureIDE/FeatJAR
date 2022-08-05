@@ -88,3 +88,22 @@ cat cli/src/test/resources/testFeatureModels/car.xml | \
   java -jar cli/target/cli-1.0-SNAPSHOT-all.jar analyze \
   -i "<stdin:dimacs>" -a cardinality
 ```
+
+## Applications
+
+In addition to the repositories under the [FeatJAR](https://github.com/FeatJAR) organization, several other tools and evaluations rely on FeatJAR, for example:
+
+* [tseitin-or-not-tseitin](https://github.com/ekuiter/tseitin-or-not-tseitin): Automated evaluation of CNF transformations' impact on feature-model analyses
+* [variED-NG](https://github.com/ekuiter/variED-NG): A collaborative, real-time feature model editor
+
+## Contributors
+
+FeatJAR development team:
+
+* [Thomas Thüm](https://www.uni-ulm.de/in/sp/team/thuem/) (University of Ulm, Germany)
+* [Sebastian Krieter](https://www.dbse.ovgu.de/Mitarbeiter/Externe+Doktoranden/Sebastian+Krieter.html) (Harz University of Applied Sciences, Germany)
+* [Elias Kuiter](https://www.dbse.ovgu.de/Mitarbeiter/Elias+Kuiter.html) (University of Magdeburg, Germany)
+
+Further contributors and former project members:
+
+* Daniel Hohmann (University of Magdeburg, Germany)
