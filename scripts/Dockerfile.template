@@ -11,3 +11,4 @@ WORKDIR /home/FeatJAR
 RUN make
 COPY . ./{MODULE}
 RUN make install:{MODULE}
+WORKDIR /home/FeatJAR/{MODULE}

@@ -190,7 +190,7 @@ docker() {
             echo "  && echo"
             tac scripts/Dockerfile.template | sed "/{MODULES}/q" | tac | tail -n+2
             if [ -f $module/*-all.jar ]; then
-                echo ENTRYPOINT [\"java\", \"-jar\", \"$(ls $module/*-all.jar)\"]
+                echo ENTRYPOINT [\"java\", \"-jar\", \"$(basename $(ls $module/*-all.jar))\"]
             fi
         } >$module/Dockerfile
         sed -i "s#{MODULE}#$module#" $module/Dockerfile
