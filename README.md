@@ -11,6 +11,7 @@ General remarks:
 * Most modules run on the JVM and are therefore platform-independent.
   However, the `native-*` modules (e.g., solvers) require a compilation step targeted to a specific platform.
 * For developers, we recommend to run `git config --global url.ssh://git@github.com/.insteadOf https://github.com/` beforehand to push/pull repositories over SSH instead of HTTPS. 
+* Run `make help` to get more detailed usage instructions for building individual modules, skipping tests, and more.
 
 ### Ubuntu
 
@@ -18,13 +19,13 @@ Run the following in a shell:
 
 ```
 sudo apt update
-sudo apt install openjdk-11-jdk git maven build-essential # required by all modules
+sudo apt install git openjdk-11-jdk maven build-essential # required by all modules
 sudo apt install libgmp-dev # required by the native-sharpsat module
 git clone https://github.com/FeatJAR/FeatJAR.git && cd FeatJAR
 make
 ```
 
-Installation on other Linux distributions works analogously.
+Installation on other Linux distributions may differ slightly, depending on the package manager.
 
 ### Windows (WSL)
 
@@ -36,9 +37,9 @@ For most modules, the assembled JAR files do not differ to *Windows (MinGW)* bel
 
 If Windows binaries are required, the build process is a little more involved.
 
-* As a prerequisite, install JDK 11, Git, and Maven, for example with [Chocolatey](https://chocolatey.org/install):
+* As a prerequisite, install Git, OpenJDK 11, and Maven, for example with [Chocolatey](https://chocolatey.org/install):
   ```
-  choco install openjdk11 git maven
+  choco install git openjdk11 maven
   ```
 * To build the `native-sharpsat` module, also install [Visual Studio](https://visualstudio.microsoft.com/downloads/) with the C++ workload (the Windows SDK, in particular).
 * Then, install [MinGW](https://sourceforge.net/projects/mingw/files/Installer/mingw-get-setup.exe/download) and add `C:\MinGW\bin` to the `Path` environment variable.
@@ -55,11 +56,18 @@ If Windows binaries are required, the build process is a little more involved.
    
 ### macOS
 
-`todo`
+Assuming [Homebrew](https://brew.sh/) is installed, run the following in a shell:
+
+```
+brew install git openjdk@11 maven make # required by all modules
+brew install gmp # required by the native-sharpsat module
+git clone https://github.com/FeatJAR/FeatJAR.git && cd FeatJAR
+make
+```
 
 ### Docker
 
-To build FeatJAR inside a Docker container (compiling Linux binaries), install [Docker](https://docs.docker.com/get-docker/) on a 64-bit Linux 5.x system or [WSL 2](https://docs.microsoft.com/de-de/windows/wsl/install).
+To build FeatJAR inside a Docker container (compiling Linux binaries), first install [Docker](https://docs.docker.com/get-docker/).
 Then run the following in a shell:
 
 ```
@@ -68,7 +76,7 @@ docker compose run featjar
 ```
 
 This does not make use of the local Maven repository, so creates a clean build on each `run`.
-To build a Docker *image* including FeatJAR (e.g., for reproducing evaluations), have a look at TODO.
+To build a Docker *image* including FeatJAR (e.g., for reproducing evaluations), consider `make docker`.
 
 ## Example usage
 
