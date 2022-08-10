@@ -16,6 +16,14 @@ mvn --version 1>/dev/null 2>/dev/null || {
     exit 1
 }
 
+tac() {
+    local lines i
+    readarray -t lines
+    for (( i = ${#lines[@]}; i--; )); do
+        printf '%s\n' "${lines[i]}"
+    done
+}
+
 foreach-module() {
     if [ ! -z "$MODULES" ]; then
         while read -r line; do
@@ -95,7 +103,7 @@ pom() {
     {
         cat pom.template.xml | sed "/<modules>/q"
         foreach-module pom-module
-        tac pom.template.xml | sed "/<\/modules>/q" | tac
+        tac < pom.template.xml | sed "/<\/modules>/q" | tac
     } >pom.xml
 }
 
@@ -188,7 +196,7 @@ docker() {
                 echo "  && echo $name $main $(git -C $name rev-parse HEAD) >> modules.cfg \\"
             done <<<"$DOCKER_MODULES"
             echo "  && echo"
-            tac scripts/Dockerfile.template | sed "/{MODULES}/q" | tac | tail -n+2
+            tac < scripts/Dockerfile.template | sed "/{MODULES}/q" | tac | tail -n+2
             if [ -f $module/*-all.jar ]; then
                 echo ENTRYPOINT [\"java\", \"-jar\", \"$(basename $(ls $module/*-all.jar))\"]
             fi
