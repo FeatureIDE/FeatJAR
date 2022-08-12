@@ -53,7 +53,7 @@ Assuming [Git](https://git-scm.com/) and [Docker](https://docs.docker.com/get-do
 ```
 git clone https://github.com/FeatJAR/FeatJAR.git && cd FeatJAR
 scripts/clone.bat
-docker run -v $(pwd):/home/gradle gradle:7.5.1-jdk11 gradle build
+docker run -v "$(pwd)":/home/gradle gradle:7.5.1-jdk11 gradle build
 ```
 
 To build a Docker image including FeatJAR (e.g., for reproducing evaluations), use `make docker`.
