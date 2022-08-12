@@ -23,46 +23,46 @@ foreach-repo() {
 
 status-repo() {
     if [ -d $1/.git ]; then
-        echo "Status of module $1"
+        echo "Status of repository $1"
         git -C $1 status -bs | sed 's/^/  /'
     else
-        echo >&2 "ERROR: Module $1 does not exist"
+        echo >&2 "ERROR: Repository $1 does not exist"
     fi
 }
 
 diff-repo() {
     if [ -d $1/.git ]; then
-        echo "Diff of module $1"
+        echo "Diff of repository $1"
         git -C $1 diff
     else
-        echo >&2 "ERROR: Module $1 does not exist"
+        echo >&2 "ERROR: Repository $1 does not exist"
     fi
 }
 
 pull-repo() {
     if [ -d $1/.git ]; then
-        echo "Pulling module $1"
+        echo "Pulling repository $1"
         git -C $1 pull -q
         if [[ "$?" -ne 0 ]]; then
-            echo >&2 "ERROR: Could not pull module $1"
+            echo >&2 "ERROR: Could not pull repository $1"
             exit 1
         fi
     else
-        echo >&2 "ERROR: Module $1 does not exist"
+        echo >&2 "ERROR: Repository $1 does not exist"
         exit 1
     fi
 }
 
 push-repo() {
     if [ -d $1/.git ]; then
-        echo "Pushing module $1"
+        echo "Pushing repository $1"
         git -C $1 push -q
         if [[ "$?" -ne 0 ]]; then
-            echo >&2 "ERROR: Could not push module $1"
+            echo >&2 "ERROR: Could not push repository $1"
             exit 1
         fi
     else
-        echo >&2 "ERROR: Module $1 does not exist"
+        echo >&2 "ERROR: Repository $1 does not exist"
         exit 1
     fi
 }
@@ -103,41 +103,6 @@ push() {
     fi
 }
 
-format() {
-    mvn formatter:format -fn $(maven-args "$@")
-}
-
-license-header() {
-    python3 scripts/license-header.py $1
-}
-
-docker() {
-    if [ -z $1 ]; then
-        echo >&2 "ERROR: No module supplied"
-        exit 1
-    else
-        module=$1
-        module_prefix=$(echo $module | cut -d/ -f1)
-        {
-            cat scripts/Dockerfile.template | sed "/{MODULES}/q" | head -n-1
-            DOCKER_MODULES=$(cat modules.cfg | grep -v "^[# ]" | grep -v "^$module_prefix" | grep -v -e '^$')
-            echo "RUN echo \\"
-            while read -r line; do
-                name=$(echo $line | cut -d' ' -f1)
-                main=$(echo $line | cut -d' ' -f2)
-                echo "  && echo $name $main $(git -C $name rev-parse HEAD) >> modules.cfg \\"
-            done <<<"$DOCKER_MODULES"
-            echo "  && echo"
-            tac < scripts/Dockerfile.template | sed "/{MODULES}/q" | tac | tail -n+2
-            if [ -f $module/*-all.jar ]; then
-                echo ENTRYPOINT [\"java\", \"-jar\", \"$(basename $(ls $module/*-all.jar))\"]
-            fi
-        } >$module/Dockerfile
-        sed -i "s#{MODULE}#$module#" $module/Dockerfile
-        sed -i "s#{COMMIT}#$(git rev-parse HEAD)#" $module/Dockerfile
-    fi
-}
-
 help() {
     echo "Usage: $0 [-h] [command[:repo][:arg...] ...]" 1>&2
     echo "Commands:"
@@ -146,9 +111,6 @@ help() {
     echo "  diff[:repo]                   Print diff of repository"
     echo "  pull[:repo]                   Pull repository"
     echo "  push[:repo]                   Push repository"
-    echo "  format[:repo][:arg...]        Format a repository's Java source files"
-    echo "  license-header[:repo]         Write license headers for a repository's Java source files"
-    echo "  docker[:repo]                 Generate Dockerfile for repository"
     echo "If no repository is passed, a command applies to all repositories in the working directory."
     exit 0
 }
