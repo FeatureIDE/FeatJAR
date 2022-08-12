@@ -1,0 +1,10 @@
+pluginManagement {
+    includeBuild 'gradle-plugins'
+}
+
+// add all buildable modules as included builds
+rootDir.eachDir { dir ->
+    if (dir.toPath().resolve('build.gradle').toFile().exists()) {
+        includeBuild dir.name
+    }
+}

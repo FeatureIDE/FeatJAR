@@ -1,0 +1,14 @@
+ https://github.com/FeatJAR/cli.git
+https://github.com/FeatJAR/evaluation.git
+https://github.com/FeatJAR/formula.git
+https://github.com/FeatJAR/formula-analysis-javasmt.git
+https://github.com/FeatJAR/formula-analysis-sat4j.git
+https://github.com/FeatJAR/formula-analysis-sat4j-sharpsat.git
+https://github.com/FeatJAR/formula-analysis-sharpsat.git
+https://github.com/FeatJAR/gradle-plugins.git
+https://github.com/FeatJAR/model.git
+https://github.com/FeatJAR/bin-javasmt.git
+https://github.com/FeatJAR/bin-sharpsat.git
+https://github.com/FeatJAR/util.git
+https://github.com/FeatJAR/uvl.git
+https://github.com/FeatJAR/uvl-parser.git

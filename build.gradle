@@ -1,0 +1,8 @@
+def registerTask(taskName) {
+    tasks.register(taskName) {
+        dependsOn gradle.includedBuilds*.task(':' + taskName)
+    }
+}
+
+// pass common tasks through to all included builds
+['assemble', 'check', 'build', 'clean'].each { registerTask it }

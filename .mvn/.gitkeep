@@ -1,1 +1,0 @@
-The .mvn directory must be present for ${maven.multiModuleProjectDirectory} to resolve correctly.

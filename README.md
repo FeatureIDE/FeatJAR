@@ -5,13 +5,7 @@ Please report feedback to sebastian.krieter@uni-ulm.de or kuiter@ovgu.de.
 
 ## Build instructions
 
-General remarks:
-
-* Choose which modules to build by editing `modules.cfg` (copying `modules.template.cfg`, if necessary).
-* Most modules run on the JVM and are therefore platform-independent.
-  However, the `native-*` modules (e.g., solvers) require a compilation step targeted to a specific platform.
-* For developers, we recommend to run `git config --global url.ssh://git@github.com/.insteadOf https://github.com/` beforehand to push/pull repositories over SSH instead of HTTPS. 
-* Run `make help` to get more detailed usage instructions for building individual modules, skipping tests, and more.
+For developers, we recommend to run `git config --global url.ssh://git@github.com/.insteadOf https://github.com/` beforehand to push/pull repositories over SSH instead of HTTPS. 
 
 ### Ubuntu
 
@@ -19,81 +13,69 @@ Run the following in a shell:
 
 ```
 sudo apt update
-sudo apt install git openjdk-11-jdk maven build-essential # required by all modules
-sudo apt install libgmp-dev # required by the native-sharpsat module
+sudo apt install git openjdk-11-jdk
 git clone https://github.com/FeatJAR/FeatJAR.git && cd FeatJAR
-make
+scripts/clone.bat
+./gradlew build
 ```
 
 Installation on other Linux distributions may differ slightly, depending on the package manager.
 
-### Windows (WSL)
+### Windows
 
-The recommended way to build on Windows is to use [WSL](https://docs.microsoft.com/en-us/windows/wsl/install).
-After installing WSL, simply follow the instructions for Ubuntu in a `wsl` shell.
-For most modules, the assembled JAR files do not differ to *Windows (MinGW)* below; however, for the `native-*` modules, Linux binaries will be compiled.
-   
-### Windows (MinGW)
+Assuming [Chocolatey](https://chocolatey.org/install) is installed, run the following in `cmd.exe`: 
 
-If Windows binaries are required, the build process is a little more involved.
+```
+choco install git openjdk11
+git clone https://github.com/FeatJAR/FeatJAR.git && cd FeatJAR
+scripts\clone.bat
+gradlew build
+```
 
-* As a prerequisite, install Git, OpenJDK 11, and Maven, for example with [Chocolatey](https://chocolatey.org/install):
-  ```
-  choco install git openjdk11 maven
-  ```
-* To build the `native-sharpsat` module, also install [Visual Studio](https://visualstudio.microsoft.com/downloads/) with the C++ workload (the Windows SDK, in particular).
-* Then, install [MinGW](https://sourceforge.net/projects/mingw/files/Installer/mingw-get-setup.exe/download) and add `C:\MinGW\bin` to the `Path` environment variable.
-* Run the following in `cmd.exe` or PowerShell:
-   ```
-   mingw-get install mingw-developer-toolkit mingw32-base mingw32-gcc-g++ # required by all modules
-   mingw-get install mingw32-gmp mingw32-libgmpxx # required by the native-sharpsat module
-   ```
-* Finally, run the following in an MSYS shell (`C:\MinGW\msys\1.0\msys.bat`):
-   ```
-   git clone https://github.com/FeatJAR/FeatJAR.git && cd FeatJAR
-   make
-   ```
-   
+Alternatively, follow the steps for Ubuntu in a [WSL](https://docs.microsoft.com/en-us/windows/wsl/install) shell.
+    
 ### macOS
 
 Assuming [Homebrew](https://brew.sh/) is installed, run the following in a shell:
 
 ```
-brew install git openjdk@11 maven make # required by all modules
-brew install gmp # required by the native-sharpsat module
+brew update
+brew install git openjdk@11
 git clone https://github.com/FeatJAR/FeatJAR.git && cd FeatJAR
-make
+scripts/clone.bat
+./gradlew build
 ```
 
 ### Docker
 
-To build FeatJAR inside a Docker container (compiling Linux binaries), first install [Docker](https://docs.docker.com/get-docker/).
-Then run the following in a shell:
+Assuming [Git](https://git-scm.com/) and [Docker](https://docs.docker.com/get-docker/) are installed, run the following in a shell (or, on Windows, in WSL):
 
 ```
 git clone https://github.com/FeatJAR/FeatJAR.git && cd FeatJAR
-docker compose run featjar
+scripts/clone.bat
+docker run -v $(pwd):/home/gradle gradle:7.5.1-jdk11 gradle build
 ```
 
-This does not make use of the local Maven repository, so creates a clean build on each `run`.
-To build a Docker *image* including FeatJAR (e.g., for reproducing evaluations), consider `make docker`.
+To build a Docker image including FeatJAR (e.g., for reproducing evaluations), use `make docker`.
 
 ## Example usage
 
 ```
 # test whether a feature model is void
-java -jar cli/target/cli-1.0-SNAPSHOT-all.jar analyze \
-  -i cli/src/test/resources/testFeatureModels/car.xml -a void
+java -jar cli/build/libs/cli-all.jar analyze -i cli/src/test/resources/testFeatureModels/car.xml -a void
+  
+# or, equivalently, using Gradle
+gradlew :cli:run --args "analyze -i src/test/resources/testFeatureModels/car.xml -a void"
 
 # convert a feature model into CNF
-java -jar cli/target/cli-1.0-SNAPSHOT-all.jar convert \
+java -jar cli/build/libs/cli-all.jar convert \
   -i cli/src/test/resources/testFeatureModels/car.xml -f dimacs -cnf -o car.dimacs
 
 # convert a feature model and analyze it by means of pipes
 cat cli/src/test/resources/testFeatureModels/car.xml | \
-  java -jar cli/target/cli-1.0-SNAPSHOT-all.jar convert -f dimacs -cnf | \
+  java -jar cli/build/libs/cli-all.jar convert -f dimacs -cnf | \
   tail -n +2 | \
-  java -jar cli/target/cli-1.0-SNAPSHOT-all.jar analyze \
+  java -jar cli/build/libs/cli-all.jar analyze \
   -i "<stdin:dimacs>" -a cardinality
 ```
 
