@@ -5,4 +5,4 @@ def registerTask(taskName) {
 }
 
 // pass common tasks through to all included builds
-['assemble', 'check', 'build', 'clean', 'licenseFormat', 'spotlessApply'].each { registerTask it }
+['assemble', 'check', 'build', 'clean', 'licenseFormat', 'spotlessApply', 'publishToMavenLocal'].each { registerTask it }
