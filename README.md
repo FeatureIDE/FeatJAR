@@ -56,9 +56,9 @@ scripts/clone.bat
 docker run -v "$(pwd)":/home/gradle gradle:7.5.1-jdk11 gradle build
 ```
 
-To build a Docker image including FeatJAR (e.g., for reproducing evaluations), use `make docker`.
+## Usage
 
-## Example usage
+### As an Executable
 
 ```
 # test whether a feature model is void
@@ -79,12 +79,17 @@ cat cli/src/test/resources/testFeatureModels/car.xml | \
   -i "<stdin:dimacs>" -a cardinality
 ```
 
-## Applications
+### As a Library
 
-In addition to the repositories under the [FeatJAR](https://github.com/FeatJAR) organization, several other tools and evaluations rely on FeatJAR, for example:
+In addition to the repositories under the [FeatJAR](https://github.com/FeatJAR) organization, several other tools and evaluations rely on FeatJAR as a library, for example:
 
 * [tseitin-or-not-tseitin](https://github.com/ekuiter/tseitin-or-not-tseitin): Automated evaluation of CNF transformations' impact on feature-model analyses
 * [variED-NG](https://github.com/ekuiter/variED-NG): A collaborative, real-time feature model editor
+
+### In FeatureIDE
+
+To use FeatJAR during FeatureIDE development, import the FeatJAR root folder as a Gradle project with default settings in Eclipse (`File > Import... > Gradle > Existing Gradle project`).
+Then you can use any FeatJAR repository (e.g., `util`) to any Eclipse project by adding it to the project's build path (`Right click project > Properties > Java Build Path > Projects > Add...`).
 
 ## Contributors
 
