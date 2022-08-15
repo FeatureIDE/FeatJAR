@@ -6,3 +6,5 @@
 !/gradle/
 !/scripts/
 /.idea/
+/.settings/
+/bin/
