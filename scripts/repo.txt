@@ -1,14 +1,14 @@
 https://github.com/FeatureIDE/FeatJAR-bin-javasmt.git bin-javasmt
 https://github.com/FeatureIDE/FeatJAR-bin-sharpsat.git bin-sharpsat
 https://github.com/FeatureIDE/FeatJAR-cli.git cli
-https://github.com/FeatureIDE/FeatJAR-evaluation.git evaluation
+https://github.com/FeatureIDE/FeatJAR-feature-modeling.git feature-modeling
 https://github.com/FeatureIDE/FeatJAR-formula.git formula
 https://github.com/FeatureIDE/FeatJAR-formula-analysis-javasmt.git formula-analysis-javasmt
 https://github.com/FeatureIDE/FeatJAR-formula-analysis-sat4j.git formula-analysis-sat4j
 https://github.com/FeatureIDE/FeatJAR-formula-analysis-sat4j-sharpsat.git formula-analysis-sat4j-sharpsat
 https://github.com/FeatureIDE/FeatJAR-formula-analysis-sharpsat.git formula-analysis-sharpsat
 https://github.com/FeatureIDE/FeatJAR-gradle-plugins.git gradle-plugins
-https://github.com/FeatureIDE/FeatJAR-model.git model
 https://github.com/FeatureIDE/FeatJAR-util.git util
+https://github.com/FeatureIDE/FeatJAR-util-evaluation.git util-evaluation
 https://github.com/FeatureIDE/FeatJAR-uvl.git uvl
-https://github.com/FeatureIDE/FeatJAR-uvl-parser.git uvl-parser
+https://github.com/FeatureIDE/uvl-parser.git uvl-parser
