@@ -5,7 +5,7 @@ Please report feedback to sebastian.krieter@uni-ulm.de or kuiter@ovgu.de.
 
 ## Build instructions
 
-For developers, we recommend to run `git config --global url.ssh://git@github.com/.insteadOf https://github.com/` beforehand to push/pull repositories over SSH instead of HTTPS. 
+For developers, we recommend to run `git config --global url.ssh://git@github.com/.insteadOf https://github.com/` (do not forget the trailing slash) beforehand to push/pull repositories over SSH instead of HTTPS. 
 
 ### Ubuntu
 
