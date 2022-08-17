@@ -14,7 +14,7 @@ Run the following in a shell:
 ```
 sudo apt update
 sudo apt install git openjdk-11-jdk
-git clone https://github.com/FeatJAR/FeatJAR.git && cd FeatJAR
+git clone https://github.com/FeatureIDE/FeatJAR.git && cd FeatJAR
 scripts/clone.bat
 ./gradlew build
 ```
@@ -27,7 +27,7 @@ Assuming [Chocolatey](https://chocolatey.org/install) is installed, run the foll
 
 ```
 choco install git openjdk11
-git clone https://github.com/FeatJAR/FeatJAR.git && cd FeatJAR
+git clone https://github.com/FeatureIDE/FeatJAR.git && cd FeatJAR
 scripts\clone.bat
 gradlew build
 ```
@@ -41,7 +41,7 @@ Assuming [Homebrew](https://brew.sh/) is installed, run the following in a shell
 ```
 brew update
 brew install git openjdk@11
-git clone https://github.com/FeatJAR/FeatJAR.git && cd FeatJAR
+git clone https://github.com/FeatureIDE/FeatJAR.git && cd FeatJAR
 scripts/clone.bat
 ./gradlew build
 ```
@@ -51,7 +51,7 @@ scripts/clone.bat
 Assuming [Git](https://git-scm.com/) and [Docker](https://docs.docker.com/get-docker/) are installed, run the following in a shell (or, on Windows, in WSL):
 
 ```
-git clone https://github.com/FeatJAR/FeatJAR.git && cd FeatJAR
+git clone https://github.com/FeatureIDE/FeatJAR.git && cd FeatJAR
 scripts/clone.bat
 docker run -v "$(pwd)":/home/gradle gradle:7.5.1-jdk11 gradle build
 ```
@@ -81,7 +81,7 @@ cat cli/src/test/resources/testFeatureModels/car.xml | \
 
 ### As a Library
 
-In addition to the repositories under the [FeatJAR](https://github.com/FeatJAR) organization, several other tools and evaluations rely on FeatJAR as a library, for example:
+In addition to the repositories under the [FeatureIDE](https://github.com/FeatureIDE) organization, several other tools and evaluations rely on FeatJAR as a library, for example:
 
 * [tseitin-or-not-tseitin](https://github.com/ekuiter/tseitin-or-not-tseitin): Automated evaluation of CNF transformations' impact on feature-model analyses
 * [variED-NG](https://github.com/ekuiter/variED-NG): A collaborative, real-time feature model editor
