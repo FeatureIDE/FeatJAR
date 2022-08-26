@@ -10,5 +10,3 @@ https://github.com/FeatureIDE/FeatJAR-formula-analysis-sharpsat.git formula-anal
 https://github.com/FeatureIDE/FeatJAR-gradle-plugins.git gradle-plugins
 https://github.com/FeatureIDE/FeatJAR-util.git util
 https://github.com/FeatureIDE/FeatJAR-util-evaluation.git util-evaluation
-https://github.com/FeatureIDE/FeatJAR-uvl.git uvl
-https://github.com/FeatureIDE/uvl-parser.git uvl-parser
