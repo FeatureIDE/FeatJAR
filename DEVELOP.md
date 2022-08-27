@@ -34,10 +34,14 @@ When developing FeatJAR code, we recommend to respect the following coding conve
 * When documenting a method, consider its most important usage example and typical failure modes.
 * As an example for appropriate documentation, refer to the package `de.featjar.util.tree`.
 
+Documentation in this fashion is currently available for the following packages:
+
+* `de.featjar.util.tree`
+
 ### Tests
 
 `todo`
 
 ### Common Idioms
 
-* `hashCode`, `equals`, `clone`, `serialVersionUID`
+* `hashCode`, `equals`, `clone`, `serialVersionUID`: `todo`
