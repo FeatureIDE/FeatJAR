@@ -33,6 +33,8 @@ When developing FeatJAR code, we recommend to respect the following coding conve
   For further guidelines, see [here](https://blog.joda.org/2012/11/javadoc-coding-standards.html).
 * When documenting a method, consider its most important usage example and typical failure modes.
 * As an example for appropriate documentation, refer to the package `de.featjar.util.tree`.
+* Tests need not be documented using JavaDoc.
+  Instead, write small tests with telling names.
 
 Documentation in this fashion is currently available for the following packages:
 
@@ -42,6 +44,7 @@ Documentation in this fashion is currently available for the following packages:
 
 `todo`
 
-### Common Idioms
+### Miscellaneous
 
 * `hashCode`, `equals`, `clone`, `serialVersionUID`: `todo`
+* [How To Design A Good API and Why it Matters](https://www.youtube.com/watch?v=aAb7hSCtvGw)
