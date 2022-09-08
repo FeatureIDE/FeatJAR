@@ -18,6 +18,7 @@ When developing FeatJAR code, we recommend to respect the following coding conve
 * We recommend to move complex algorithms for manipulating a data structure `<Struct>` into a class with static methods `<Struct>s` (e.g., `Trees` manipulates `Tree` instances).
   For common algorithms, consider adding a convenience method to `<Struct>` to ensure obvious visibility for API consumers (e.g., `Traversable#traverse(TreeVisitor)` as a shorthand for `Trees#traverse(Traversable, TreeVisitor)`).
   The rationale is to keep the data structure class free from algorithm details (e.g., traversal iterators) and make better use of generic types.
+* The same naming convention is also applied for extensions (e.g., `Thing`) and their extension points (e.g., `Things`).
 
 ### Documentation
 
@@ -38,8 +39,9 @@ When developing FeatJAR code, we recommend to respect the following coding conve
 
 Documentation in this fashion is currently available for the following packages:
 
-* `de.featjar.util.tree`
+* `de.featjar.util.extension`
 * `de.featjar.util.logging`
+* `de.featjar.util.tree`
 
 Todo: job, io, extension, data, cli, bin
 
@@ -49,5 +51,5 @@ Todo: job, io, extension, data, cli, bin
 
 ### Miscellaneous
 
-* `hashCode`, `equals`, `clone`, `serialVersionUID`: `todo`
+* `hashCode`, `equals`, `clone`, `serialVersionUID`, `toString` format: `todo`
 * [How To Design A Good API and Why it Matters](https://www.youtube.com/watch?v=aAb7hSCtvGw)
