@@ -39,6 +39,9 @@ When developing FeatJAR code, we recommend to respect the following coding conve
 Documentation in this fashion is currently available for the following packages:
 
 * `de.featjar.util.tree`
+* `de.featjar.util.logging`
+
+Todo: job, io, extension, data, cli, bin
 
 ### Tests
 
