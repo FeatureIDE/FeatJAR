@@ -41,9 +41,10 @@ Documentation in this fashion is currently available for the following packages:
 
 * `de.featjar.util.extension`
 * `de.featjar.util.logging`
+* `de.featjar.util.task`
 * `de.featjar.util.tree`
 
-Todo: job, io, extension, data, cli, bin
+Todo: io, data, cli, bin
 
 ### Tests
 
