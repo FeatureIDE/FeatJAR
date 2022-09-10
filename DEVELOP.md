@@ -39,6 +39,7 @@ When developing FeatJAR code, we recommend to respect the following coding conve
 
 Documentation in this fashion is currently available for the following packages:
 
+* `de.featjar.util.data` (todo: revise Store and Computation, could be more monadic)
 * `de.featjar.util.extension`
 * `de.featjar.util.logging`
 * `de.featjar.util.task`
