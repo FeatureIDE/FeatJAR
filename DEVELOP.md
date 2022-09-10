@@ -41,11 +41,12 @@ Documentation in this fashion is currently available for the following packages:
 
 * `de.featjar.util.data` (todo: revise Store and Computation, could be more monadic)
 * `de.featjar.util.extension`
+* `de.featjar.util.io`
 * `de.featjar.util.logging`
 * `de.featjar.util.task`
 * `de.featjar.util.tree`
 
-Todo: io, data, cli, bin
+Todo: io, cli, bin
 
 ### Tests
 
