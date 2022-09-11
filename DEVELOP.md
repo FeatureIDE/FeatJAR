@@ -46,7 +46,7 @@ Documentation in this fashion is currently available for the following packages:
 * `de.featjar.util.task`
 * `de.featjar.util.tree`
 
-Todo: io, cli, bin
+Todo: cli, bin
 
 ### Tests
 
@@ -54,5 +54,8 @@ Todo: io, cli, bin
 
 ### Miscellaneous
 
-* `hashCode`, `equals`, `clone`, `serialVersionUID`, `toString` format: `todo`
+* Avoid global mutable state (i.e., non-final `static` fields).
+  When it cannot be avoided, implement an `Extension` and register it in `Installers`.
+  This way, global mutable state is at least encapsulated in a singleton and its lifetime is limited by the (un-)installer in `Extensions`.
 * [How To Design A Good API and Why it Matters](https://www.youtube.com/watch?v=aAb7hSCtvGw)
+* `hashCode`, `equals`, `clone`, `serialVersionUID`, `toString` format: `todo`
