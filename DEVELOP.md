@@ -55,7 +55,9 @@ Todo: cli, bin
 ### Miscellaneous
 
 * Avoid global mutable state (i.e., non-final `static` fields).
-  When it cannot be avoided, implement an `Extension` and register it in `Installers`.
+  When it cannot be avoided, implement an `Extension` and register it (e.g., in `Initializers`).
   This way, global mutable state is at least encapsulated in a singleton and its lifetime is limited by the (un-)installer in `Extensions`.
+* Avoid `private` fields and methods.
+  Use `protected` instead to allow API extensions. 
 * [How To Design A Good API and Why it Matters](https://www.youtube.com/watch?v=aAb7hSCtvGw)
 * `hashCode`, `equals`, `clone`, `serialVersionUID`, `toString` format: `todo`
