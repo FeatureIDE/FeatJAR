@@ -33,18 +33,18 @@ When developing FeatJAR code, we recommend to respect the following coding conve
 * Use the JavaDoc tags `@author` (for classes), `@param`, `@return`, `@throws`, and `@inheritDoc` (when extending documentation).
   For further guidelines, see [here](https://blog.joda.org/2012/11/javadoc-coding-standards.html).
 * When documenting a method, consider its most important usage example and typical failure modes.
-* As an example for appropriate documentation, refer to the package `de.featjar.util.tree`.
+* As an example for appropriate documentation, refer to the `base` module.
 * Tests need not be documented using JavaDoc.
   Instead, write small tests with telling names.
 
 Documentation in this fashion is currently available for the following packages:
 
-* `de.featjar.util.data` (todo: revise Store and Computation, could be more monadic)
-* `de.featjar.util.extension`
-* `de.featjar.util.io`
-* `de.featjar.util.logging`
-* `de.featjar.util.task`
-* `de.featjar.util.tree`
+* `de.featjar.base.data` (todo: revise Store and Computation, could be more monadic)
+* `de.featjar.base.extension`
+* `de.featjar.base.io`
+* `de.featjar.base.logging`
+* `de.featjar.base.task`
+* `de.featjar.base.tree`
 
 Todo: cli, bin
 
