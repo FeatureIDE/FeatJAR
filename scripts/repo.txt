@@ -2,7 +2,7 @@ https://github.com/FeatureIDE/FeatJAR-base.git base
 https://github.com/FeatureIDE/FeatJAR-bin-javasmt.git bin-javasmt
 https://github.com/FeatureIDE/FeatJAR-bin-sharpsat.git bin-sharpsat
 https://github.com/FeatureIDE/FeatJAR-cli.git cli
-https://github.com/FeatureIDE/FeatJAR-feature-modeling.git feature-modeling
+https://github.com/FeatureIDE/FeatJAR-feature-model.git feature-model
 https://github.com/FeatureIDE/FeatJAR-expression.git expression
 https://github.com/FeatureIDE/FeatJAR-expression-analysis-javasmt.git expression-analysis-javasmt
 https://github.com/FeatureIDE/FeatJAR-expression-analysis-sat4j.git expression-analysis-sat4j
