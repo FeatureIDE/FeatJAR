@@ -89,7 +89,7 @@ In addition to the repositories under the [FeatureIDE](https://github.com/Featur
 ### In FeatureIDE
 
 To use FeatJAR during FeatureIDE development, import the FeatJAR root folder as a Gradle project with default settings in Eclipse (`File > Import... > Gradle > Existing Gradle project`).
-Then you can use any FeatJAR repository (e.g., `util`) to any Eclipse project by adding it to the project's build path (`Right click project > Properties > Java Build Path > Projects > Add...`).
+Then you can use any FeatJAR repository (e.g., `util`) in any Eclipse project by adding it to the project's build path (`Right click project > Properties > Java Build Path > Projects > Add...`).
 
 ## Contributors
 
