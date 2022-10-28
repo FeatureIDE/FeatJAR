@@ -1,13 +1,13 @@
 # FeatJAR
 
-This is the root project for FeatJAR.
+This is the root project for **FeatJAR**, a collection of Java libraries for feature-oriented software development, planned to replace the [FeatureIDE library](https://featureide.github.io/#download), starting with FeatureIDE 4.0.0.
 Please report feedback to sebastian.krieter@uni-ulm.de or kuiter@ovgu.de.
 
-## Build instructions
+## How to Build
 
 For developers, we recommend to run `git config --global url.ssh://git@github.com/.insteadOf https://github.com/` (do not forget the trailing slash) beforehand to push/pull repositories over SSH instead of HTTPS. 
 
-### Ubuntu
+### On Ubuntu
 
 Run the following in a shell:
 
@@ -21,7 +21,7 @@ scripts/clone.bat
 
 Installation on other Linux distributions may differ slightly, depending on the package manager.
 
-### Windows
+### On Windows
 
 Assuming [Chocolatey](https://chocolatey.org/install) is installed, run the following in `cmd.exe`: 
 
@@ -34,7 +34,7 @@ gradlew build
 
 Alternatively, follow the steps for Ubuntu in a [WSL](https://docs.microsoft.com/en-us/windows/wsl/install) shell.
     
-### macOS
+### On macOS
 
 Assuming [Homebrew](https://brew.sh/) is installed, run the following in a shell:
 
@@ -46,7 +46,7 @@ scripts/clone.bat
 ./gradlew build
 ```
 
-### Docker
+### Using Docker
 
 Assuming [Git](https://git-scm.com/) and [Docker](https://docs.docker.com/get-docker/) are installed, run the following in a shell (or, on Windows, in WSL):
 
@@ -56,7 +56,31 @@ scripts/clone.bat
 docker run -v "$(pwd)":/home/gradle gradle:7.5.1-jdk11 gradle build
 ```
 
-## Usage
+### More about Gradle
+
+Besides building and testing all modules, Gradle supports many commands to control the build process, including:
+
+```
+# assemble all modules as JARs and run all tests (= assemble + check)
+./gradlew build
+
+# assemble all modules as JARs, skipping all tests
+./gradlew assemble
+
+# run all tests for all modules, skipping JAR assembly
+./gradlew check
+
+# run the FeatJAR command-line interface with the specified arguments
+./gradlew :cli:run --args "<arguments>"
+
+# run a task (e.g., 'build') only for the specified module (e.g., 'base') and its dependencies
+./gradlew :<module>:<task>
+
+# print a comprehensive list of tasks 
+gradle :<module>:tasks
+```
+
+## How to Use
 
 ### As an Executable
 
@@ -65,7 +89,7 @@ docker run -v "$(pwd)":/home/gradle gradle:7.5.1-jdk11 gradle build
 java -jar cli/build/libs/cli-all.jar analyze -i cli/src/test/resources/testFeatureModels/car.xml -a void
   
 # or, equivalently, using Gradle
-gradlew :cli:run --args "analyze -i src/test/resources/testFeatureModels/car.xml -a void"
+./gradlew :cli:run --args "analyze -i src/test/resources/testFeatureModels/car.xml -a void"
 
 # convert a feature model into CNF
 java -jar cli/build/libs/cli-all.jar convert \
