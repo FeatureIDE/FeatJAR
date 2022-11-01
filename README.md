@@ -86,20 +86,20 @@ gradle :<module>:tasks
 
 ```
 # test whether a feature model is void
-java -jar cli/build/libs/cli-all.jar analyze -i cli/src/test/resources/testFeatureModels/car.xml -a void
+java -jar cli/build/libs/cli-*.jar analyze -i cli/src/test/resources/testFeatureModels/car.xml -a void
   
 # or, equivalently, using Gradle
 ./gradlew :cli:run --args "analyze -i src/test/resources/testFeatureModels/car.xml -a void"
 
 # convert a feature model into CNF
-java -jar cli/build/libs/cli-all.jar convert \
+java -jar cli/build/libs/cli-*.jar convert \
   -i cli/src/test/resources/testFeatureModels/car.xml -f dimacs -cnf -o car.dimacs
 
 # convert a feature model and analyze it by means of pipes
 cat cli/src/test/resources/testFeatureModels/car.xml | \
-  java -jar cli/build/libs/cli-all.jar convert -f dimacs -cnf | \
+  java -jar cli/build/libs/cli-*.jar convert -f dimacs -cnf | \
   tail -n +2 | \
-  java -jar cli/build/libs/cli-all.jar analyze \
+  java -jar cli/build/libs/cli-*.jar analyze \
   -i "<stdin:dimacs>" -a cardinality
 ```
 
