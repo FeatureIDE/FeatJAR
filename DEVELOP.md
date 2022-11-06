@@ -61,3 +61,10 @@ Todo: cli, bin
   Use `protected` instead to allow API extensions. 
 * [How To Design A Good API and Why it Matters](https://www.youtube.com/watch?v=aAb7hSCtvGw)
 * `hashCode`, `equals`, `clone`, `serialVersionUID`, `toString` format: `todo`
+* Avoid returning `null` and throwing exceptions.
+  Instead, return an `Optional` for planned absence of values or `Result` for planned or erroneous absence of values.
+  Exceptions to this rule:
+  * You can return `null` when implementing an optional feature in an extension (i.e., a default method in an interface that inherits `Extension`).
+    If you do so, document this (`{@return ..., if any}`).
+  * You can throw (preferably checked) exceptions in `void` methods to avoid introducing a necessarily empty return value.
+    If you do so, document this, especially for unchecked exceptions (`@throws ... when ...`).
