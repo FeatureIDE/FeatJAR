@@ -1,14 +1,12 @@
-https://github.com/FeatJAR/bin-javasmt.git
-https://github.com/FeatJAR/bin-sharpsat.git
-https://github.com/FeatJAR/cli.git
-https://github.com/FeatJAR/evaluation.git
-https://github.com/FeatJAR/formula.git
-https://github.com/FeatJAR/formula-analysis-javasmt.git
-https://github.com/FeatJAR/formula-analysis-sat4j.git
-https://github.com/FeatJAR/formula-analysis-sat4j-sharpsat.git
-https://github.com/FeatJAR/formula-analysis-sharpsat.git
-https://github.com/FeatJAR/gradle-plugins.git
-https://github.com/FeatJAR/model.git
-https://github.com/FeatJAR/util.git
-https://github.com/FeatJAR/uvl.git
-https://github.com/FeatJAR/uvl-parser.git
+https://github.com/FeatureIDE/FeatJAR-base.git util
+https://github.com/FeatureIDE/FeatJAR-bin-javasmt.git bin-javasmt
+https://github.com/FeatureIDE/FeatJAR-bin-sharpsat.git bin-sharpsat
+https://github.com/FeatureIDE/FeatJAR-cli.git cli
+https://github.com/FeatureIDE/FeatJAR-feature-model.git feature-model
+https://github.com/FeatureIDE/FeatJAR-formula.git formula
+https://github.com/FeatureIDE/FeatJAR-formula-analysis-javasmt.git formula-analysis-javasmt
+https://github.com/FeatureIDE/FeatJAR-formula-analysis-sat4j.git formula-analysis-sat4j
+https://github.com/FeatureIDE/FeatJAR-formula-analysis-sat4j-sharpsat.git formula-analysis-sat4j-sharpsat
+https://github.com/FeatureIDE/FeatJAR-formula-analysis-sharpsat.git formula-analysis-sharpsat
+https://github.com/FeatureIDE/FeatJAR-gradle-plugins.git gradle-plugins
+https://github.com/FeatureIDE/FeatJAR-util-evaluation.git evaluation
