@@ -68,3 +68,6 @@ Todo: cli, bin
     If you do so, document this (`{@return ..., if any}`).
   * You can throw (preferably checked) exceptions in `void` methods to avoid introducing a necessarily empty return value.
     If you do so, document this, especially for unchecked exceptions (`@throws ... when ...`).
+* Concrete implementations of `Computation` and `Analysis` should be named `Compute*` and `Analyze*`, respectively.
+* Variables of type `Computation` should be named without `computation` suffix.
+  Use the helpers in `Computations` to convert between (a)synchronous computation modes.
