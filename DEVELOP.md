@@ -71,3 +71,4 @@ Todo: cli, bin
 * Concrete implementations of `Computation` and `Analysis` should be named `Compute*` and `Analyze*`, respectively.
 * Variables of type `Computation` should be named without `computation` suffix.
   Use the helpers in `Computations` to convert between (a)synchronous computation modes.
+* Use `LinkedHashMap` and `LinkedHashSet` instead of `HashMap` and `HashSet` to preserve order and guarantee determinism.
