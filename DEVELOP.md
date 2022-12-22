@@ -12,7 +12,7 @@ When developing FeatJAR code, we recommend to respect the following coding conve
 
   This should be reflected in their naming. 
 * Prepend names of abstract classes with `A` and interfaces with `I`, so there is room for a canonical implementation (e.g., `ITree` and its primary implementation `Tree`).
-  Do not prepend names of inner classes in this way.
+  Avoid using inner classes and interfaces - if using them, do not prepend their names.
 * Abbreviations should be capitalized (e.g., prefer `ComputeCNFFormula` over `ComputeCnfFormula`).
   Only use well-known abbreviations.
 * We recommend to move complex algorithms for manipulating a data structure `<Struct>` into a class with static methods `<Struct>s` (e.g., `Trees` manipulates `ITree` instances).
