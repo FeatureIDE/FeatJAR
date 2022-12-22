@@ -6,17 +6,17 @@ When developing FeatJAR code, we recommend to respect the following coding conve
 
 * Rule of thumb: Prefer good naming (without documentation) over bad naming (with documentation).
 * Most classes are
-  * things, which actors operate on (e.g., `Traversable`, `Tree`),
-  * actors, which operate on things (e.g., `TreeVisitor`, `Executor`), or
-  * buckets, which loosely collect related methods (e.g., `Trees`, `IO`).
+  * things, which actors operate on (e.g., `Tree`),
+  * actors, which operate on things (e.g., `TreeVisitor`), or
+  * buckets, which loosely collect related methods (e.g., `Trees`).
 
   This should be reflected in their naming. 
-* Class names should not contain `Abstract` or `Interface` (unless the domain justifies it).
-  To mark interfaces, consider using `able` as suffix (e.g., `Traversable` instead of `ITree`).
-* Abbreviations should be capitalized (e.g., prefer `CLIFunction` over `CliFunction`).
+* Prepend names of abstract classes with `A` and interfaces with `I`, so there is room for a canonical implementation (e.g., `ITree` and its primary implementation `Tree`).
+  Do not prepend names of inner classes in this way.
+* Abbreviations should be capitalized (e.g., prefer `ComputeCNFFormula` over `ComputeCnfFormula`).
   Only use well-known abbreviations.
-* We recommend to move complex algorithms for manipulating a data structure `<Struct>` into a class with static methods `<Struct>s` (e.g., `Trees` manipulates `Tree` instances).
-  For common algorithms, consider adding a convenience method to `<Struct>` to ensure obvious visibility for API consumers (e.g., `Traversable#traverse(TreeVisitor)` as a shorthand for `Trees#traverse(Traversable, TreeVisitor)`).
+* We recommend to move complex algorithms for manipulating a data structure `<Struct>` into a class with static methods `<Struct>s` (e.g., `Trees` manipulates `ITree` instances).
+  For common algorithms, consider adding a convenience method to `<Struct>` to ensure obvious visibility for API consumers (e.g., `ITree#traverse(TreeVisitor)` as a shorthand for `Trees#traverse(ITree, TreeVisitor)`).
   The rationale is to keep the data structure class free from algorithm details (e.g., traversal iterators) and make better use of generic types.
 * The same naming convention is also applied for extensions (e.g., `Thing`) and their extension points (e.g., `Things`).
 
@@ -37,38 +37,27 @@ When developing FeatJAR code, we recommend to respect the following coding conve
 * Tests need not be documented using JavaDoc.
   Instead, write small tests with telling names.
 
-Documentation in this fashion is currently available for the following packages:
-
-* `de.featjar.base.data` (todo: revise Store and Computation, could be more monadic)
-* `de.featjar.base.extension`
-* `de.featjar.base.io`
-* `de.featjar.base.logging`
-* `de.featjar.base.task`
-* `de.featjar.base.tree`
-
-Todo: cli, bin
-
 ### Tests
 
-`todo`
+`TODO`
 
 ### Miscellaneous
 
 * Avoid global mutable state (i.e., non-final `static` fields).
-  When it cannot be avoided, implement an `Extension` and register it (e.g., in `Initializers`).
+  When it cannot be avoided, implement an `IExtension` and register it (e.g., in `Initializers`).
   This way, global mutable state is at least encapsulated in a singleton and its lifetime is limited by the (un-)installer in `Extensions`.
 * Avoid `private` fields and methods.
   Use `protected` instead to allow API extensions. 
 * [How To Design A Good API and Why it Matters](https://www.youtube.com/watch?v=aAb7hSCtvGw)
-* `hashCode`, `equals`, `clone`, `serialVersionUID`, `toString` format: `todo`
+* `hashCode`, `equals`, `clone`, `serialVersionUID`, `toString` format: `TODO`
 * Avoid returning `null` and throwing exceptions.
   Instead, return an `Optional` for planned absence of values or `Result` for planned or erroneous absence of values.
   Exceptions to this rule:
   * You can return `null` when implementing an optional feature in an extension (i.e., a default method in an interface that inherits `Extension`).
-    If you do so, document this (`{@return ..., if any}`).
+    If you do so, still document it (`{@return ..., if any}`).
   * You can throw (preferably checked) exceptions in `void` methods to avoid introducing a necessarily empty return value.
-    If you do so, document this, especially for unchecked exceptions (`@throws ... when ...`).
-* Concrete implementations of `Computation` and `Analysis` should be named `Compute*` and `Analyze*`, respectively.
-* Variables of type `Computation` should be named without `computable` suffix.
-  Use the helpers in `Computations` to convert between (a)synchronous computable modes.
+    If you do so, document it, especially for unchecked exceptions (`@throws ... when ...`).
+* Concrete implementations of `IComputation`, `IAnalysis`, and `ITransformation` should be named `Compute*`, `Analyze*`, and `Transform*`, respectively.
+* Variables of type `IComputation` should be named without `computation` suffix.
+  Use the helpers in `Computations` to convert between (a)synchronous computation modes.
 * Use `LinkedHashMap` and `LinkedHashSet` instead of `HashMap` and `HashSet` to preserve order and guarantee determinism.
