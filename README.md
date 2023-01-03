@@ -86,10 +86,12 @@ gradle :<module>:tasks
 
 ```
 # test whether a feature model is void
-java -jar cli/build/libs/cli-*.jar analyze -i cli/src/test/resources/testFeatureModels/car.xml -a void
+java -jar cli/build/libs/cli-*-all.jar AnalyzeGetSolutionSAT4J --input cli/src/test/resources/testFeatureModels/car.xml
   
 # or, equivalently, using Gradle
-./gradlew :cli:run --args "analyze -i src/test/resources/testFeatureModels/car.xml -a void"
+./gradlew :cli:run --args "AnalyzeGetSolutionSAT4J --input src/test/resources/testFeatureModels/car.xml"
+
+todo: revise invocations below
 
 # convert a feature model into CNF
 java -jar cli/build/libs/cli-*.jar convert \
