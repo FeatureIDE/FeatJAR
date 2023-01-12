@@ -49,7 +49,10 @@ When developing FeatJAR code, we recommend to respect the following coding conve
 * Avoid `private` fields and methods.
   Use `protected` instead to allow API extensions. 
 * [How To Design A Good API and Why it Matters](https://www.youtube.com/watch?v=aAb7hSCtvGw)
-* `hashCode`, `equals`, `clone`, `serialVersionUID`, `toString` format: `TODO`
+* Do not implement `Object.clone`, which cannot be used reliably for all classes.
+  Instead, write copy constructors.
+* Implement `Object.equals` and `Object.hashCode` where necessary and mark your class as `IHashable`. 
+* `serialVersionUID`, `toString` format: `TODO`
 * Avoid returning `null` and throwing exceptions.
   Instead, return a `Result` for planned or erroneous absence of values.
   Exceptions to this rule:
@@ -61,3 +64,4 @@ When developing FeatJAR code, we recommend to respect the following coding conve
 * Variables of type `IComputation` should be named without `computation` suffix.
   Use the helpers in `Computations` to convert between (a)synchronous computation modes.
 * Use `LinkedHashMap` and `LinkedHashSet` instead of `HashMap` and `HashSet` to preserve order and guarantee determinism.
+* 
