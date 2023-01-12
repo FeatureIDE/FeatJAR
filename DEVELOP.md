@@ -51,7 +51,7 @@ When developing FeatJAR code, we recommend to respect the following coding conve
 * [How To Design A Good API and Why it Matters](https://www.youtube.com/watch?v=aAb7hSCtvGw)
 * Do not implement `Object.clone`, which cannot be used reliably for all classes.
   Instead, write copy constructors.
-* Implement `Object.equals` and `Object.hashCode` where necessary and mark your class as `IHashable`. 
+* Implement `Object.equals` and `Object.hashCode` where necessary (e.g., for objects cached in computations), but always in pairs. 
 * `serialVersionUID`, `toString` format: `TODO`
 * Avoid returning `null` and throwing exceptions.
   Instead, return a `Result` for planned or erroneous absence of values.
