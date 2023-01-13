@@ -9,4 +9,3 @@ https://github.com/FeatureIDE/FeatJAR-formula-analysis-sat4j.git formula-analysi
 https://github.com/FeatureIDE/FeatJAR-formula-analysis-sat4j-sharpsat.git formula-analysis-sat4j-sharpsat
 https://github.com/FeatureIDE/FeatJAR-formula-analysis-sharpsat.git formula-analysis-sharpsat
 https://github.com/FeatureIDE/FeatJAR-gradle-plugins.git gradle-plugins
-https://github.com/FeatureIDE/FeatJAR-util-evaluation.git util-evaluation
