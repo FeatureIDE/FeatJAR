@@ -85,24 +85,11 @@ gradle :<module>:tasks
 ### As an Executable
 
 ```
-# test whether a feature model is void
-java -jar cli/build/libs/cli-*-all.jar AnalyzeGetSolutionSAT4J --input cli/src/test/resources/testFeatureModels/car.xml
+# count feature model solutions
+java -jar cli/build/libs/cli-*-all.jar --command countsharpsat --input cli/src/test/resources/testFeatureModels/car.xml
   
 # or, equivalently, using Gradle
-./gradlew :cli:run --args "AnalyzeGetSolutionSAT4J --input src/test/resources/testFeatureModels/car.xml"
-
-todo: revise invocations below
-
-# convert a feature model into CNF
-java -jar cli/build/libs/cli-*.jar convert \
-  -i cli/src/test/resources/testFeatureModels/car.xml -f dimacs -cnf -o car.dimacs
-
-# convert a feature model and analyze it by means of pipes
-cat cli/src/test/resources/testFeatureModels/car.xml | \
-  java -jar cli/build/libs/cli-*.jar convert -f dimacs -cnf | \
-  tail -n +2 | \
-  java -jar cli/build/libs/cli-*.jar analyze \
-  -i "<stdin:dimacs>" -a cardinality
+./gradlew :cli:run --args " --command countsharpsat --input src/test/resources/testFeatureModels/car.xml"
 ```
 
 ### As a Library
@@ -127,4 +114,6 @@ FeatJAR development team:
 
 Further contributors and former project members:
 
+* Katjana Herbst (University of Ulm, Germany)
 * Daniel Hohmann (University of Magdeburg, Germany)
+* Timo Zuccarello (University of Ulm, Germany)
