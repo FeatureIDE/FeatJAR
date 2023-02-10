@@ -1,4 +1,4 @@
 #! /bin/bash
 ./scripts/clone.bat
-cd evaluation-continuous-sampling
+cd evaluation-sampling-algorithms
 ./setup.sh

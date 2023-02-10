@@ -1,3 +1,3 @@
 #! /bin/bash
-cd evaluation-continuous-sampling
+cd evaluation-sampling-algorithms
 ./run.sh
