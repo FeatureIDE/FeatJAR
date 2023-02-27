@@ -1,6 +1,8 @@
+https://github.com/FeatureIDE/FeatJAR-bin-sharpsat.git bin-sharpsat
 https://github.com/FeatureIDE/FeatJAR-base.git util
 https://github.com/FeatureIDE/FeatJAR-formula.git formula
 https://github.com/FeatureIDE/FeatJAR-formula-analysis-sat4j.git formula-analysis-sat4j
+https://github.com/FeatureIDE/FeatJAR-formula-analysis-sharpsat.git formula-analysis-sharpsat
 https://github.com/FeatureIDE/FeatJAR-gradle-plugins.git gradle-plugins
 https://github.com/FeatureIDE/FeatJAR-util-evaluation.git evaluation
-https://github.com/skrieter/evaluation-sampling-algorithms.git evaluation-sampling-algorithms
+https://github.com/skrieter/evaluation-continuous-sampling.git evaluation-continuous-sampling
