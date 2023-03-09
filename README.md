@@ -53,7 +53,7 @@ Assuming [Git](https://git-scm.com/) and [Docker](https://docs.docker.com/get-do
 ```
 git clone https://github.com/FeatureIDE/FeatJAR.git && cd FeatJAR
 scripts/clone.bat
-docker run -v "$(pwd)":/home/gradle gradle:7.5.1-jdk11 gradle build
+docker run -v "$(pwd)":/home/gradle gradle:8.0.2-jdk11 gradle build
 ```
 
 ### More about Gradle
