@@ -1,6 +1,2 @@
 https://github.com/FeatureIDE/FeatJAR-base.git util
-https://github.com/FeatureIDE/FeatJAR-formula.git formula
-https://github.com/FeatureIDE/FeatJAR-formula-analysis-sat4j.git formula-analysis-sat4j
 https://github.com/FeatureIDE/FeatJAR-gradle-plugins.git gradle-plugins
-https://github.com/FeatureIDE/FeatJAR-util-evaluation.git evaluation
-https://github.com/skrieter/evaluation-sampling-algorithms.git evaluation-sampling-algorithms
