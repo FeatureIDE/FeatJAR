@@ -7,6 +7,9 @@ Please report feedback to sebastian.krieter@uni-ulm.de or kuiter@ovgu.de.
 
 For developers who intend to push changes, we recommend to run `git config --global url.ssh://git@github.com/.insteadOf https://github.com/` (do not forget the trailing slash) beforehand to push/pull repositories over SSH instead of HTTPS.
 
+
+FeatJAR is still in active development. Thus, there can be test fails in some projects. Run `gradle assemble` instead of `gradle build` to skip tests.
+
 ### On Ubuntu
 
 Run the following in a shell:
