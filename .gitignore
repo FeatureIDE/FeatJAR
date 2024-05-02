@@ -8,3 +8,5 @@
 /.idea/
 /.settings/
 /bin/
+
+.DS_Store

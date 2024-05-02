@@ -2,7 +2,7 @@
 
 When developing FeatJAR code, we recommend to respect the following coding conventions to ensure consistency and high-quality code.
 
-### [Naming Things](https://martinfowler.com/bliki/TwoHardThings.html)
+## [Naming Things](https://martinfowler.com/bliki/TwoHardThings.html)
 
 * Rule of thumb: Prefer good naming (without documentation) over bad naming (with documentation).
 * Most classes are
@@ -20,7 +20,7 @@ When developing FeatJAR code, we recommend to respect the following coding conve
   The rationale is to keep the data structure class free from algorithm details (e.g., traversal iterators) and make better use of generic types.
 * The same naming convention is also applied for extensions (e.g., `Thing`) and their extension points (e.g., `Things`).
 
-### Documentation
+## Documentation
 
 * All Java classes in FeatJAR should be documented with a JavaDoc comment above the class, including the purpose of the class and its author(s).
 * Depending on the subjective importance of the class, either
@@ -37,11 +37,11 @@ When developing FeatJAR code, we recommend to respect the following coding conve
 * Tests need not be documented using JavaDoc.
   Instead, write small tests with telling names.
 
-### Tests
+## Tests
 
 `TODO`
 
-### Miscellaneous
+## Miscellaneous
 
 * Avoid global mutable state (i.e., non-final `static` fields).
   When it cannot be avoided, implement an `IExtension` and register it (e.g., in `Initializers`).
