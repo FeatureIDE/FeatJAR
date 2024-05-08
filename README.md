@@ -119,29 +119,29 @@ When using the `--help` flag on the *formula-analysis-sat4j* package, the follow
     
     The following commands are available:
             core-sat4j: Computes core and dead variables for a given formula using SAT4J.
-                (Classpath: de.featjar.formula.analysis.cli.CoreCommand)
+                    (Classpath: de.featjar.formula.analysis.cli.CoreCommand)
             atomic-sets-sat4j: Computes atomic sets for a given formula using SAT4J.
-                (Classpath: de.featjar.formula.analysis.cli.AtomicSetsCommand)
+                    (Classpath: de.featjar.formula.analysis.cli.AtomicSetsCommand)
             solutions-sat4j: Computes solutions for a given formula using SAT4J.
-                (Classpath: de.featjar.formula.analysis.cli.SolutionsCommand)
+                    (Classpath: de.featjar.formula.analysis.cli.SolutionsCommand)
             solution-count-sat4j: Computes number of solutions for a given formula using SAT4J.
-                (Classpath: de.featjar.formula.analysis.cli.SolutionCountCommand)
+                    (Classpath: de.featjar.formula.analysis.cli.SolutionCountCommand)
             t-wise-sat4j: Computes solutions for a given formula using SAT4J.
-                (Classpath: de.featjar.formula.analysis.cli.TWiseCommand)
+                    (Classpath: de.featjar.formula.analysis.cli.TWiseCommand)
             projection-sat4j: Removes literals of a given formula using SAT4J.
-                (Classpath: de.featjar.formula.transform.cli.ProjectionCommand)
+                    (Classpath: de.featjar.formula.transform.cli.ProjectionCommand)
             print-sat4j: Prints the formula in a readable format using SAT4J.
-                (Classpath: de.featjar.formula.transform.cli.PrintCommand)
+                    (Classpath: de.featjar.formula.transform.cli.PrintCommand)
             convert-cnf-format-sat4j: Converts the format of a given formula into another CNF format using SAT4J.
-                (Classpath: de.featjar.formula.transform.cli.ConvertCNFFormatCommand)
+                    (Classpath: de.featjar.formula.transform.cli.ConvertCNFFormatCommand)
             convert-format-sat4j: Converts the format of a given formula using SAT4J.
-                (Classpath: de.featjar.formula.transform.cli.ConvertFormatCommand)            
+                    (Classpath: de.featjar.formula.transform.cli.ConvertFormatCommand)            
 
 If you want more details of one specific command, you can again use the `--help` flag.
 Here is an example:
 
     $ java -jar formula-analysis-sat4j/build/libs/formula-analysis-sat4j-0.1.1-SNAPSHOT-all.jar print-sat4j --help
-    Usage: java -jar feat.jar [--command <command> | <shortcut>] [--<flag> | --<option> <value>]...
+    Usage: java -jar feat.jar [<command> | --command <classpath>] [--<flag> | --<option> <value>]...
 
     Help for de.featjar.formula.transform.cli.PrintCommand
             Prints the formula in a readable format using SAT4J.
@@ -149,7 +149,7 @@ Here is an example:
             General options:
                     --config <value1,value2,...>: The names of configuration files (default: [])
                     --config_dir <value>: The path to the configuration files
-                    --command <value>: Command to execute
+                    --command <value>: Classpath from command to execute
                     --help: Print usage information
                     --version: Print version information
                     --info-file <value>: Path to info log file
