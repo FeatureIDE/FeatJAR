@@ -20,62 +20,6 @@ When developing FeatJAR code, we recommend to respect the following coding conve
   The rationale is to keep the data structure class free from algorithm details (e.g., traversal iterators) and make better use of generic types.
 * The same naming convention is also applied for extensions (e.g., `Thing`) and their extension points (e.g., `Things`).
 
-## How to write commands
-
-### Adding a new command
-
-You can add a new command by creating a class that implements the `ICommand` interface.
-The `run` method will be called when the command is executed.
-The `getShortName` method returns the command shortcut.
-
-    public class MyCommand implements ICommand {
-        public void run(OptionList optionParser) { ... }
-        public String getShortName() { ... }
-    }
-
-You can create a flag or an option for your command like this:
-
-    // Example for string option
-    public static final Option<String> MY_OPTION = new Option<>("option_name", Option.StringParser)
-        .setDescription("My option")
-        .setRequired(true)
-        .setValidator(str -> str.contains("hi"));
-
-    // example for flag
-    public static final Option<Boolean> MY_FLAG = new Flag("flag_name")
-        .setDescription("My flag")
-
-    // list option
-    public static final ListOption<String> MY_LIST_OPTION = new ListOption<>("literals", Option.StringParser);
-
-You can also create a list option where you separate the elements with a comma.
-After creating the command, open the file `<package>/src/main/resources/extensions.xml`.
-There you must add the classpath of the command:
-
-    <?xml version="1.0"?>
-    <extensions>
-        <point id="de.featjar.base.cli.Commands">
-            ...
-            <extension id="de.featjar.formula. ... .MyCommand" />
-            ...
-        </point>
-    </extensions>
-
-Finally, you must run the gradle build or assemble command to compile a new JAR file.
-An example for this is shown in the next subsection.
-
-### Modifying a command
-
-Before testing any changes that you made, you must first rebuild the modules that are affected.
-For example, if you changed a class in the *formula-analysis-sat4j* module, you must first run:
-
-    # assemble module and run all tests
-    ./gradlew :formula-analysis-sat4j:build
-    
-    # assemble module and skip all tests
-    ./gradlew :formula-analysis-sat4j:assemble
-
-
 ## Documentation
 
 * All Java classes in FeatJAR should be documented with a JavaDoc comment above the class, including the purpose of the class and its author(s).

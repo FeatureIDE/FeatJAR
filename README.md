@@ -3,7 +3,7 @@
 This is the root project for **FeatJAR**, a collection of Java libraries for feature-oriented software development, planned to replace the [FeatureIDE library](https://featureide.github.io/#download), starting with FeatureIDE 4.0.0.
 Please report feedback to sebastian.krieter@uni-ulm.de or kuiter@ovgu.de.
 
-## How to Build
+## How to build
 
 For developers who intend to push changes, we recommend to run `git config --global url.ssh://git@github.com/.insteadOf https://github.com/` (do not forget the trailing slash) beforehand to push/pull repositories over SSH instead of HTTPS.
 
@@ -73,15 +73,15 @@ Besides building and testing all modules, Gradle supports many commands to contr
     # print a comprehensive list of tasks 
     gradle :<module>:tasks
 
-## How to Use
+## How to run
 
 ### Run as an Executable
 
     # count feature model solutions
-    java -jar cli/build/libs/cli-*-all.jar --command countsharpsat --input cli/src/test/resources/testFeatureModels/car.xml
+    java -jar cli/build/libs/cli-*-all.jar solution-count-sharpsat --input cli/src/test/resources/testFeatureModels/car.xml
       
     # or, equivalently, using Gradle
-    ./gradlew :cli:run --args " --command countsharpsat --input src/test/resources/testFeatureModels/car.xml"
+    ./gradlew :cli:run --args " solution-count-sharpsat --input src/test/resources/testFeatureModels/car.xml"
 
 ### Run as a Library
 
@@ -95,8 +95,10 @@ In addition to the repositories under the [FeatureIDE](https://github.com/Featur
 To use FeatJAR during FeatureIDE development, import the FeatJAR root folder as a Gradle project with default settings in Eclipse (`File > Import... > Gradle > Existing Gradle project`).
 Then you can use any FeatJAR repository (e.g., `util`) in any Eclipse project by adding it to the project's build path (`Right click project > Properties > Java Build Path > Projects > Add...`).
 
+## How to execute commands
 
 ### Using the `--help` flag
+
 You can get an overview of all commands by appending the --help flag.
 Here is an example with an executable:
 
@@ -105,17 +107,8 @@ Here is an example with an executable:
 When using the `--help` flag on the *formula-analysis-sat4j* package, the following output will be produced:
 
     $ java -jar formula-analysis-sat4j/build/libs/formula-analysis-sat4j-0.1.1-SNAPSHOT-all.jar --help
-    Usage: java -jar feat.jar [<command> | --command <classpath>] [--<flag> | --<option> <value>]...
 
-            de.featjar.formula.analysis.cli.CoreCommand: Computes core and dead variables for a given formula using SAT4J.
-            de.featjar.formula.analysis.cli.AtomicSetsCommand: Computes atomic sets for a given formula using SAT4J.
-            de.featjar.formula.analysis.cli.SolutionsCommand: Computes solutions for a given formula using SAT4J.
-            de.featjar.formula.analysis.cli.SolutionCountCommand: Computes number of solutions for a given formula using SAT4J.
-            de.featjar.formula.analysis.cli.TWiseCommand: Computes solutions for a given formula using SAT4J.
-            de.featjar.formula.transform.cli.ProjectionCommand: Removes literals of a given formula using SAT4J.
-            de.featjar.formula.transform.cli.PrintCommand: Prints the formula in a readable format using SAT4J.
-            de.featjar.formula.transform.cli.ConvertCNFFormatCommand: Converts the format of a given formula into another CNF format using SAT4J.
-            de.featjar.formula.transform.cli.ConvertFormatCommand: Converts the format of a given formula using SAT4J.
+    Usage: java -jar feat.jar [<command> | --command <classpath>] [--<flag> | --<option> <value>]...
     
     The following commands are available:
             core-sat4j: Computes core and dead variables for a given formula using SAT4J.
@@ -126,25 +119,26 @@ When using the `--help` flag on the *formula-analysis-sat4j* package, the follow
                     (Classpath: de.featjar.formula.analysis.cli.SolutionsCommand)
             solution-count-sat4j: Computes number of solutions for a given formula using SAT4J.
                     (Classpath: de.featjar.formula.analysis.cli.SolutionCountCommand)
-            t-wise-sat4j: Computes solutions for a given formula using SAT4J.
+            t-wise-sat4j: Computes solutions for a given formula using SAT4J
                     (Classpath: de.featjar.formula.analysis.cli.TWiseCommand)
             projection-sat4j: Removes literals of a given formula using SAT4J.
                     (Classpath: de.featjar.formula.transform.cli.ProjectionCommand)
-            print-sat4j: Prints the formula in a readable format using SAT4J.
-                    (Classpath: de.featjar.formula.transform.cli.PrintCommand)
-            convert-cnf-format-sat4j: Converts the format of a given formula into another CNF format using SAT4J.
+            convert-cnf-format: Converts the format of a given formula into another CNF format.
                     (Classpath: de.featjar.formula.transform.cli.ConvertCNFFormatCommand)
-            convert-format-sat4j: Converts the format of a given formula using SAT4J.
-                    (Classpath: de.featjar.formula.transform.cli.ConvertFormatCommand)            
+            convert-format: Converts the format of a given formula.
+                    (Classpath: de.featjar.formula.transform.cli.ConvertFormatCommand)
+            print: Prints the formula in a readable format.
+                    (Classpath: de.featjar.formula.visitor.cli.PrintCommand)
+
 
 If you want more details of one specific command, you can again use the `--help` flag.
 Here is an example:
 
-    $ java -jar formula-analysis-sat4j/build/libs/formula-analysis-sat4j-0.1.1-SNAPSHOT-all.jar print-sat4j --help
+    $ java -jar formula-analysis-sat4j/build/libs/formula-analysis-sat4j-0.1.1-SNAPSHOT-all.jar print --help
     Usage: java -jar feat.jar [<command> | --command <classpath>] [--<flag> | --<option> <value>]...
-
-    Help for de.featjar.formula.transform.cli.PrintCommand
-            Prints the formula in a readable format using SAT4J.
+        
+    Help for de.featjar.formula.visitor.cli.PrintCommand
+            Prints the formula in a readable format.
     
             General options:
                     --config <value1,value2,...>: The names of configuration files (default: [])
@@ -159,9 +153,9 @@ Here is an example:
                     --log-info-file <value1,value2,...>: Message types printed to the info file (message, error, warning, info, debug, progress) (default: [MESSAGE, INFO, DEBUG])
                     --log-error-file <value1,value2,...>: Message types printed to the error file (message, error, warning, info, debug, progress) (default: [ERROR, WARNING])
             
-            Options of command de.featjar.formula.transform.cli.PrintCommand:
-                    --enforce-parentheses <value>: Enforces parentheses.
-                    --enquote-whitespace <value>: Enquotes whitespace.
+            Options of command de.featjar.formula.visitor.cli.PrintCommand:
+                    --enforce-parentheses: Enforces parentheses.
+                    --enquote-whitespace: Enquotes whitespace.
                     --format <value>: Defines the symbols.
                     --input <value>: Path to input file(s)
                     --newline <value>: Defines the new line string.
@@ -169,19 +163,20 @@ Here is an example:
                     --separator <value>: Defines the separator string.
                     --tab <value>: Defines the tab string.
 
-### Command shortcuts
+### Using the `--command` option
 
-Typing commands can be somewhat verbose. Therefore, it is possible to discard the `--command` option and use shortcuts instead.
-You can get a list of all shortcuts by typing using the `--help` flag as shown above.
-For example, when executing the `de.featjar.formula.transform.cli.PrintCommand`, you could instead type:
+If several libraries are imported that contain commands with the same name, FeatJAR does not know which command should be executed.
+Therefore, it is possible to specify the classpath of the command class with the `--command` option.
+You can get a list of all classpaths by using the `--help` flag as shown above.
+For example, when executing the `print-sat4j` command, you could instead type:
 
-    java -jar formula-analysis-sat4j/build/libs/formula-analysis-sat4j-0.1.1-SNAPSHOT-all.jar print-sat4j ...
+    java -jar formula-analysis-sat4j/build/libs/formula-analysis-sat4j-0.1.1-SNAPSHOT-all.jar --command de.featjar.formula.visitor.cli.PrintCommand ...
 
-### Full example of the `print-sat4j` command
+### Full example of the `print` command
 
 Every option and flag is specified in this example. You can get an overview of all options by using the `--help` flag as shown above.
 
-     java -jar formula-analysis-sat4j/build/libs/formula-analysis-sat4j-0.1.1-SNAPSHOT-all.jar print-sat4j --input formula/src/testFixtures/resources/GPL/model.xml --tab tab --notation PREFIX --separator separator --format de.featjar.formula.io.textual.JavaSymbols --newline newline --enforce-parentheses --enquote-whitespace
+     java -jar formula-analysis-sat4j/build/libs/formula-analysis-sat4j-0.1.1-SNAPSHOT-all.jar print --input formula/src/testFixtures/resources/GPL/model.xml --tab tab --notation PREFIX --separator separator --format de.featjar.formula.io.textual.JavaSymbols --newline newline --enforce-parentheses --enquote-whitespace
 
 The output will be printed in the console because no `--output` option was set:
 
