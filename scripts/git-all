@@ -1,0 +1,13 @@
+#!/bin/bash
+COLOR='\033[0;32m'
+NOCOLOR='\033[0m'
+
+find . -name ".git" -type d -print0 | while read -d $'\0' GIT_DIR
+do
+    CUR_DIR="$(dirname "${GIT_DIR}")"
+    echo -e "${COLOR}${CUR_DIR}${NOCOLOR}"
+    pushd "${CUR_DIR}"
+    git $*
+    popd
+done
+
