@@ -2,8 +2,10 @@ def registerTaskForRepo(taskName) {
     tasks.register(taskName) {
         gradle.includedBuilds.each { build ->
             // simple hack to pass common tasks only through to included builds that belong to FeatJAR
-            if (build.projectDir.toPath().resolve('build.gradle').toFile().text.contains('id \'de.featjar.')) {
-                dependsOn gradle.includedBuild(build.name).task(":$taskName")
+            if (!build.projectDir.name.equals("all")) {
+                if (build.projectDir.toPath().resolve('build.gradle').toFile().text.contains('id \'de.featjar.')) {
+                    dependsOn gradle.includedBuild(build.name).task(":$taskName")
+                }
             }
         }
     }
@@ -11,7 +13,7 @@ def registerTaskForRepo(taskName) {
 
 // pass common tasks through to included builds
 ['assemble', 'check', 'test', 'build', 'clean',
- 'licenseFormat', 'spotlessApply', 'publishToMavenLocal',
+ 'licenseFormatMain', 'licenseFormatTest', 'spotlessApply', 'publishToMavenLocal',
  'currentVersion', 'release'].each { registerTaskForRepo it }
 
 // release with:
