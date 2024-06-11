@@ -2,12 +2,6 @@
 /build/
 /.project
 /.classpath
-/*/
-!/gradle/
-!/scripts/
-!/all/
 /.idea/
 /.settings/
 /bin/
-
-.DS_Store

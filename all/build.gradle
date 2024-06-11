@@ -1,0 +1,14 @@
+plugins {
+    id 'de.featjar.java-featjar'
+}
+
+dependencies {
+    file("..").eachDir { dir ->
+        if (!(dir.name.equals("all")
+                || dir.name.equals("gradle-plugins")
+                || dir.name.startsWith("evaluation"))
+            && dir.toPath().resolve('build.gradle').toFile().exists()) {
+            implementation "de.featjar:${dir.name}"
+        }
+    }
+}
