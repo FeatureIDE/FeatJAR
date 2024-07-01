@@ -2,10 +2,6 @@
 /build/
 /.project
 /.classpath
-/*/
-!/gradle-plugins/
-!/gradle/
-!/scripts/
 /.idea/
 /.settings/
 /bin/
