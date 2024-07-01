@@ -1,4 +1,3 @@
-https://github.com/FeatureIDE/FeatJAR-gradle-plugins.git gradle-plugins
 https://github.com/FeatureIDE/FeatJAR-base.git base
 https://github.com/FeatureIDE/FeatJAR-util-evaluation.git evaluation
 https://github.com/FeatureIDE/FeatJAR-formula.git formula
