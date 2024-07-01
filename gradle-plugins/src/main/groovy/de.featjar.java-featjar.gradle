@@ -1,0 +1,76 @@
+import com.github.jengelman.gradle.plugins.shadow.transformers.XmlAppendingTransformer
+
+plugins {
+    id 'java'
+    id 'com.github.johnrengelman.shadow'
+}
+
+group = 'de.featjar'
+version = '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+jar{
+    manifest {
+        attributes 'Main-Class': 'de.featjar.base.FeatJAR'
+    }
+}
+
+def getJavaSources() {
+    def dependencyNames = project.configurations.collectMany { it.dependencies }
+    dependencyNames.stream()
+        .map(d -> d.name)
+        .distinct()
+        .map(n -> file("../${n}/src/main/java"))
+        .filter(f -> f.exists()).toList();
+}
+
+project.tasks.register('allJavadoc', Javadoc) {
+    javadocTool = javaToolchains.javadocToolFor {
+        languageVersion = JavaLanguageVersion.of(17)
+        vendor = JvmVendorSpec.ORACLE
+    }
+    javadoc.options.addStringOption('Xdoclint:none', '-quiet')
+    source {
+        getJavaSources()
+    }
+    configurations.compileClasspath.each { part -> classpath += files(part) }
+    destinationDir = file("${buildDir}/javadoc")
+}
+
+project.tasks.register('allJavadocJar', Jar) {
+    dependsOn allJavadoc
+    archiveBaseName.set('featjar')
+    archiveClassifier.set('javadoc')
+    from allJavadoc.destinationDir
+}
+
+project.tasks.register('allSources', Zip) {
+    archiveBaseName.set('featjar')
+    archiveClassifier.set('source')
+    archiveVersion = project.version
+    destinationDirectory.set(project.layout.buildDirectory.dir('libs'))
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    from {
+        getJavaSources()
+    }
+}
+
+shadowJar {
+    archiveBaseName.set('featjar')
+    transform(XmlAppendingTransformer.class) {
+        resource = 'extensions.xml'
+    }
+    include '**/*.jar'     
+    include 'bin/'     
+    include '**/*.class'    
+    include '**/extensions.xml'
+}
+
+project.tasks.named('build') {
+    dependsOn tasks.named('shadowJar')
+    dependsOn tasks.named('allSources')
+    dependsOn tasks.named('allJavadocJar')
+}
