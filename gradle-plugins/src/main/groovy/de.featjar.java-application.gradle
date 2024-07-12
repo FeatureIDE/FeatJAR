@@ -1,0 +1,36 @@
+/**
+ * Creates self-contained JAR files that are executable on the command line (fat/uber JAR).
+ */
+import com.github.jengelman.gradle.plugins.shadow.transformers.XmlAppendingTransformer
+
+plugins {
+    id 'de.featjar.java'
+    id 'application'
+    id 'com.github.johnrengelman.shadow'
+}
+
+application {
+    mainClass = 'de.featjar.base.FeatJAR'
+}
+
+shadowJar {
+    transform(XmlAppendingTransformer.class) {
+        resource = 'extensions.xml'
+    }
+}
+
+project.tasks.register('allSources', Zip) {
+    archiveBaseName = project.name
+    archiveClassifier = 'all-sources'
+    archiveVersion = project.version
+    destinationDirectory.set(project.layout.buildDirectory.dir('libs'))
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    from {
+        def dependencyNames = project.configurations.collectMany { it.dependencies }
+        dependencyNames.stream()
+            .map(d -> d.name)
+            .distinct()
+            .map(n -> file("../${n}/src/main/java"))
+            .filter(f -> f.exists()).toList();
+    }
+}

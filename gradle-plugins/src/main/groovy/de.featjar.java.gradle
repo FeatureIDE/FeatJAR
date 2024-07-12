@@ -1,0 +1,109 @@
+/**
+ * Contains conventions shared between Gradle builds that compile Java code.
+ */
+
+plugins {
+    id 'java'
+    id 'maven-publish'
+    id 'com.github.hierynomus.license-base'
+    id 'com.diffplug.spotless'
+    id 'com.github.spotbugs'
+    id 'pl.allegro.tech.build.axion-release'
+}
+
+repositories {
+    mavenCentral()
+}
+
+group = 'de.featjar'
+version = scmVersion.version
+
+dependencies {
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.0'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.9.0'
+    testImplementation 'org.mockito:mockito-inline:4.7.0'
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+        vendor = JvmVendorSpec.ORACLE
+    }
+    sourceCompatibility = 1.11
+    withSourcesJar()
+    withJavadocJar()
+}
+
+test {
+    useJUnitPlatform()
+}
+
+task copyBinaries (type: Copy) {
+    from 'src/main/resources/bin/.'
+    into System.getProperty('user.home') + '/.featjar-bin'
+}
+tasks.matching { it != copyBinaries }.all { it.dependsOn copyBinaries }
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            from(components.java)
+        }
+    }
+}
+
+license {
+    header = null
+    headerURI = DeFeatjarJavaPlugin.class.getResource('licenseHeaders/lgpl30.txt').toURI()
+    ext {
+        licence_program = rootProject.name
+        licence_year = Calendar.getInstance().get(Calendar.YEAR)
+        licence_author = 'FeatJAR-Development-Team'
+        licence_url = 'https://github.com/FeatJAR'
+    }
+    include "**/*.java"
+    ignoreFailures false // TODO: discuss whether to enable always
+    mapping {
+        java='SLASHSTAR_STYLE'
+    }
+}
+
+spotless {
+    enforceCheck = false // TODO: discuss whether to enable always
+    java {
+        importOrder()
+        removeUnusedImports()
+        palantirJavaFormat() // TODO: discuss format
+    }
+}
+
+def spotbugsConfiguration = {
+    effort = 'max'
+    reports {
+        html {
+            enabled = true // TODO: fix spotbugs config and re-enable
+            stylesheet = 'fancy-hist.xsl'
+        }
+    }
+}
+
+spotbugs {
+    ignoreFailures = true // TODO: discuss whether to enable always
+}
+
+spotbugsMain {
+    configure spotbugsConfiguration
+}
+
+spotbugsTest {
+    configure spotbugsConfiguration
+}
+
+javadoc {
+    failOnError = false
+    javadocTool = javaToolchains.javadocToolFor {
+        languageVersion = JavaLanguageVersion.of(17)
+        vendor = JvmVendorSpec.ORACLE
+    }
+    javadoc.options.addStringOption('Xdoclint:none', '-quiet')
+}
