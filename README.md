@@ -78,10 +78,10 @@ Besides building and testing all modules, Gradle supports many commands to contr
 ### Run as an Executable
 
     # count feature model solutions
-    java -jar cli/build/libs/cli-*-all.jar solution-count-sharpsat --input cli/src/test/resources/testFeatureModels/car.xml
+    java -jar all/build/libs/*-all.jar solution-count-sharpsat --input formula/src/testFixtures/resources/testFeatureModels/car.xml
       
     # or, equivalently, using Gradle
-    ./gradlew :cli:run --args " solution-count-sharpsat --input src/test/resources/testFeatureModels/car.xml"
+    ./gradlew :all:run --args " solution-count-sharpsat --input ../formula/src/testFixtures/resources/testFeatureModels/car.xml"
 
 ### Run as a Library
 
@@ -93,7 +93,7 @@ In addition to the repositories under the [FeatureIDE](https://github.com/Featur
 ### Run in FeatureIDE
 
 To use FeatJAR during FeatureIDE development, import the FeatJAR root folder as a Gradle project with default settings in Eclipse (`File > Import... > Gradle > Existing Gradle project`).
-Then you can use any FeatJAR repository (e.g., `util`) in any Eclipse project by adding it to the project's build path (`Right click project > Properties > Java Build Path > Projects > Add...`).
+Then you can use any FeatJAR repository (e.g., `base`) in any Eclipse project by adding it to the project's build path (`Right click project > Properties > Java Build Path > Projects > Add...`).
 
 ## How to execute commands
 
@@ -102,7 +102,7 @@ Then you can use any FeatJAR repository (e.g., `util`) in any Eclipse project by
 You can get an overview of all commands by appending the --help flag.
 Here is an example with an executable:
 
-    java -jar cli/build/libs/cli-*-all.jar --help
+    java -jar all/build/libs/*-all.jar --help
 
 When using the `--help` flag on the *formula-analysis-sat4j* package, the following output will be produced:
 
