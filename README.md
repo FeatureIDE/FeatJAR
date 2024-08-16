@@ -78,10 +78,10 @@ Besides building and testing all modules, Gradle supports many commands to contr
 ### Run as an Executable
 
     # count feature model solutions
-    java -jar all/build/libs/*-all.jar solution-count-sharpsat --input formula/src/testFixtures/resources/testFeatureModels/car.xml
+    java -jar all/build/libs/*-all.jar count-sharpsat --input formula/src/testFixtures/resources/testFeatureModels/car.xml
       
     # or, equivalently, using Gradle
-    ./gradlew :all:run --args " solution-count-sharpsat --input ../formula/src/testFixtures/resources/testFeatureModels/car.xml"
+    ./gradlew :all:run --args " count-sharpsat --input ../formula/src/testFixtures/resources/testFeatureModels/car.xml"
 
 ### Run as a Library
 
@@ -100,68 +100,80 @@ Then you can use any FeatJAR repository (e.g., `base`) in any Eclipse project by
 ### Using the `--help` flag
 
 You can get an overview of all commands by appending the --help flag.
-Here is an example with an executable:
-
-    java -jar all/build/libs/*-all.jar --help
-
-When using the `--help` flag on the *formula-analysis-sat4j* package, the following output will be produced:
+For example, when using the `--help` flag on the *formula-analysis-sat4j* package, the following output will be produced:
 
     $ java -jar formula-analysis-sat4j/build/libs/formula-analysis-sat4j-0.1.1-SNAPSHOT-all.jar --help
 
     Usage: java -jar feat.jar [<command> | --command <classpath>] [--<flag> | --<option> <value>]...
+
+    General options:
+            --config <value1,value2,...>: The names of configuration files (default: [])
+            --config_dir <value>: The path to the configuration files
+            --command <value>: Classpath from command to execute
+            --help: Print usage information
+            --version: Print version information
+            --print-stacktrace: Print a stacktrace for all logged exceptions
+            --quiet: Suppress all unnecessary output. (Overwrites --log-info and --log-error options)
+            --info-file <value>: Path to info log file
+            --error-file <value>: Path to error log file
+            --log-info <value1,value2,...>: Message types printed to the info stream (message, error, warning, info, debug, progress) (default: [MESSAGE, INFO, PROGRESS])
+            --log-error <value1,value2,...>: Message types printed to the error stream (message, error, warning, info, debug, progress) (default: [ERROR])
+            --log-info-file <value1,value2,...>: Message types printed to the info file (message, error, warning, info, debug, progress) (default: [MESSAGE, INFO, DEBUG])
+            --log-error-file <value1,value2,...>: Message types printed to the error file (message, error, warning, info, debug, progress) (default: [ERROR, WARNING])
     
     The following commands are available:
-            core-sat4j: Computes core and dead variables for a given formula using SAT4J.
-                    (Classpath: de.featjar.formula.analysis.cli.CoreCommand)
             atomic-sets-sat4j: Computes atomic sets for a given formula using SAT4J.
-                    (Classpath: de.featjar.formula.analysis.cli.AtomicSetsCommand)
-            solutions-sat4j: Computes solutions for a given formula using SAT4J.
-                    (Classpath: de.featjar.formula.analysis.cli.SolutionsCommand)
-            solution-count-sat4j: Computes number of solutions for a given formula using SAT4J.
-                    (Classpath: de.featjar.formula.analysis.cli.SolutionCountCommand)
-            t-wise-sat4j: Computes solutions for a given formula using SAT4J
-                    (Classpath: de.featjar.formula.analysis.cli.TWiseCommand)
-            projection-sat4j: Removes literals of a given formula using SAT4J.
-                    (Classpath: de.featjar.formula.transform.cli.ProjectionCommand)
+                    (Classpath: de.featjar.analysis.sat4j.cli.AtomicSetsCommand)
             convert-cnf-format: Converts the format of a given formula into another CNF format.
-                    (Classpath: de.featjar.formula.transform.cli.ConvertCNFFormatCommand)
+                    (Classpath: de.featjar.formula.cli.ConvertCNFFormatCommand)
             convert-format: Converts the format of a given formula.
-                    (Classpath: de.featjar.formula.transform.cli.ConvertFormatCommand)
+                    (Classpath: de.featjar.formula.cli.ConvertFormatCommand)
+            core-sat4j: Computes core and dead variables for a given formula using SAT4J.
+                    (Classpath: de.featjar.analysis.sat4j.cli.CoreCommand)
+            count-sat4j: Computes number of solutions for a given formula using SAT4J.
+                    (Classpath: de.featjar.analysis.sat4j.cli.SolutionCountCommand)
             print: Prints the formula in a readable format.
-                    (Classpath: de.featjar.formula.visitor.cli.PrintCommand)
+                    (Classpath: de.featjar.formula.cli.PrintCommand)
+            projection-sat4j: Removes literals of a given formula using SAT4J.
+                    (Classpath: de.featjar.analysis.sat4j.cli.ProjectionCommand)
+            solutions-sat4j: Computes solutions for a given formula using SAT4J.
+                    (Classpath: de.featjar.analysis.sat4j.cli.SolutionsCommand)
+            t-wise-sat4j: Computes solutions for a given formula using SAT4J
+                    (Classpath: de.featjar.analysis.sat4j.cli.TWiseCommand)
+
 
 
 If you want more details of one specific command, you can again use the `--help` flag.
 Here is an example:
 
     $ java -jar formula-analysis-sat4j/build/libs/formula-analysis-sat4j-0.1.1-SNAPSHOT-all.jar print --help
-    Usage: java -jar feat.jar [<command> | --command <classpath>] [--<flag> | --<option> <value>]...
-        
-    Help for de.featjar.formula.visitor.cli.PrintCommand
+    General options:
+            --config <value1,value2,...>: The names of configuration files (default: [])
+            --config_dir <value>: The path to the configuration files
+            --command <value>: Classpath from command to execute
+            --help: Print usage information
+            --version: Print version information
+            --print-stacktrace: Print a stacktrace for all logged exceptions
+            --quiet: Suppress all unnecessary output. (Overwrites --log-info and --log-error options)
+            --info-file <value>: Path to info log file
+            --error-file <value>: Path to error log file
+            --log-info <value1,value2,...>: Message types printed to the info stream (message, error, warning, info, debug, progress) (default: [MESSAGE, INFO, PROGRESS])
+            --log-error <value1,value2,...>: Message types printed to the error stream (message, error, warning, info, debug, progress) (default: [ERROR])
+            --log-info-file <value1,value2,...>: Message types printed to the info file (message, error, warning, info, debug, progress) (default: [MESSAGE, INFO, DEBUG])
+            --log-error-file <value1,value2,...>: Message types printed to the error file (message, error, warning, info, debug, progress) (default: [ERROR, WARNING])
+
+    Help for de.featjar.formula.cli.PrintCommand
             Prints the formula in a readable format.
-    
-            General options:
-                    --config <value1,value2,...>: The names of configuration files (default: [])
-                    --config_dir <value>: The path to the configuration files
-                    --command <value>: Classpath from command to execute
-                    --help: Print usage information
-                    --version: Print version information
-                    --info-file <value>: Path to info log file
-                    --error-file <value>: Path to error log file
-                    --log-info <value1,value2,...>: Message types printed to the info stream (message, error, warning, info, debug, progress) (default: [MESSAGE, INFO, PROGRESS])
-                    --log-error <value1,value2,...>: Message types printed to the error stream (message, error, warning, info, debug, progress) (default: [ERROR])
-                    --log-info-file <value1,value2,...>: Message types printed to the info file (message, error, warning, info, debug, progress) (default: [MESSAGE, INFO, DEBUG])
-                    --log-error-file <value1,value2,...>: Message types printed to the error file (message, error, warning, info, debug, progress) (default: [ERROR, WARNING])
-            
-            Options of command de.featjar.formula.visitor.cli.PrintCommand:
+
+            Options of command de.featjar.formula.cli.PrintCommand:
                     --enforce-parentheses: Enforces parentheses.
                     --enquote-whitespace: Enquotes whitespace.
-                    --format <value>: Defines the symbols.
+                    --format <value>: Defines the symbols. (default: de.featjar.formula.io.textual.ShortSymbols: [not, and, or, implies, biimplies, choose, atleast, between, atmost, exists, forall, -, &, |, =>, <=>])
                     --input <value>: Path to input file(s)
-                    --newline <value>: Defines the new line string.
-                    --notation <value>: Defines the notation. Possible options: [INFIX, PREFIX, POSTFIX, TREE]
-                    --separator <value>: Defines the separator string.
-                    --tab <value>: Defines the tab string.
+                    --newline <value>: Defines the new line value. Possible options: [TAB, NEWLINE, SPACE]. For custom value, type CUSTOM:<value> (default: NEWLINE)
+                    --notation <value>: Defines the notation. Possible options: [INFIX, PREFIX, POSTFIX, TREE] (default: INFIX)
+                    --output <value>: Path to output file(s)
+                    --tab <value>: Defines the tab value. Possible options: [TAB, NEWLINE, SPACE]. For custom value, type CUSTOM:<value> (default: TAB)
 
 ### Using the `--command` option
 
@@ -176,11 +188,11 @@ For example, when executing the `print-sat4j` command, you could instead type:
 
 Every option and flag is specified in this example. You can get an overview of all options by using the `--help` flag as shown above.
 
-     java -jar formula-analysis-sat4j/build/libs/formula-analysis-sat4j-0.1.1-SNAPSHOT-all.jar print --input formula/src/testFixtures/resources/GPL/model.xml --tab tab --notation PREFIX --separator separator --format de.featjar.formula.io.textual.JavaSymbols --newline newline --enforce-parentheses --enquote-whitespace
+     java -jar formula-analysis-sat4j/build/libs/formula-analysis-sat4j-0.1.1-SNAPSHOT-all.jar print --input formula/src/testFixtures/resources/GPL/model.xml --notation PREFIX --format de.featjar.formula.io.textual.JavaSymbols --enforce-parentheses --enquote-whitespace
 
 The output will be printed in the console because no `--output` option was set:
 
-    &&(||(GPL) ||(Result{!, []}MainGpl GPL) ||(Result{!, []}HiddenGtp MainGpl) ||(Result{!, []}MainGpl HiddenGtp) ||(Result{!, []}DirectedWithEdges HiddenGtp) ||(Result{!, []}DirectedWithNeighbors HiddenGtp) ||(Result{!, []}DirectedOnlyVertices HiddenGtp) ||(Result{!, []}UndirectedWithEdges HiddenGtp) ||(Result{!, []}UndirectedWithNeighbors HiddenGtp) ||(Result{!, []}UndirectedOnlyVertices HiddenGtp) ||(Result{!, []}HiddenGtp DirectedWithEdges DirectedWithNeighbors DirectedOnlyVertices UndirectedWithEdges UndirectedWithNeighbors UndirectedOnlyVertices) ||(Result{!, []}DirectedWithEdges Result{!, []}DirectedWithNeighbors) ||(Result{!, []}DirectedWithEdges Result{!, []}DirectedOnlyVertices) ||(Result{!, []}DirectedWithEdges Result{!, []}UndirectedWithEdges) ||(Result{!, []}DirectedWithEdges Result{!, []}UndirectedWithNeighbors) ||(Result{!, []}DirectedWithEdges Result{!, []}UndirectedOnlyVertices) ||(Result{!, []}DirectedWithNeighbors Result{!, []}DirectedOnlyVertices) ||(Result{!, []}DirectedWithNeighbors Result{!, []}UndirectedWithEdges) ||(Result{!, []}DirectedWithNeighbors Result{!, []}UndirectedWithNeighbors) ||(Result{!, []}DirectedWithNeighbors Result{!, []}UndirectedOnlyVertices) ||(Result{!, []}DirectedOnlyVertices Result{!, []}UndirectedWithEdges) ||(Result{!, []}DirectedOnlyVertices Result{!, []}UndirectedWithNeighbors) ||(Result{!, []}DirectedOnlyVertices Result{!, []}UndirectedOnlyVertices) ||(Result{!, []}UndirectedWithEdges Result{!, []}UndirectedWithNeighbors) ||(Result{!, []}UndirectedWithEdges Result{!, []}UndirectedOnlyVertices) ||(Result{!, []}UndirectedWithNeighbors Result{!, []}UndirectedOnlyVertices) ||(Result{!, []}TestProg MainGpl) ||(Result{!, []}MainGpl TestProg) ||(Result{!, []}Alg MainGpl) ||(Result{!, []}MainGpl Alg) ||(Result{!, []}Number Alg) ||(Result{!, []}Connected Alg) ||(Result{!, []}StrongC Alg) ||(Result{!, []}StronglyConnected StrongC) ||(Result{!, []}StrongC StronglyConnected) ||(Result{!, []}Transpose StrongC) ||(Result{!, []}StrongC Transpose) ||(Result{!, []}Cycle Alg) ||(Result{!, []}MSTPrim Alg) ||(Result{!, []}MSTKruskal Alg) ||(Result{!, []}Alg Number Connected StrongC Cycle MSTPrim MSTKruskal) ||(Result{!, []}Src MainGpl) ||(Result{!, []}MainGpl Src) ||(Result{!, []}BFS Src) ||(Result{!, []}DFS Src) ||(Result{!, []}Src BFS DFS) ||(Result{!, []}BFS Result{!, []}DFS) ||(Result{!, []}HiddenWgt MainGpl) ||(Result{!, []}MainGpl HiddenWgt) ||(Result{!, []}WeightOptions HiddenWgt) ||(Result{!, []}HiddenWgt WeightOptions) ||(Result{!, []}WeightedWithEdges WeightOptions) ||(Result{!, []}WeightedWithNeighbors WeightOptions) ||(Result{!, []}WeightedOnlyVertices WeightOptions) ||(Result{!, []}Wgt MainGpl) ||(Result{!, []}MainGpl Wgt) ||(Result{!, []}Weighted Wgt) ||(Result{!, []}Unweighted Wgt) ||(Result{!, []}Wgt Weighted Unweighted) ||(Result{!, []}Weighted Result{!, []}Unweighted) ||(Result{!, []}Gtp MainGpl) ||(Result{!, []}MainGpl Gtp) ||(Result{!, []}Directed Gtp) ||(Result{!, []}Undirected Gtp) ||(Result{!, []}Gtp Directed Undirected) ||(Result{!, []}Directed Result{!, []}Undirected) ||(Result{!, []}Implementation MainGpl) ||(Result{!, []}MainGpl Implementation) ||(Result{!, []}OnlyVertices Implementation) ||(Result{!, []}WithNeighbors Implementation) ||(Result{!, []}WithEdges Implementation) ||(Result{!, []}Implementation OnlyVertices WithNeighbors WithEdges) ||(Result{!, []}OnlyVertices Result{!, []}WithNeighbors) ||(Result{!, []}OnlyVertices Result{!, []}WithEdges) ||(Result{!, []}WithNeighbors Result{!, []}WithEdges) ||(Result{!, []}Base MainGpl) ||(Result{!, []}MainGpl Base) ||(Result{!, []}GPL MainGpl) ||(Result{!, []}Number Src) ||(Result{!, []}Number Gtp) ||(Result{!, []}Connected Src) ||(Result{!, []}Connected Undirected) ||(Result{!, []}StrongC DFS) ||(Result{!, []}StrongC Directed) ||(Result{!, []}Cycle DFS) ||(Result{!, []}Cycle Gtp) ||(Weighted Result{!, []}MSTPrim) ||(Weighted Result{!, []}MSTKruskal) ||(Undirected Result{!, []}MSTPrim) ||(Undirected Result{!, []}MSTKruskal) ||(Result{!, []}MSTPrim Result{!, []}MSTKruskal) ||(Result{!, []}MSTKruskal WithEdges) ||(Result{!, []}OnlyVertices Result{!, []}Weighted WeightedOnlyVertices) ||(Result{!, []}WeightedOnlyVertices Weighted) ||(Result{!, []}WeightedOnlyVertices OnlyVertices) ||(Result{!, []}WithNeighbors Result{!, []}Weighted WeightedWithNeighbors) ||(Result{!, []}WeightedWithNeighbors Weighted) ||(Result{!, []}WeightedWithNeighbors WithNeighbors) ||(Result{!, []}WithEdges Result{!, []}Weighted WeightedWithEdges) ||(Result{!, []}WeightedWithEdges Weighted) ||(Result{!, []}WeightedWithEdges WithEdges) ||(Result{!, []}OnlyVertices Result{!, []}Directed DirectedOnlyVertices) ||(Result{!, []}DirectedOnlyVertices Directed) ||(Result{!, []}DirectedOnlyVertices OnlyVertices) ||(Result{!, []}WithNeighbors Result{!, []}Directed DirectedWithNeighbors) ||(Result{!, []}DirectedWithNeighbors Directed) ||(Result{!, []}DirectedWithNeighbors WithNeighbors) ||(Result{!, []}WithEdges Result{!, []}Directed DirectedWithEdges) ||(Result{!, []}DirectedWithEdges Directed) ||(Result{!, []}DirectedWithEdges WithEdges) ||(Result{!, []}OnlyVertices Result{!, []}Undirected UndirectedOnlyVertices) ||(Result{!, []}UndirectedOnlyVertices Undirected) ||(Result{!, []}UndirectedOnlyVertices OnlyVertices) ||(Result{!, []}WithNeighbors Result{!, []}Undirected UndirectedWithNeighbors) ||(Result{!, []}UndirectedWithNeighbors Undirected) ||(Result{!, []}UndirectedWithNeighbors WithNeighbors) ||(Result{!, []}WithEdges Result{!, []}Undirected UndirectedWithEdges) ||(Result{!, []}UndirectedWithEdges Undirected) ||(Result{!, []}UndirectedWithEdges WithEdges))
+    &&(||(GPL) ||(!MainGpl GPL) ||(!HiddenGtp MainGpl) ||(!MainGpl HiddenGtp) ||(!DirectedWithEdges HiddenGtp) ||(!DirectedWithNeighbors HiddenGtp) ||(!DirectedOnlyVertices HiddenGtp) ||(!UndirectedWithEdges HiddenGtp) ||(!UndirectedWithNeighbors HiddenGtp) ||(!UndirectedOnlyVertices HiddenGtp) ||(!HiddenGtp DirectedWithEdges DirectedWithNeighbors DirectedOnlyVertices UndirectedWithEdges UndirectedWithNeighbors UndirectedOnlyVertices) ||(!DirectedWithEdges !DirectedWithNeighbors) ||(!DirectedWithEdges !DirectedOnlyVertices) ||(!DirectedWithEdges !UndirectedWithEdges) ||(!DirectedWithEdges !UndirectedWithNeighbors) ||(!DirectedWithEdges !UndirectedOnlyVertices) ||(!DirectedWithNeighbors !DirectedOnlyVertices) ||(!DirectedWithNeighbors !UndirectedWithEdges) ||(!DirectedWithNeighbors !UndirectedWithNeighbors) ||(!DirectedWithNeighbors !UndirectedOnlyVertices) ||(!DirectedOnlyVertices !UndirectedWithEdges) ||(!DirectedOnlyVertices !UndirectedWithNeighbors) ||(!DirectedOnlyVertices !UndirectedOnlyVertices) ||(!UndirectedWithEdges !UndirectedWithNeighbors) ||(!UndirectedWithEdges !UndirectedOnlyVertices) ||(!UndirectedWithNeighbors !UndirectedOnlyVertices) ||(!TestProg MainGpl) ||(!MainGpl TestProg) ||(!Alg MainGpl) ||(!MainGpl Alg) ||(!Number Alg) ||(!Connected Alg) ||(!StrongC Alg) ||(!StronglyConnected StrongC) ||(!StrongC StronglyConnected) ||(!Transpose StrongC) ||(!StrongC Transpose) ||(!Cycle Alg) ||(!MSTPrim Alg) ||(!MSTKruskal Alg) ||(!Alg Number Connected StrongC Cycle MSTPrim MSTKruskal) ||(!Src MainGpl) ||(!MainGpl Src) ||(!BFS Src) ||(!DFS Src) ||(!Src BFS DFS) ||(!BFS !DFS) ||(!HiddenWgt MainGpl) ||(!MainGpl HiddenWgt) ||(!WeightOptions HiddenWgt) ||(!HiddenWgt WeightOptions) ||(!WeightedWithEdges WeightOptions) ||(!WeightedWithNeighbors WeightOptions) ||(!WeightedOnlyVertices WeightOptions) ||(!Wgt MainGpl) ||(!MainGpl Wgt) ||(!Weighted Wgt) ||(!Unweighted Wgt) ||(!Wgt Weighted Unweighted) ||(!Weighted !Unweighted) ||(!Gtp MainGpl) ||(!MainGpl Gtp) ||(!Directed Gtp) ||(!Undirected Gtp) ||(!Gtp Directed Undirected) ||(!Directed !Undirected) ||(!Implementation MainGpl) ||(!MainGpl Implementation) ||(!OnlyVertices Implementation) ||(!WithNeighbors Implementation) ||(!WithEdges Implementation) ||(!Implementation OnlyVertices WithNeighbors WithEdges) ||(!OnlyVertices !WithNeighbors) ||(!OnlyVertices !WithEdges) ||(!WithNeighbors !WithEdges) ||(!Base MainGpl) ||(!MainGpl Base) ||(!GPL MainGpl) ||(!Number Src) ||(!Number Gtp) ||(!Connected Src) ||(!Connected Undirected) ||(!StrongC DFS) ||(!StrongC Directed) ||(!Cycle DFS) ||(!Cycle Gtp) ||(Weighted !MSTPrim) ||(Weighted !MSTKruskal) ||(Undirected !MSTPrim) ||(Undirected !MSTKruskal) ||(!MSTPrim !MSTKruskal) ||(!MSTKruskal WithEdges) ||(!OnlyVertices !Weighted WeightedOnlyVertices) ||(!WeightedOnlyVertices Weighted) ||(!WeightedOnlyVertices OnlyVertices) ||(!WithNeighbors !Weighted WeightedWithNeighbors) ||(!WeightedWithNeighbors Weighted) ||(!WeightedWithNeighbors WithNeighbors) ||(!WithEdges !Weighted WeightedWithEdges) ||(!WeightedWithEdges Weighted) ||(!WeightedWithEdges WithEdges) ||(!OnlyVertices !Directed DirectedOnlyVertices) ||(!DirectedOnlyVertices Directed) ||(!DirectedOnlyVertices OnlyVertices) ||(!WithNeighbors !Directed DirectedWithNeighbors) ||(!DirectedWithNeighbors Directed) ||(!DirectedWithNeighbors WithNeighbors) ||(!WithEdges !Directed DirectedWithEdges) ||(!DirectedWithEdges Directed) ||(!DirectedWithEdges WithEdges) ||(!OnlyVertices !Undirected UndirectedOnlyVertices) ||(!UndirectedOnlyVertices Undirected) ||(!UndirectedOnlyVertices OnlyVertices) ||(!WithNeighbors !Undirected UndirectedWithNeighbors) ||(!UndirectedWithNeighbors Undirected) ||(!UndirectedWithNeighbors WithNeighbors) ||(!WithEdges !Undirected UndirectedWithEdges) ||(!UndirectedWithEdges Undirected) ||(!UndirectedWithEdges WithEdges))
 
 ## Contributors
 

@@ -23,7 +23,7 @@ For example, if you changed a class in the *formula-analysis-sat4j* module, you 
 
 ## How to write commands
 
-You can add a new command by creating a class that implements the `ICommand` interface.
+You can add a new command by creating a class that implements the `ICommand` interface or extends the `ACommand` class.
 The `run` method will be called when the command is executed.
 The `getShortName` method returns the command shortcut.
 
@@ -32,22 +32,23 @@ The `getShortName` method returns the command shortcut.
         public String getShortName() { ... }
     }
 
-You can create a flag or an option for your command like this:
+You can create a flag or option for your command like this:
 
     // Example for string option
-    public static final Option<String> MY_OPTION = new Option<>("option_name", Option.StringParser)
+    public static final Option<String> MY_OPTION = Option.newOption("option_name", Option.StringParser)
         .setDescription("My option")
         .setRequired(true)
         .setValidator(str -> str.contains("hi"));
 
     // example for flag
-    public static final Option<Boolean> MY_FLAG = new Flag("flag_name")
+    public static final Option<Boolean> MY_FLAG = Option.newFlag("flag_name")
         .setDescription("My flag")
 
-    // list option
-    public static final ListOption<String> MY_LIST_OPTION = new ListOption<>("literals", Option.StringParser);
-
 You can also create a list option where you separate the elements with a comma.
+
+    // list option
+    public static final ListOption<String> MY_LIST_OPTION = Option.newListOption("literals", Option.StringParser);
+
 After creating the command, you must also add an extension point.
 Open the file `<package>/src/main/resources/extensions.xml`.
 There you can add the classpath of the command:
