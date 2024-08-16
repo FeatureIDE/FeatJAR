@@ -2,6 +2,10 @@ plugins {
     id 'de.featjar.java-featjar'
 }
 
+application {
+    mainClass = 'de.featjar.base.FeatJAR'
+}
+
 dependencies {
     file("..").eachDir { dir ->
         if (!(dir.name.equals("all")

@@ -2,6 +2,7 @@ import com.github.jengelman.gradle.plugins.shadow.transformers.XmlAppendingTrans
 
 plugins {
     id 'java'
+    id 'application'
     id 'com.github.johnrengelman.shadow'
 }
 
