@@ -7,6 +7,5 @@ https://github.com/FeatureIDE/FeatJAR-formula-analysis-cadical.git formula-analy
 https://github.com/FeatureIDE/FeatJAR-formula-analysis-ddnnife.git formula-analysis-ddnnife
 https://github.com/FeatureIDE/FeatJAR-formula-analysis-javasmt.git formula-analysis-javasmt
 https://github.com/FeatureIDE/FeatJAR-formula-analysis-sharpsat.git formula-analysis-sharpsat
-https://github.com/FeatureIDE/FeatJAR-bin-kissat.git bin-kissat
 https://github.com/FeatureIDE/FeatJAR-formula-analysis-kissat.git formula-analysis-kissat
 https://github.com/FeatureIDE/FeatJAR-uvl.git uvl
