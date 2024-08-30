@@ -3,14 +3,9 @@ https://github.com/FeatureIDE/FeatJAR-util-evaluation.git evaluation
 https://github.com/FeatureIDE/FeatJAR-formula.git formula
 https://github.com/FeatureIDE/FeatJAR-feature-model.git feature-model
 https://github.com/FeatureIDE/FeatJAR-formula-analysis-sat4j.git formula-analysis-sat4j
-https://github.com/FeatureIDE/FeatJAR-bin-cadical.git bin-cadical
 https://github.com/FeatureIDE/FeatJAR-formula-analysis-cadical.git formula-analysis-cadical
-https://github.com/FeatureIDE/FeatJAR-bin-ddnnife.git bin-ddnnife
 https://github.com/FeatureIDE/FeatJAR-formula-analysis-ddnnife.git formula-analysis-ddnnife
-https://github.com/FeatureIDE/FeatJAR-bin-javasmt.git bin-javasmt
 https://github.com/FeatureIDE/FeatJAR-formula-analysis-javasmt.git formula-analysis-javasmt
-https://github.com/FeatureIDE/FeatJAR-bin-kissat.git bin-kissat
-https://github.com/FeatureIDE/FeatJAR-formula-analysis-kissat.git formula-analysis-kissat
-https://github.com/FeatureIDE/FeatJAR-bin-sharpsat.git bin-sharpsat
 https://github.com/FeatureIDE/FeatJAR-formula-analysis-sharpsat.git formula-analysis-sharpsat
+https://github.com/FeatureIDE/FeatJAR-formula-analysis-kissat.git formula-analysis-kissat
 https://github.com/FeatureIDE/FeatJAR-uvl.git uvl
