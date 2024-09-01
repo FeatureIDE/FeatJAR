@@ -4,7 +4,7 @@ NOCOLOR='\033[0m'
 
 ROOT_DIR="${PWD}"
 
-find . -name ".git" -type d -print0 | while read -d $'\0' GIT_DIR
+find . -name ".git" -type d -print0 | sort -z | while read -d $'\0' GIT_DIR
 do
     CUR_DIR="$(dirname "${GIT_DIR}")"
     CUR_DIR=$(realpath --relative-to="${ROOT_DIR}" "${CUR_DIR}")
