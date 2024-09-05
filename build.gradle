@@ -1,29 +1,35 @@
 def registerTaskForRepo(taskName) {
     tasks.register(taskName) {
-        gradle.includedBuilds.each { build ->
-            if (build.projectDir.toPath().resolve('build.gradle').toFile().text.contains('id \'de.featjar.')
-            && !build.projectDir.name.equals('all')) {
-                dependsOn gradle.includedBuild(build.name).task(":$taskName")
-            }
-        }
+        group = 'Format'
+        gradle.includedBuilds.stream()
+        .filter(build -> build.projectDir.toPath().resolve('build.gradle').toFile().text.contains('id \'de.featjar.'))
+        .filter(build -> !build.projectDir.name.equals('all'))
+        .forEach(build -> dependsOn build.task(":$taskName"))
     }
 }
 
 def registerTaskForEveryRepo(taskName) {
     tasks.register(taskName) {
-        gradle.includedBuilds.each { build ->
-            if (build.projectDir.name.equals('gradle-plugins') || 
-                build.projectDir.toPath().resolve('build.gradle').toFile().text.contains('id \'de.featjar.')) {
-                dependsOn gradle.includedBuild(build.name).task(":$taskName")
-            }
-        }
+        group = 'Build'
+        gradle.includedBuilds.stream()
+        .filter(build -> build.projectDir.name.equals('gradle-plugins') || build.projectDir.toPath().resolve('build.gradle').toFile().text.contains('id \'de.featjar.'))
+        .forEach(build -> dependsOn build.task(":$taskName"))
     }
 }
 
 // pass common tasks through to included builds
-['test', 'licenseFormatMain', 'licenseFormatTest', 'spotlessApply', 'publishToMavenLocal', 'release'].each { registerTaskForRepo it }
+['licenseFormatMain', 'licenseFormatTest', 'spotlessApply', 'publishToMavenLocal', 'release'].each { registerTaskForRepo it }
 
-['assemble', 'build', 'clean', 'currentVersion'].each { registerTaskForEveryRepo it }
+['assemble', 'build', 'clean'].each { registerTaskForEveryRepo it }
 
-// release with:
-// eval $(ssh-agent); ssh-add ~/.ssh/id_rsa; gradle release
+tasks.register('format') {
+    group = 'Format'
+    finalizedBy spotlessApply, licenseFormatMain, licenseFormatTest
+}
+
+tasks.register('check') {
+    group = 'Check'
+    gradle.includedBuilds.stream()
+        .filter(build -> build.projectDir.name.equals('all'))
+        .forEach(build -> dependsOn build.task(":check"))
+}
