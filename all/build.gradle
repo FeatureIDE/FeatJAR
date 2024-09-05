@@ -101,7 +101,7 @@ reporting {
 project.tasks.named('spotbugsMain') {
     dependsOn assemble
     effort = com.github.spotbugs.snom.Effort.MAX
-    reportLevel = com.github.spotbugs.snom.Confidence.valueOf('LOW')
+    reportLevel = com.github.spotbugs.snom.Confidence.valueOf('MEDIUM')
     reports {
         xml.enabled = false
         html.enabled = true
@@ -121,7 +121,7 @@ project.tasks.named('spotbugsMain') {
 project.tasks.named('spotbugsTest') {
     dependsOn test
     effort = com.github.spotbugs.snom.Effort.MAX
-    reportLevel = com.github.spotbugs.snom.Confidence.valueOf('LOW')
+    reportLevel = com.github.spotbugs.snom.Confidence.valueOf('MEDIUM')
     reports {
         xml.enabled = false
         html.enabled = true
