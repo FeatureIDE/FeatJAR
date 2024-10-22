@@ -33,3 +33,10 @@ tasks.register('check') {
         .filter(build -> build.projectDir.name.equals('all'))
         .forEach(build -> dependsOn build.task(":check"))
 }
+
+tasks.register('test') {
+    group = 'Check'
+    gradle.includedBuilds.stream()
+        .filter(build -> build.projectDir.name.equals('all'))
+        .forEach(build -> dependsOn build.task(":test"))
+}

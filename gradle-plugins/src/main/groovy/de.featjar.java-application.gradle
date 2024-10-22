@@ -13,6 +13,14 @@ application {
     mainClass = 'de.featjar.base.FeatJAR'
 }
 
+jar {
+  manifest {
+    attributes(
+      'Main-Class': 'de.featjar.base.FeatJAR'
+    )
+  }
+}
+
 shadowJar {
     transform(XmlAppendingTransformer.class) {
         resource = 'extensions.xml'
@@ -20,6 +28,7 @@ shadowJar {
 }
 
 project.tasks.register('allSources', Zip) {
+    group = 'Build'
     archiveBaseName = project.name
     archiveClassifier = 'all-sources'
     archiveVersion = project.version
