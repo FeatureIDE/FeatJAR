@@ -1,42 +1,47 @@
-def registerTaskForRepo(taskName) {
-    tasks.register(taskName) {
-        group = 'Format'
-        gradle.includedBuilds.stream()
-        .filter(build -> build.projectDir.toPath().resolve('build.gradle').toFile().text.contains('id \'de.featjar.'))
-        .filter(build -> !build.projectDir.name.equals('all'))
-        .forEach(build -> dependsOn build.task(":$taskName"))
-    }
+plugins {
+    id 'test-report-aggregation'
 }
 
-def registerTaskForEveryRepo(taskName) {
-    tasks.register(taskName) {
-        group = 'Build'
-        gradle.includedBuilds.stream()
-        .filter(build -> build.projectDir.name.equals('gradle-plugins') || build.projectDir.toPath().resolve('build.gradle').toFile().text.contains('id \'de.featjar.'))
-        .forEach(build -> dependsOn build.task(":$taskName"))
+reporting {
+    reports {
+        testAggregateTestReport(AggregateTestReport) {
+            testType = TestSuiteType.UNIT_TEST
+        }
     }
 }
 
 // pass common tasks through to included builds
-['licenseFormatMain', 'licenseFormatTest', 'spotlessApply', 'publishToMavenLocal', 'release'].each { registerTaskForRepo it }
+['assemble', 'build', 'clean', 'licenseFormatMain', 'licenseFormatTest', 'spotlessApply', 'publishToMavenLocal', 'release'].each { registerTaskForRepo it }
 
-['assemble', 'build', 'clean'].each { registerTaskForEveryRepo it }
+def registerTaskForRepo(taskName) {
+    tasks.register(taskName) {
+        group = 'ForAll'
+        gradle.includedBuilds.stream()
+        .filter(build -> build.projectDir.toPath().resolve('build.gradle').toFile().text.contains('id \'de.featjar.'))
+        .forEach(build -> dependsOn build.task(":$taskName"))
+    }
+}
+
 
 tasks.register('format') {
-    group = 'Format'
+    group = 'ForAll'
     finalizedBy spotlessApply, licenseFormatMain, licenseFormatTest
 }
 
-tasks.register('check') {
-    group = 'Check'
+tasks.register('testEach') {
     gradle.includedBuilds.stream()
-        .filter(build -> build.projectDir.name.equals('all'))
-        .forEach(build -> dependsOn build.task(":check"))
+        .filter(build -> build.projectDir.toPath().resolve('build.gradle').toFile().text.contains('id \'de.featjar.'))
+        .forEach(build -> dependsOn build.task(":test"))
 }
 
 tasks.register('test') {
-    group = 'Check'
-    gradle.includedBuilds.stream()
-        .filter(build -> build.projectDir.name.equals('all'))
-        .forEach(build -> dependsOn build.task(":test"))
+    group = 'ForAll'
+    dependsOn assemble, testEach
+    testEach.mustRunAfter assemble
+    doLast {
+        String url1 = "file://" + project.buildDir + "/reports/tests/unit-test/aggregated-results/index.html"
+        String url2 = "file://" + project.buildDir + "/reports/spotbugs/main.html"
+        String url3 = "file://" + project.buildDir + "/reports/spotbugs/test.html"
+        println "See the reports at:\n\u001B]8;;${url1}\u001B\\${url1}\u001B]8;;\u001B\\\n\u001B]8;;${url2}\u001B\\${url2}\u001B]8;;\u001B\\\n\u001B]8;;${url3}\u001B\\${url3}\u001B]8;;\u001B\\"
+    }
 }
