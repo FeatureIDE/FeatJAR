@@ -22,6 +22,7 @@ package de.featjar.base.env;
 
 import de.featjar.base.FeatJAR;
 import de.featjar.base.data.Problem;
+import de.featjar.base.data.Problem.Severity;
 import de.featjar.base.data.Result;
 import de.featjar.base.data.Void;
 import java.io.BufferedReader;
@@ -39,6 +40,7 @@ import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 /**
  * Executes an external executable in a process.
@@ -134,8 +136,19 @@ public class Process implements Supplier<Result<List<String>>> {
     @Override
     public Result<List<String>> get() {
         List<String> output = new ArrayList<>();
-        Result<Void> result = run(output::add, output::add);
-        return result.map(r -> output);
+        List<String> error = new ArrayList<>();
+        Result<Void> result = run(output::add, error::add);
+
+        if (result.isPresent()) {
+            output.addAll(error);
+            return result.map(r -> output);
+        } else {
+            if (error.isEmpty()) {
+                return result.map(r -> null);
+            } else {
+                return Result.empty(new Problem(error.stream().collect(Collectors.joining("\n")), Severity.ERROR));
+            }
+        }
     }
 
     /**
