@@ -20,7 +20,8 @@
  */
 package de.featjar.feature.model;
 
-import de.featjar.base.data.*;
+import de.featjar.base.data.Result;
+import de.featjar.base.data.Sets;
 import de.featjar.feature.model.mixins.IHasCommonAttributes;
 import de.featjar.formula.structure.IFormula;
 import de.featjar.formula.structure.term.value.Variable;

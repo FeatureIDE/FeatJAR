@@ -7,4 +7,13 @@
         <extension id="de.featjar.feature.model.io.tikz.LatexFeatureModelFormat" />
         <extension id="de.featjar.feature.model.io.tikz.TikzFeatureModelFormat" />
     </point>
+    <point id="de.featjar.base.shell.ShellCommands">
+    	<extension id="de.featjar.feature.model.LoadFeatureModel" />
+    	<extension id="de.featjar.feature.model.LoadFormula" />
+    	<extension id="de.featjar.feature.model.LoadConfig" />
+    	<extension id="de.featjar.feature.model.LoadSample" />
+    	<extension id="de.featjar.feature.model.LoadSampleGroup" />
+		<extension id="de.featjar.feature.model.StoreShellCommand" />
+		<extension id="de.featjar.feature.model.LoadPath" />
+    </point>       
 </extensions>

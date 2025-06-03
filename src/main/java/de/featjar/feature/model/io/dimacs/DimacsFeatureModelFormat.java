@@ -36,8 +36,8 @@ import de.featjar.formula.computation.ComputeNNFFormula;
 import de.featjar.formula.io.dimacs.DimacsParser;
 import de.featjar.formula.io.dimacs.DimacsSerializer;
 import de.featjar.formula.structure.IExpression;
-import de.featjar.formula.structure.IFormula;
 import de.featjar.formula.structure.connective.Or;
+import de.featjar.formula.structure.connective.Reference;
 import de.featjar.formula.structure.predicate.Literal;
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -52,14 +52,15 @@ public class DimacsFeatureModelFormat implements IFormat<IFeatureModel> {
 
     @Override
     public Result<String> serialize(IFeatureModel featureModel) {
-        IFormula formula = Computations.of(featureModel)
+        Reference formula = Computations.of(featureModel)
                 .map(ComputeFormula::new)
                 .map(ComputeNNFFormula::new)
                 .map(ComputeCNFFormula::new)
+                .set(ComputeCNFFormula.IS_STRICT, true)
                 .compute();
         VariableMap variableMap = new VariableMap(formula.getVariableMap().keySet());
-        return Result.of(
-                DimacsSerializer.serialize(variableMap, formula.getChildren(), c -> writeClause(c, variableMap)));
+        return Result.of(DimacsSerializer.serialize(
+                variableMap, formula.getExpression().getChildren(), c -> writeClause(c, variableMap)));
     }
 
     private static int[] writeClause(IExpression clause, VariableMap variableMap) {
