@@ -21,9 +21,10 @@
 package de.featjar.evaluation.util;
 
 import de.featjar.base.FeatJAR;
-import de.featjar.base.cli.AListOption;
 import de.featjar.base.cli.ListOption;
+import de.featjar.base.cli.Option;
 import de.featjar.base.cli.OptionList;
+import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -33,10 +34,11 @@ import java.util.function.Function;
  *
  * @author Sebastian Krieter
  */
+@SuppressWarnings("unchecked")
 public class OptionCombiner {
 
     private OptionList optionParser;
-    private AListOption<?>[] options;
+    private Option<? extends List<?>>[] options;
     private ProgressTracker progress;
 
     public OptionCombiner(OptionList parser) {
@@ -51,12 +53,12 @@ public class OptionCombiner {
      *     Otherwise it should return the index of the option at which the problem was detected.
      *     The function may also deliberately return a lower index, if runs with the different values of the current options should be skipped.
      */
-    public final void loopOverOptions(Function<Integer, Integer> forEachOption, AListOption<?>... options) {
+    public final void loopOverOptions(Function<Integer, Integer> forEachOption, Option<? extends List<?>>... options) {
         init(options);
         loopOverOptions(forEachOption, l -> {});
     }
 
-    public void init(AListOption<?>... options) {
+    public void init(Option<? extends List<?>>... options) {
         this.options = options;
 
         int[] sizes = new int[options.length];
@@ -116,7 +118,6 @@ public class OptionCombiner {
         }
     }
 
-    @SuppressWarnings("unchecked")
     public <T> T getValue(int index) {
         int optionIndex = progress.getIndices()[index];
         return optionIndex < 0
@@ -124,7 +125,7 @@ public class OptionCombiner {
                 : (T) optionParser.getResult(options[index]).orElseThrow().get(optionIndex);
     }
 
-    private String printOptionNames(AListOption<?>... loptions) {
+    private String printOptionNames(Option<? extends List<?>>... loptions) {
         StringBuilder optionMessage = new StringBuilder();
         int[] sizes = progress.getSizes();
         for (int i = 0; i < sizes.length; i++) {

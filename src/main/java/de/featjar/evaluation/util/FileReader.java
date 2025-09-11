@@ -37,6 +37,8 @@ import java.util.Iterator;
 import java.util.regex.Pattern;
 
 /**
+ * Reads and parses files from a resource location.
+ * @param <T> the type of object to be parsed.
  * @author Sebastian Krieter
  */
 public class FileReader<T> {
