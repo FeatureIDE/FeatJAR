@@ -58,7 +58,8 @@ public class OptionCombiner {
         loopOverOptions(forEachOption, l -> {});
     }
 
-    public void init(Option<? extends List<?>>... options) {
+    @SafeVarargs
+    public final void init(Option<? extends List<?>>... options) {
         this.options = options;
 
         int[] sizes = new int[options.length];
@@ -92,13 +93,13 @@ public class OptionCombiner {
         int lastErrorLevel = -1;
         while (progress.hasNext()) {
             if (lastErrorLevel < 0) {
-                FeatJAR.log().info(progress::nextAndPrint);
+                FeatJAR.log().progress(progress::nextAndPrint);
             } else {
                 do {
                     progress.next();
                     if (progress.getLastChanged() <= lastErrorLevel) {
                         lastErrorLevel = -1;
-                        FeatJAR.log().info(progress::printStatus);
+                        FeatJAR.log().progress(progress::printStatus);
                         break;
                     } else {
                         errorHandler.accept(progress.getLastChanged());
