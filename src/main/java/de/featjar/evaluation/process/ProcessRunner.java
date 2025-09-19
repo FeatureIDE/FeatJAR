@@ -21,9 +21,8 @@
 package de.featjar.evaluation.process;
 
 import de.featjar.base.FeatJAR;
-import de.featjar.evaluation.streams.ErrStreamCollector;
-import de.featjar.evaluation.streams.ErrStreamReader;
-import de.featjar.evaluation.streams.OutStreamReader;
+import de.featjar.evaluation.streams.ErrStreamLogger;
+import de.featjar.evaluation.streams.OutStreamRedirector;
 import de.featjar.evaluation.streams.StreamRedirector;
 import java.util.Arrays;
 import java.util.List;
@@ -33,7 +32,7 @@ public class ProcessRunner implements IProcessRunner {
 
     private long timeout = Long.MAX_VALUE;
 
-    public <R> ProcessResult<R> run(Algorithm<R> algorithm) {
+    public <R> ProcessResult<R> run(IAlgorithm<R> algorithm) {
         final ProcessResult<R> result = new ProcessResult<>();
         boolean terminatedInTime = false;
         boolean noError = false;
@@ -49,11 +48,11 @@ public class ProcessRunner implements IProcessRunner {
                 final ProcessBuilder processBuilder = new ProcessBuilder(command);
                 Process process = null;
 
-                final ErrStreamCollector errStreamCollector = new ErrStreamCollector();
-                final StreamRedirector errRedirector =
-                        new StreamRedirector(Arrays.asList(new ErrStreamReader(), errStreamCollector));
+                ErrStreamLogger errStreamLogger = new ErrStreamLogger();
+                errStreamLogger.setSource(algorithm.getFullName());
+                final StreamRedirector errRedirector = new StreamRedirector(Arrays.asList(errStreamLogger));
                 final StreamRedirector outRedirector =
-                        new StreamRedirector(Arrays.asList(new OutStreamReader(), algorithm));
+                        new StreamRedirector(Arrays.asList(new OutStreamRedirector(), algorithm));
                 final Thread outThread = new Thread(outRedirector);
                 final Thread errThread = new Thread(errRedirector);
                 try {
@@ -67,7 +66,7 @@ public class ProcessRunner implements IProcessRunner {
 
                     terminatedInTime = process.waitFor(timeout, TimeUnit.MILLISECONDS);
                     endTime = System.nanoTime();
-                    noError = errStreamCollector.getErrList().isEmpty();
+                    noError = !errStreamLogger.isErrorOccured();
                     result.setTerminatedInTime(terminatedInTime);
                     result.setNoError(noError);
                     result.setTime((endTime - startTime) / 1_000_000L);
@@ -81,7 +80,7 @@ public class ProcessRunner implements IProcessRunner {
                 result.setTerminatedInTime(false);
                 result.setNoError(false);
                 result.setTime(ProcessResult.INVALID_TIME);
-                FeatJAR.log().info("Invalid command");
+                FeatJAR.log().error("Invalid command for algorithm %s", algorithm.getFullName());
             }
         } catch (final Exception e) {
             FeatJAR.log().error(e);

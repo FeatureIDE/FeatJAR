@@ -18,13 +18,14 @@
  *
  * See <https://github.com/FeatureIDE/FeatJAR-evaluation> for further information.
  */
-package de.featjar.evaluation.process;
+package de.featjar.evaluation.streams;
 
-public interface IProcessRunner {
+import de.featjar.base.FeatJAR;
 
-    public <R> ProcessResult<R> run(IAlgorithm<R> algorithm);
+public class ErrStreamRedirector implements IOutputReader {
 
-    public long getTimeout();
-
-    public void setTimeout(long timeout);
+    @Override
+    public void readOutput(String line) throws Exception {
+        FeatJAR.log().error(line);
+    }
 }

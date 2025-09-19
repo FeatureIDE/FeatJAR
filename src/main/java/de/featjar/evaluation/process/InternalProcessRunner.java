@@ -33,7 +33,7 @@ public class InternalProcessRunner implements IProcessRunner {
 
     private long timeout = Long.MAX_VALUE;
 
-    public <R> ProcessResult<R> run(Algorithm<R> algorithm) {
+    public <R> ProcessResult<R> run(IAlgorithm<R> algorithm) {
         final ProcessResult<R> result = new ProcessResult<>();
         boolean terminatedInTime = false;
         boolean noError = false;
@@ -68,7 +68,7 @@ public class InternalProcessRunner implements IProcessRunner {
                 result.setTerminatedInTime(false);
                 result.setNoError(false);
                 result.setTime(ProcessResult.INVALID_TIME);
-                FeatJAR.log().info("Invalid command");
+                FeatJAR.log().error("Invalid command for algorithm %s", algorithm.getFullName());
             }
         } catch (final Exception e) {
             FeatJAR.log().error(e);

@@ -18,14 +18,22 @@
  *
  * See <https://github.com/FeatureIDE/FeatJAR-evaluation> for further information.
  */
-package de.featjar.evaluation.streams;
+package de.featjar.evaluation.process;
 
-import de.featjar.base.FeatJAR;
+public abstract class AJavaAlgorithm<T> extends Algorithm<T> {
 
-public class ErrStreamReader implements IOutputReader {
+    protected int memory = -1;
+
+    public void setMemory(int memory) {
+        this.memory = memory;
+    }
 
     @Override
-    public void readOutput(String line) throws Exception {
-        FeatJAR.log().error(line);
+    protected void addCommandElements() {
+        addCommandElement("java");
+        if (memory >= 0) {
+            addCommandElement(String.format("-Xmx%dg", memory));
+        }
+        addCommandElement("-da");
     }
 }

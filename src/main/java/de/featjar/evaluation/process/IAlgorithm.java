@@ -20,11 +20,26 @@
  */
 package de.featjar.evaluation.process;
 
-public interface IProcessRunner {
+import de.featjar.base.data.Result;
+import de.featjar.evaluation.streams.IOutputReader;
+import java.io.IOException;
+import java.util.List;
 
-    public <R> ProcessResult<R> run(IAlgorithm<R> algorithm);
+public interface IAlgorithm<R> extends IOutputReader {
 
-    public long getTimeout();
+    void postProcess() throws Exception;
 
-    public void setTimeout(long timeout);
+    Result<R> parseResults() throws IOException;
+
+    String getName();
+
+    String getParameterSettings();
+
+    void preProcess() throws Exception;
+
+    List<String> getCommandElements();
+
+    String getCommand();
+
+    String getFullName();
 }

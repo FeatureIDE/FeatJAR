@@ -20,14 +20,12 @@
  */
 package de.featjar.evaluation.process;
 
-import de.featjar.evaluation.streams.IOutputReader;
+import de.featjar.base.data.Result;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class Algorithm<R> implements IOutputReader {
-
-    protected int iterations = -1;
+public abstract class Algorithm<R> implements IAlgorithm<R> {
 
     protected final ArrayList<String> commandElements = new ArrayList<>();
 
@@ -36,8 +34,8 @@ public abstract class Algorithm<R> implements IOutputReader {
     @Override
     public void readOutput(String line) throws Exception {}
 
-    public R parseResults() throws IOException {
-        return null;
+    public Result<R> parseResults() throws IOException {
+        return Result.empty();
     }
 
     public String getName() {
@@ -79,13 +77,5 @@ public abstract class Algorithm<R> implements IOutputReader {
     @Override
     public String toString() {
         return getFullName();
-    }
-
-    public int getIterations() {
-        return iterations;
-    }
-
-    public void setIterations(int iterations) {
-        this.iterations = iterations;
     }
 }

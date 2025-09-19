@@ -22,7 +22,7 @@ package de.featjar.evaluation.streams;
 
 import de.featjar.base.FeatJAR;
 
-public class OutStreamReader implements IOutputReader {
+public class OutStreamRedirector implements IOutputReader {
 
     @Override
     public void readOutput(String line) throws Exception {

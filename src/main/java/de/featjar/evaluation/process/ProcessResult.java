@@ -20,14 +20,16 @@
  */
 package de.featjar.evaluation.process;
 
+import de.featjar.base.data.Result;
+
 public class ProcessResult<R> {
 
     public static final long INVALID_TIME = -1;
 
-    private boolean terminatedInTime = false;
-    private boolean noError = false;
+    private boolean terminatedInTime;
+    private boolean noError;
     private long time = INVALID_TIME;
-    private R result = null;
+    private Result<R> result;
 
     public boolean isTerminatedInTime() {
         return terminatedInTime;
@@ -53,11 +55,11 @@ public class ProcessResult<R> {
         this.time = time;
     }
 
-    public R getResult() {
-        return result;
+    public Result<R> getResult() {
+        return result == null ? Result.empty() : result;
     }
 
-    public void setResult(R result) {
+    public void setResult(Result<R> result) {
         this.result = result;
     }
 }
