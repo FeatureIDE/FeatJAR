@@ -24,6 +24,7 @@ import de.featjar.base.FeatJAR;
 import de.featjar.base.data.Result;
 import de.featjar.base.io.IO;
 import de.featjar.base.io.format.IFormatSupplier;
+import de.featjar.base.log.Log.Verbosity;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.file.DirectoryStream;
@@ -131,7 +132,7 @@ public class FileReader<T> {
         if (loadedFm.isPresent()) {
             return loadedFm;
         } else {
-            FeatJAR.log().debug(loadedFm.getProblems().get(0));
+            FeatJAR.log().problems(loadedFm.getProblems(), Verbosity.DEBUG);
         }
         final Filter<Path> fileFilter = file -> Files.isReadable(file)
                 && Files.isRegularFile(file)
@@ -140,10 +141,13 @@ public class FileReader<T> {
             final Iterator<Path> iterator = files.iterator();
             while (iterator.hasNext()) {
                 final Path next = iterator.next();
-                FeatJAR.log().debug("Trying to load from file " + next);
+                FeatJAR.log().debug("Trying to load from file %s", next);
                 loadedFm = loadFile(next);
                 if (loadedFm.isPresent()) {
                     return loadedFm;
+                } else {
+                    FeatJAR.log().error("Error while loading file %s", next);
+                    FeatJAR.log().problems(loadedFm.getProblems(), Verbosity.ERROR);
                 }
             }
             return Result.empty();
