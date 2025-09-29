@@ -25,13 +25,9 @@ dependencies {
 }
 
 java {
-    toolchain {
-        languageVersion = JavaLanguageVersion.of(17)
-        vendor = JvmVendorSpec.ORACLE
-    }
     sourceCompatibility = 1.11
     withSourcesJar()
-    withJavadocJar()
+    //withJavadocJar()
 }
 
 test {
@@ -42,6 +38,15 @@ test {
 task copyBinaries (type: Copy) {
     from 'src/main/resources/bin/.'
     into System.getProperty('user.home') + '/.featjar-bin'
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    filePermissions {
+     user {
+         write = true
+         read = true
+         execute = true
+     }
+     other.execute = false
+ }
 }
 tasks.matching { it != copyBinaries }.all { it.dependsOn copyBinaries }
 
@@ -102,9 +107,5 @@ spotbugsTest {
 
 javadoc {
     failOnError = false
-    javadocTool = javaToolchains.javadocToolFor {
-        languageVersion = JavaLanguageVersion.of(17)
-        vendor = JvmVendorSpec.ORACLE
-    }
-    javadoc.options.addStringOption('Xdoclint:none', '-quiet')
+    //javadoc.options.addStringOption('Xdoclint:none', '-quiet')
 }

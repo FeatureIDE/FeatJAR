@@ -39,7 +39,7 @@ project.tasks.register('allSources', Zip) {
         dependencyNames.stream()
             .map(d -> d.name)
             .distinct()
-            .map(n -> file("../${n}/src/main/java"))
+            .map(n -> file("../${n}/src/main"))
             .filter(f -> f.exists()).toList();
     }
 }
