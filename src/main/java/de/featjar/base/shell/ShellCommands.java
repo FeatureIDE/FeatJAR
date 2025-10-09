@@ -18,18 +18,20 @@
  *
  * See <https://github.com/FeatureIDE/FeatJAR-base> for further information.
  */
-package de.featjar.base.env;
+package de.featjar.base.shell;
 
 import de.featjar.base.FeatJAR;
 import de.featjar.base.extension.AExtensionPoint;
+import de.featjar.base.shell.command.IShellCommand;
 
 /**
- * Manages all native binaries bundled with FeatJAR.
+ * Extension point for {@link IShellCommand}.
  *
- * @author Elias Kuiter
+ * @author Niclas Kleinert
  */
-public class Binaries extends AExtensionPoint<ABinary> {
-    public static Binaries getInstance() {
-        return FeatJAR.extensionPoint(Binaries.class);
+public class ShellCommands extends AExtensionPoint<IShellCommand> {
+
+    public static ShellCommands getInstance() {
+        return FeatJAR.extensionPoint(ShellCommands.class);
     }
 }

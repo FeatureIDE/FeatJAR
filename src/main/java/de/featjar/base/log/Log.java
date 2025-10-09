@@ -314,6 +314,18 @@ public interface Log {
         plainMessage(() -> String.valueOf(messageObject));
     }
 
+    default void noLineBreakMessage(Supplier<String> message) {
+        print(message, Verbosity.MESSAGE, false);
+    }
+
+    default void noLineBreakMessage(String formatMessage, Object... elements) {
+        noLineBreakMessage(() -> String.format(formatMessage, elements));
+    }
+
+    default void noLineBreakMessage(Object messageObject) {
+        noLineBreakMessage(() -> String.valueOf(messageObject));
+    }
+
     /**
      * Logs a debug message.
      *

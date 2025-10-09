@@ -18,35 +18,41 @@
  *
  * See <https://github.com/FeatureIDE/FeatJAR-base> for further information.
  */
-package de.featjar.base.cli;
+package de.featjar.base.shell.command;
 
 import de.featjar.base.extension.IExtension;
+import de.featjar.base.shell.AbortException;
+import de.featjar.base.shell.ShellCommands;
 import de.featjar.base.shell.ShellSession;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.LinkedList;
 import java.util.Optional;
 
 /**
- * A command run within a {@link Commands}.
+ * A shell command run within a {@link ShellCommands}
  *
- * @author Sebastian Krieter
- * @author Elias Kuiter
+ * @author Niclas Kleinert
  */
-public interface ICommand extends IExtension {
+public interface IShellCommand extends IExtension {
 
-    /**
-     * {@return this command's description, if any}
-     */
-    default Optional<String> getDescription() {
-        return Optional.empty();
+    static Optional<String> getCommandDescriptionString(IShellCommand c) {
+        Optional<String> shortName = c.getShortName();
+        if (shortName.isEmpty()) {
+            return Optional.empty();
+        }
+        Optional<String> description = c.getDescription();
+        if (description.isEmpty()) {
+            return Optional.empty();
+        }
+        return Optional.of(String.format("\t%-10s - %s", shortName.get(), description.get()));
     }
 
     /**
-     * {@return this command's options}
+     * Executes the shell command.
+     *
+     * @param session the storage location of all variables
+     * @param cmdParams all arguments except the shell command
      */
-    default List<Option<?>> getOptions() {
-        return new ArrayList<>();
-    }
+    void execute(ShellSession session, LinkedList<String> cmdParams) throws AbortException;
 
     /**
      * {@return this command's short name, if any} The short name can be used to call this command from the CLI.
@@ -56,24 +62,9 @@ public interface ICommand extends IExtension {
     }
 
     /**
-     * Runs this command with some given options.
-     *
-     * @param optionParser the option parser
-     *
-     * @return exit code
+     * {@return this command's description name, if any}
      */
-    int run(OptionList optionParser);
-
-    /**
-     * Parses arguments into an option list.
-     *
-     * @param session the shell session
-     * @param cmdParams the given arguments for the command
-     * @return an option list containing parsed arguments
-     */
-    default OptionList getShellOptions(ShellSession session, List<String> cmdParams) {
-        OptionList optionList = new OptionList();
-        optionList.parseArguments();
-        return optionList;
+    default Optional<String> getDescription() {
+        return Optional.empty();
     }
 }

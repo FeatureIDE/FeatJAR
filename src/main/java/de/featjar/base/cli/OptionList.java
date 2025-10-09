@@ -46,8 +46,6 @@ import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Properties;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 /**
  * Parses a list of strings.
@@ -59,109 +57,11 @@ public class OptionList {
 
     private static final String GENERAL_CONFIG_NAME = "general";
 
-    /**
-     * Option for setting the configuration file.
-     */
-    public static final Option<List<String>> CONFIGURATION_OPTION =
-            Option.newListOption("config", Option.StringParser).setDescription("The names of configuration files");
+    private final List<Option<?>> options;
 
-    /**
-     * Option for setting a directory containing configuration files.
-     */
-    public static final Option<Path> CONFIGURATION_DIR_OPTION =
-            Option.newOption("config_dir", Option.PathParser).setDescription("The path to the configuration files");
+    private final List<String> originalCommandLineArguments;
 
-    /**
-     * Option for printing usage information.
-     */
-    public static final Option<ICommand> COMMAND_OPTION = Option.newOption(
-                    "command", s -> FeatJAR.extensionPoint(Commands.class)
-                            .getMatchingExtension(s)
-                            .orElseThrow())
-            .setDescription("Classpath from command to execute");
-
-    /**
-     * Option for printing usage information.
-     */
-    public static final Option<Boolean> HELP_OPTION = Option.newFlag("help").setDescription("Print usage information");
-
-    /**
-     * Option for printing version information.
-     */
-    public static final Option<Boolean> VERSION_OPTION =
-            Option.newFlag("version").setDescription("Print version information");
-
-    /**
-     * Option for printing version information.
-     */
-    public static final Option<Boolean> STACKTRACE_OPTION =
-            Option.newFlag("print-stacktrace").setDescription("Print a stacktrace for all logged exceptions");
-
-    /**
-     * Option for writing less output to the console.
-     */
-    public static final Option<Boolean> QUIET_OPTION = Option.newFlag("quiet")
-            .setDescription("Suppress all unnecessary output. (Overwrites --log-info and --log-error options)");
-
-    /**
-     * Option for writing progress regularly to the console.
-     */
-    public static final Option<Boolean> PROGRESS_OPTION =
-            Option.newFlag("progress").setDescription("Shows progress regularly.");
-
-    /**
-     * Option to specify a path to a log file for non-error messages.
-     */
-    public static final Option<Path> INFO_FILE_OPTION =
-            Option.newOption("info-file", Option.PathParser).setDescription("Path to info log file");
-
-    /**
-     * Option to specify a path to a log file for error messages.
-     */
-    public static final Option<Path> ERROR_FILE_OPTION =
-            Option.newOption("error-file", Option.PathParser).setDescription("Path to error log file");
-
-    /**
-     * Option to configure which logging types count as non-error messages.
-     */
-    public static final Option<List<Log.Verbosity>> LOG_INFO_OPTION = Option.newEnumListOption(
-                    "log-info", Log.Verbosity.class)
-            .setDescription("Message types printed to the info stream")
-            .setDefaultValue(List.of(Log.Verbosity.MESSAGE, Log.Verbosity.INFO, Log.Verbosity.PROGRESS));
-    /**
-     * Option to configure which logging types count as error messages.
-     */
-    public static final Option<List<Log.Verbosity>> LOG_ERROR_OPTION = Option.newEnumListOption(
-                    "log-error", Log.Verbosity.class)
-            .setDescription("Message types printed to the error stream.")
-            .setDefaultValue(List.of(Log.Verbosity.WARNING, Log.Verbosity.ERROR));
-
-    /**
-     * Option to configure which logging types are written to the non-error log file (if one exists).
-     */
-    public static final Option<List<Log.Verbosity>> LOG_INFO_FILE_OPTION = Option.newEnumListOption(
-                    "log-info-file", Log.Verbosity.class)
-            .setDescription("Message types printed to the info file.")
-            .setDefaultValue(List.of(Log.Verbosity.MESSAGE, Log.Verbosity.INFO, Log.Verbosity.DEBUG));
-
-    /**
-     * Option to configure which logging types are written to the error log file (if one exists).
-     */
-    public static final Option<List<Log.Verbosity>> LOG_ERROR_FILE_OPTION = Option.newEnumListOption(
-                    "log-error-file", Log.Verbosity.class)
-            .setDescription("Message types printed to the error file.")
-            .setDefaultValue(List.of(Log.Verbosity.ERROR, Log.Verbosity.WARNING));
-
-    private final List<Option<?>> options = new ArrayList<>(Option.getAllOptions(getClass()));
-
-    private List<String> commandLineArguments;
-
-    private final List<String> unparsedCommandLineArguments;
-
-    private List<String> configFileArguments;
-
-    private LinkedList<String> arguments;
-    private LinkedHashMap<String, Object> properties;
+    private final LinkedHashMap<String, Object> properties = new LinkedHashMap<>();
 
     /**
      * Creates a new option list.
@@ -178,7 +78,29 @@ public class OptionList {
      * @param arguments the arguments
      */
     public OptionList(List<String> arguments) {
-        this.unparsedCommandLineArguments = new ArrayList<>(arguments);
+        this.originalCommandLineArguments = new ArrayList<>(arguments);
+        this.options = new ArrayList<>();
+    }
+
+    /**
+     * Creates a new option list.
+     *
+     * @param options the list of options
+     * @param arguments the arguments
+     */
+    public OptionList(List<Option<?>> options, String... arguments) {
+        this(options, List.of(arguments));
+    }
+
+    /**
+     * Creates a new option list.
+     *
+     * @param options the list of options
+     * @param arguments the arguments
+     */
+    public OptionList(List<Option<?>> options, List<String> arguments) {
+        this.originalCommandLineArguments = new ArrayList<>(arguments);
+        this.options = new ArrayList<>(options);
     }
 
     /**
@@ -187,71 +109,47 @@ public class OptionList {
      * @return the list problems occurred during parsing.
      */
     public List<Problem> parseArguments() {
-        properties = new LinkedHashMap<>();
-        arguments = new LinkedList<>();
-        configFileArguments = new ArrayList<>();
-        commandLineArguments = new ArrayList<>(unparsedCommandLineArguments);
         List<Problem> problemList = new ArrayList<>();
+        properties.clear();
 
-        parseBareCommand(problemList);
+        LinkedList<String> arguments = new LinkedList<>(originalCommandLineArguments);
+
+        parseBareCommand(arguments, problemList);
         if (Problem.containsError(problemList)) {
             return problemList;
         }
 
-        parseConfigurationFiles(problemList);
+        arguments.addAll(parseConfigurationFiles(arguments, problemList));
         if (Problem.containsError(problemList)) {
             return problemList;
         }
-        arguments.addAll(commandLineArguments);
-        arguments.addAll(configFileArguments);
 
-        parseCommand(problemList);
+        parseCommand(arguments, problemList);
         if (Problem.containsError(problemList)) {
             return problemList;
         }
 
         getCommand().ifPresent(c -> addOptions(c.getOptions()));
 
-        parseRemainingArguments(problemList);
+        parseRemainingArguments(arguments, problemList);
 
         return problemList;
     }
 
-    private void parseBareCommand(List<Problem> problemList) {
-        if (!commandLineArguments.isEmpty() && !commandLineArguments.get(0).startsWith("--")) {
-            String commandString = commandLineArguments.get(0);
-            Commands commandsExentionsPoint = FeatJAR.extensionPoint(Commands.class);
-            List<ICommand> commands = commandsExentionsPoint.getExtensions().stream()
-                    .filter(command -> command.getShortName()
-                            .map(name -> Objects.equals(name, commandString))
-                            .orElse(Boolean.FALSE))
-                    .collect(Collectors.toList());
-
-            if (commands.isEmpty()) {
-                commands = commandsExentionsPoint.getMatchingExtensions(".*" + Pattern.quote(commandString) + ".*");
-            }
-
-            commandLineArguments.remove(0);
-
-            if (commands.size() > 1) {
-                addProblem(
-                        problemList,
-                        Severity.ERROR,
-                        "Command name '%s' is ambiguous! It matches the following commands: \n\t%s\n",
-                        commandString,
-                        commands.stream().map(ICommand::getIdentifier).collect(Collectors.joining("\n\t")));
-                return;
-            } else if (commands.isEmpty()) {
-                addProblem(problemList, Severity.ERROR, "No command matched the name '%s'!", commandString);
-                return;
+    private void parseBareCommand(List<String> arguments, List<Problem> problemList) {
+        if (!arguments.isEmpty() && !arguments.get(0).startsWith("--")) {
+            Result<ICommand> command = Commands.getCommandByName(arguments.get(0));
+            if (command.isPresent()) {
+                properties.put(FeatJAR.COMMAND_OPTION.getName(), command.get());
             } else {
-                properties.put(COMMAND_OPTION.getName(), commands.get(0));
+                problemList.addAll(command.getProblems());
             }
+            arguments.remove(0);
         }
     }
 
-    private void parseCommand(List<Problem> problemList) {
-        int commandIndex = arguments.indexOf("--" + COMMAND_OPTION.getName());
+    private void parseCommand(LinkedList<String> arguments, List<Problem> problemList) {
+        int commandIndex = arguments.indexOf("--" + FeatJAR.COMMAND_OPTION.getName());
         if (commandIndex >= 0) {
             int argumentIndex = commandIndex + 1;
             if (argumentIndex >= arguments.size()) {
@@ -259,11 +157,11 @@ public class OptionList {
                         problemList,
                         Severity.ERROR,
                         "Option %s is supplied without value, but a value is required",
-                        COMMAND_OPTION.getName());
+                        FeatJAR.COMMAND_OPTION.getName());
                 return;
             }
-            parseOption(COMMAND_OPTION, arguments.get(argumentIndex), problemList);
-            Result<ICommand> command = getResult(COMMAND_OPTION);
+            parseOption(FeatJAR.COMMAND_OPTION, arguments.get(argumentIndex), problemList);
+            Result<ICommand> command = getResult(FeatJAR.COMMAND_OPTION);
             if (command.isEmpty()) {
                 problemList.addAll(command.getProblems());
                 return;
@@ -272,9 +170,10 @@ public class OptionList {
         }
     }
 
-    private void parseConfigurationFiles(List<Problem> problemList) {
+    private List<String> parseConfigurationFiles(List<String> commandLineArguments, List<Problem> problemList) {
+        List<String> configFileArguments = new ArrayList<>();
         final Path configDir;
-        int configurationDirIndex = commandLineArguments.indexOf("--" + CONFIGURATION_DIR_OPTION.getName());
+        int configurationDirIndex = commandLineArguments.indexOf("--" + FeatJAR.CONFIGURATION_DIR_OPTION.getName());
         if (configurationDirIndex < 0) {
             configDir = Path.of("");
         } else {
@@ -284,14 +183,14 @@ public class OptionList {
                         problemList,
                         Severity.ERROR,
                         "Option %s is supplied without value, but a value is required",
-                        CONFIGURATION_DIR_OPTION.getName());
-                return;
+                        FeatJAR.CONFIGURATION_DIR_OPTION.getName());
+                return configFileArguments;
             }
-            parseOption(CONFIGURATION_DIR_OPTION, commandLineArguments.get(argumentIndex), problemList);
-            Result<Path> configDirValue = getResult(CONFIGURATION_DIR_OPTION);
+            parseOption(FeatJAR.CONFIGURATION_DIR_OPTION, commandLineArguments.get(argumentIndex), problemList);
+            Result<Path> configDirValue = getResult(FeatJAR.CONFIGURATION_DIR_OPTION);
             if (configDirValue.isEmpty()) {
                 problemList.addAll(configDirValue.getProblems());
-                return;
+                return configFileArguments;
             }
             commandLineArguments
                     .subList(configurationDirIndex, configurationDirIndex + 2)
@@ -303,11 +202,11 @@ public class OptionList {
                         Severity.ERROR,
                         "Specified configuration directory %s is not a directory",
                         configDir.toString());
-                return;
+                return configFileArguments;
             }
         }
 
-        int configurationNamesIndex = commandLineArguments.indexOf("--" + CONFIGURATION_OPTION.getName());
+        int configurationNamesIndex = commandLineArguments.indexOf("--" + FeatJAR.CONFIGURATION_OPTION.getName());
         if (configurationNamesIndex >= 0) {
             int argumentIndex = configurationNamesIndex + 1;
             if (argumentIndex >= commandLineArguments.size()) {
@@ -315,19 +214,18 @@ public class OptionList {
                         problemList,
                         Severity.ERROR,
                         "Option %s is supplied without value, but a value is required",
-                        CONFIGURATION_OPTION.getName());
-                return;
+                        FeatJAR.CONFIGURATION_OPTION.getName());
+                return configFileArguments;
             }
-            parseOption(CONFIGURATION_OPTION, commandLineArguments.get(argumentIndex), problemList);
-            Result<List<String>> config = getResult(CONFIGURATION_OPTION);
+            parseOption(FeatJAR.CONFIGURATION_OPTION, commandLineArguments.get(argumentIndex), problemList);
+            Result<List<String>> config = getResult(FeatJAR.CONFIGURATION_OPTION);
             if (config.isEmpty()) {
                 problemList.addAll(config.getProblems());
-                return;
+                return configFileArguments;
             }
             commandLineArguments
                     .subList(configurationNamesIndex, configurationNamesIndex + 2)
                     .clear();
-            configFileArguments.clear();
 
             List<String> configNameList = config.get();
             ArrayList<String> reverseNameList = new ArrayList<>(configNameList.size() + 1);
@@ -356,9 +254,10 @@ public class OptionList {
                 }
             }
         }
+        return configFileArguments;
     }
 
-    private void parseRemainingArguments(List<Problem> problemList) {
+    private void parseRemainingArguments(LinkedList<String> arguments, List<Problem> problemList) {
         ListIterator<String> listIterator = arguments.listIterator();
         while (listIterator.hasNext()) {
             String argument = listIterator.next();
@@ -376,7 +275,7 @@ public class OptionList {
             }
 
             Option<?> option = optionalOption.get();
-            if (option.equals(CONFIGURATION_OPTION)) {
+            if (option.equals(FeatJAR.CONFIGURATION_OPTION)) {
                 listIterator.remove();
                 listIterator.next();
                 listIterator.remove();
@@ -448,6 +347,12 @@ public class OptionList {
         return problemList.add(new Problem(String.format(message, arguments), severity));
     }
 
+    public <T> List<Problem> parseOption(Option<T> option, String value) {
+        List<Problem> problemList = new ArrayList<>();
+        parseOption(option, value, problemList);
+        return problemList;
+    }
+
     private <T> void parseOption(Option<T> option, String nextArgument, List<Problem> problemList) {
         Result<T> parseResult = option.parse(nextArgument);
         if (parseResult.isEmpty()) {
@@ -509,7 +414,7 @@ public class OptionList {
      * {@return the commands supplied in this option input}
      */
     public Result<ICommand> getCommand() {
-        return getResult(COMMAND_OPTION);
+        return getResult(FeatJAR.COMMAND_OPTION);
     }
 
     /**
@@ -629,22 +534,22 @@ public class OptionList {
      */
     public Configuration getConfiguration() {
         final Configuration configuration = FeatJAR.configure();
-        getResult(INFO_FILE_OPTION).ifPresent(p -> logToFile(configuration, p, LOG_INFO_FILE_OPTION));
-        getResult(ERROR_FILE_OPTION).ifPresent(p -> logToFile(configuration, p, LOG_ERROR_FILE_OPTION));
-        if (get(QUIET_OPTION)) {
-            if (get(PROGRESS_OPTION)) {
+        getResult(FeatJAR.INFO_FILE_OPTION).ifPresent(p -> logToFile(configuration, p, FeatJAR.LOG_INFO_FILE_OPTION));
+        getResult(FeatJAR.ERROR_FILE_OPTION).ifPresent(p -> logToFile(configuration, p, FeatJAR.LOG_ERROR_FILE_OPTION));
+        if (get(FeatJAR.QUIET_OPTION)) {
+            if (get(FeatJAR.PROGRESS_OPTION)) {
                 configuration.useProgressThread = true;
                 configuration.logConfig.logToSystemOut(Log.Verbosity.MESSAGE, Log.Verbosity.PROGRESS);
             } else {
                 configuration.logConfig.logToSystemOut(Log.Verbosity.MESSAGE);
             }
         } else {
-            configuration.useProgressThread = get(PROGRESS_OPTION);
+            configuration.useProgressThread = get(FeatJAR.PROGRESS_OPTION);
             configuration
                     .logConfig
-                    .logToSystemOut(get(LOG_INFO_OPTION).toArray(new Log.Verbosity[0]))
-                    .logToSystemErr(get(LOG_ERROR_OPTION).toArray(new Log.Verbosity[0]))
-                    .setPrintStacktrace(get(STACKTRACE_OPTION))
+                    .logToSystemOut(get(FeatJAR.LOG_INFO_OPTION).toArray(new Log.Verbosity[0]))
+                    .logToSystemErr(get(FeatJAR.LOG_ERROR_OPTION).toArray(new Log.Verbosity[0]))
+                    .setPrintStacktrace(get(FeatJAR.STACKTRACE_OPTION))
                     .addFormatter(new TimeStampFormatter())
                     .addFormatter(new VerbosityFormatter());
         }
@@ -663,14 +568,14 @@ public class OptionList {
      * {@return whether this option input requests help information}
      */
     public boolean isHelp() {
-        return getResult(HELP_OPTION).orElse(Boolean.FALSE);
+        return getResult(FeatJAR.HELP_OPTION).orElse(Boolean.FALSE);
     }
 
     /**
      * {@return whether this option input requests version information}
      */
     public boolean isVersion() {
-        return getResult(VERSION_OPTION).orElse(Boolean.FALSE);
+        return getResult(FeatJAR.VERSION_OPTION).orElse(Boolean.FALSE);
     }
 
     /**

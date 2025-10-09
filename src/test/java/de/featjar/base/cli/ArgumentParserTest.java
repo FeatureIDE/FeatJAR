@@ -45,7 +45,7 @@ class ArgumentParserTest {
     }
 
     OptionList parser(String... args) {
-        OptionList optionList = new OptionList(args);
+        OptionList optionList = new OptionList(Option.getAllOptions(FeatJAR.class), args);
         List<Problem> problems = optionList.parseArguments();
         assertTrue(problems.isEmpty(), Problem.printProblems(problems));
         return optionList;
@@ -61,7 +61,7 @@ class ArgumentParserTest {
         // assertEquals(Log.Verbosity.DEBUG, parser("arg", "--log-info").getVerbosity()); TODO: mock System.exit
         OptionList parser = parser("--log-info", "debug");
         parser.parseArguments();
-        assertEquals(Log.Verbosity.DEBUG, parser.get(OptionList.LOG_INFO_OPTION).get(0));
+        assertEquals(Log.Verbosity.DEBUG, parser.get(FeatJAR.LOG_INFO_OPTION).get(0));
     }
 
     @Test

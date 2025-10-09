@@ -21,6 +21,8 @@
 package de.featjar.base.cli;
 
 import de.featjar.base.FeatJAR;
+import de.featjar.base.data.Problem;
+import de.featjar.base.data.Problem.Severity;
 import de.featjar.base.data.Result;
 import de.featjar.base.extension.AExtensionPoint;
 import de.featjar.base.io.IO;
@@ -33,6 +35,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Duration;
+import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -71,6 +75,10 @@ public class Commands extends AExtensionPoint<ICommand> {
      * A pattern that matches the standard input identifier, accepting an optional file extension.
      */
     public static final Pattern STANDARD_INPUT_PATTERN = Pattern.compile(STANDARD_INPUT + "(\\.(.+))?");
+
+    public static Commands getInstance() {
+        return FeatJAR.extensionPoint(Commands.class);
+    }
 
     /**
      * Runs a given function in a new thread, aborting it when it is not done after a timeout expires.
@@ -172,5 +180,35 @@ public class Commands extends AExtensionPoint<ICommand> {
         } catch (final IOException e) {
             FeatJAR.log().error(e);
         }
+    }
+
+    public static Result<ICommand> getCommandByName(String name) {
+        List<ICommand> commands = getCommandsByName(name);
+
+        if (commands.size() > 1) {
+            return Result.empty(new Problem(
+                    String.format(
+                            "Command name '%s' is ambiguous! It matches the following commands: \n\t%s\n",
+                            name, commands.stream().map(ICommand::getIdentifier).collect(Collectors.joining("\n\t"))),
+                    Severity.ERROR));
+        } else if (commands.isEmpty()) {
+            return Result.empty(new Problem("No command matched the name " + name + "!", Severity.ERROR));
+        } else {
+            return Result.of(commands.get(0));
+        }
+    }
+
+    public static List<ICommand> getCommandsByName(String name) {
+        Commands instance = getInstance();
+        List<ICommand> commands = instance.getExtensions().stream()
+                .filter(command -> command.getShortName()
+                        .map(shortName -> Objects.equals(shortName, name))
+                        .orElse(Boolean.FALSE))
+                .collect(Collectors.toList());
+
+        if (commands.isEmpty()) {
+            commands = instance.getMatchingExtensions(".*" + Pattern.quote(name) + ".*");
+        }
+        return commands;
     }
 }

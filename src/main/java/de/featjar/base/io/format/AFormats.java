@@ -41,6 +41,7 @@ import java.util.stream.Collectors;
  * @author Elias Kuiter
  */
 public abstract class AFormats<T> extends AExtensionPoint<IFormat<T>> implements IFormatSupplier<T> {
+
     /**
      * {@return all formats that support a given file extension}
      *
@@ -91,4 +92,6 @@ public abstract class AFormats<T> extends AExtensionPoint<IFormat<T>> implements
                         String.format("No suitable format found. Possible formats: %s", Arrays.toString(getNames())),
                         Problem.Severity.ERROR)));
     }
+
+    public abstract Class<T> getType();
 }

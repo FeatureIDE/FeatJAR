@@ -18,18 +18,31 @@
  *
  * See <https://github.com/FeatureIDE/FeatJAR-base> for further information.
  */
-package de.featjar.base.env;
+package de.featjar.base.shell.command;
 
-import de.featjar.base.FeatJAR;
-import de.featjar.base.extension.AExtensionPoint;
+import de.featjar.base.shell.ShellSession;
+import java.util.LinkedList;
+import java.util.Optional;
 
 /**
- * Manages all native binaries bundled with FeatJAR.
+ * Deletes a given list of variables from the shell session.
  *
- * @author Elias Kuiter
+ * @author Niclas Kleinert
  */
-public class Binaries extends AExtensionPoint<ABinary> {
-    public static Binaries getInstance() {
-        return FeatJAR.extensionPoint(Binaries.class);
+public class ListVariablesShellCommand implements IShellCommand {
+
+    @Override
+    public void execute(ShellSession session, LinkedList<String> cmdParams) {
+        session.printAll();
+    }
+
+    @Override
+    public Optional<String> getShortName() {
+        return Optional.of("list");
+    }
+
+    @Override
+    public Optional<String> getDescription() {
+        return Optional.of("list session variables");
     }
 }

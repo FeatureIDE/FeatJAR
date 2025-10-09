@@ -49,6 +49,15 @@ public class ParseProblem extends Problem {
     /**
      * Create a new parse problem.
      *
+     * @param exception the parse exception
+     */
+    public ParseProblem(ParseException exception) {
+        this(exception, Severity.ERROR, exception.getLineNumber());
+    }
+
+    /**
+     * Create a new parse problem.
+     *
      * @param message    the message
      * @param severity   the severity
      * @param lineNumber the line number

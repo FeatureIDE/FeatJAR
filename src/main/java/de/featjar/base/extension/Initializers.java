@@ -20,9 +20,15 @@
  */
 package de.featjar.base.extension;
 
+import de.featjar.base.FeatJAR;
+
 /**
  * Extension point for registering static (de-)initializers.
  *
  * @author Elias Kuiter
  */
-public class Initializers extends AExtensionPoint<IInitializer> {}
+public class Initializers extends AExtensionPoint<IInitializer> {
+    public static Initializers getInstance() {
+        return FeatJAR.extensionPoint(Initializers.class);
+    }
+}
