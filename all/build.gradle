@@ -1,0 +1,35 @@
+plugins {
+	id 'application'
+	id 'pl.allegro.tech.build.axion-release' version '1.20.1'
+	id 'com.gradleup.shadow' version '9.2.2'
+}
+
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+	gradle.includedBuilds.stream()
+		.filter(build -> !build.projectDir.name.equals('gradle-plugins'))
+		.forEach(build -> implementation 'de.featjar:' + build.projectDir.name)
+}
+
+scmVersion {
+	repository {
+		directory.set(project.rootProject.file('../').absolutePath)
+	}
+}
+
+group = 'de.featjar'
+version = scmVersion.version
+
+application {
+	mainClass = 'de.featjar.base.FeatJAR'
+}
+
+tasks.named('shadowJar', com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar) {
+	duplicatesStrategy = DuplicatesStrategy.INCLUDE
+	transform(com.github.jengelman.gradle.plugins.shadow.transformers.XmlAppendingTransformer) {
+		resource = 'extensions.xml'
+	}
+}

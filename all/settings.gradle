@@ -1,0 +1,9 @@
+rootDir.parentFile.eachDir { dir ->
+	if (dir.name.equals('all') || dir.name.startsWith('evaluation')) {
+		return
+	}
+	var buildFile = dir.toPath().resolve('build.gradle').toFile()
+	if (buildFile.exists() && buildFile.text.contains('id \'de.featjar.')) {
+		includeBuild '../' + dir.name
+	}
+}
