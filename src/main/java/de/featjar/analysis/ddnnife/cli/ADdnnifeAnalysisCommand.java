@@ -28,7 +28,7 @@ import de.featjar.base.computation.Computations;
 import de.featjar.base.computation.IComputation;
 import de.featjar.base.io.IO;
 import de.featjar.formula.VariableMap;
-import de.featjar.formula.assignment.ComputeBooleanRepresentation;
+import de.featjar.formula.assignment.conversion.ComputeBooleanRepresentation;
 import de.featjar.formula.computation.ComputeCNFFormula;
 import de.featjar.formula.computation.ComputeNNFFormula;
 import de.featjar.formula.io.FormulaFormats;

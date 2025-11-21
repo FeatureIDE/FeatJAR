@@ -29,7 +29,7 @@ import de.featjar.analysis.ddnnife.computation.ComputeSolutionCountDdnnife;
 import de.featjar.base.FeatJAR;
 import de.featjar.base.computation.Computations;
 import de.featjar.base.data.Result;
-import de.featjar.formula.assignment.ComputeBooleanRepresentation;
+import de.featjar.formula.assignment.conversion.ComputeBooleanRepresentation;
 import de.featjar.formula.computation.ComputeCNFFormula;
 import de.featjar.formula.computation.ComputeNNFFormula;
 import de.featjar.formula.structure.Expressions;
