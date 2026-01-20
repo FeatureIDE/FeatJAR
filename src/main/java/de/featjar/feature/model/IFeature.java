@@ -49,7 +49,7 @@ public interface IFeature extends IFeatureModelElement, IHasCommonAttributes {
     IFeature clone(IFeatureModel newFeatureModel);
 
     default boolean isAbstract() {
-        return (boolean) getAttributeValue(Attributes.ABSTRACT).get();
+        return (boolean) getAttributeValue(FeatureModelAttributes.ABSTRACT).get();
     }
 
     default boolean isConcrete() {
@@ -57,7 +57,7 @@ public interface IFeature extends IFeatureModelElement, IHasCommonAttributes {
     }
 
     default boolean isHidden() {
-        return (boolean) getAttributeValue(Attributes.HIDDEN).get();
+        return (boolean) getAttributeValue(FeatureModelAttributes.HIDDEN).get();
     }
 
     /**
@@ -98,11 +98,11 @@ public interface IFeature extends IFeatureModelElement, IHasCommonAttributes {
         void setType(Class<?> type);
 
         default void setAbstract(boolean value) {
-            setAttributeValue(Attributes.ABSTRACT, value);
+            setAttributeValue(FeatureModelAttributes.ABSTRACT, value);
         }
 
         default boolean toggleAbstract() {
-            return toggleAttributeValue(Attributes.ABSTRACT);
+            return toggleAttributeValue(FeatureModelAttributes.ABSTRACT);
         }
 
         default void setAbstract() {
@@ -114,11 +114,11 @@ public interface IFeature extends IFeatureModelElement, IHasCommonAttributes {
         }
 
         default void setHidden(boolean value) {
-            setAttributeValue(Attributes.HIDDEN, value);
+            setAttributeValue(FeatureModelAttributes.HIDDEN, value);
         }
 
         default boolean toggleHidden() {
-            return toggleAttributeValue(Attributes.HIDDEN);
+            return toggleAttributeValue(FeatureModelAttributes.HIDDEN);
         }
 
         default void setHidden() {

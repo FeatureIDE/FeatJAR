@@ -20,7 +20,20 @@
  */
 package de.featjar.feature.model.io;
 
-import de.featjar.base.data.*;
+import de.featjar.base.data.Attribute;
+import de.featjar.base.data.Attributes;
+import de.featjar.base.data.IAttributable;
+import de.featjar.base.data.Name;
+import de.featjar.base.data.Problem;
+import de.featjar.base.data.Result;
+import de.featjar.base.data.type.BooleanType;
+import de.featjar.base.data.type.DoubleType;
+import de.featjar.base.data.type.FloatType;
+import de.featjar.base.data.type.GenericType;
+import de.featjar.base.data.type.IntegerType;
+import de.featjar.base.data.type.LongType;
+import de.featjar.base.data.type.StringType;
+import de.featjar.base.data.type.Type;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -52,29 +65,27 @@ public class AttributeIO {
         }
     }
 
-    public static Result<String> getTypeString(Class<?> type) {
-        if (String.class.equals(type)) {
+    public static Result<String> getTypeString(Type<?> type) {
+        if (type == StringType.INSTANCE) {
             return Result.of("string");
-        } else if (Boolean.class.equals(type)) {
+        } else if (type == BooleanType.INSTANCE) {
             return Result.of("boolean");
-        } else if (Integer.class.equals(type)) {
+        } else if (type == IntegerType.INSTANCE) {
             return Result.of("integer");
-        } else if (Long.class.equals(type)) {
+        } else if (type == LongType.INSTANCE) {
             return Result.of("long");
-        } else if (Float.class.equals(type)) {
+        } else if (type == FloatType.INSTANCE) {
             return Result.of("float");
-        } else if (Double.class.equals(type)) {
+        } else if (type == DoubleType.INSTANCE) {
             return Result.of("double");
+        } else if (type instanceof GenericType<?>) {
+            return Result.of(((GenericType<?>) type).toTypeString());
         }
         return Result.empty();
     }
 
-    public static Result<Attribute<?>> parseAttribute(String name, String typeString) {
-        return getType(typeString).map(type -> new Attribute<>(name, type));
-    }
-
-    public static Result<Attribute<?>> parseAttribute(String namespace, String name, String typeString) {
-        return getType(typeString).map(type -> new Attribute<>(namespace, name, type));
+    public static Result<Attribute<?>> parseAttribute(Name name, String typeString) {
+        return getType(typeString).map(type -> Attributes.get(name, type));
     }
 
     public static Result<Object> parseAttributeValue(Class<?> type, String valueString) {
@@ -100,9 +111,9 @@ public class AttributeIO {
 
     @SuppressWarnings("unchecked")
     public static List<Problem> parseAndSetAttributeValue(
-            IAttributable attributable, String namespace, String name, String typeString, String valueString) {
+            IAttributable attributable, Name name, String typeString, String valueString) {
         List<Problem> problems = new ArrayList<>();
-        Result<Attribute<?>> attribute = AttributeIO.parseAttribute(namespace, name, typeString);
+        Result<Attribute<?>> attribute = AttributeIO.parseAttribute(name, typeString);
         Result<?> value = parseAttributeValue(typeString, valueString);
         if (attribute.isEmpty()) {
             problems.add(new Problem("invalid type for attribute " + name, Problem.Severity.WARNING));

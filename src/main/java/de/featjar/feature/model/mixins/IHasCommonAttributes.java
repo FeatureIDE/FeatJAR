@@ -34,11 +34,11 @@ import de.featjar.feature.model.*;
  */
 public interface IHasCommonAttributes extends IAttributable {
     default Result<String> getName() {
-        return getAttributeValue(Attributes.NAME);
+        return getAttributeValue(FeatureModelAttributes.NAME);
     }
 
     default Result<String> getDescription() {
-        return getAttributeValue(Attributes.DESCRIPTION);
+        return getAttributeValue(FeatureModelAttributes.DESCRIPTION);
     }
 
     public static interface IHasMutableCommonAttributes extends IMutatableAttributable {

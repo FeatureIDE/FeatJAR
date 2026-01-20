@@ -57,7 +57,7 @@ public interface IConstraint extends IFeatureModelElement, IHasCommonAttributes 
     }
 
     default LinkedHashSet<String> getTags() {
-        return getAttributeValue(Attributes.TAGS).get();
+        return getAttributeValue(FeatureModelAttributes.TAGS).get();
     }
 
     default IMutableConstraint mutate() {
@@ -72,7 +72,7 @@ public interface IConstraint extends IFeatureModelElement, IHasCommonAttributes 
         }
 
         default void setTags(LinkedHashSet<String> tags) {
-            setAttributeValue(Attributes.TAGS, tags);
+            setAttributeValue(FeatureModelAttributes.TAGS, tags);
         }
 
         default boolean addTag(String tag) {

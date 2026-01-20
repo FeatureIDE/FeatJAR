@@ -68,18 +68,18 @@ public class IdentifierTest {
         assertEquals("1", featureModel.getIdentifier().toString());
         featureModel.mutate().addFeatureTreeRoot(featureModel.mutate().addFeature("root"));
         Assertions.assertEquals(
-                "2", featureModel.getRootFeatures().get(0).getIdentifier().toString());
-        Assertions.assertEquals("3", identifier.getFactory().get().toString());
+                "3", featureModel.getRootFeatures().get(0).getIdentifier().toString());
+        Assertions.assertEquals("4", identifier.getFactory().get().toString());
         Assertions.assertEquals(
-                "4", featureModel.getRootFeatures().get(0).getNewIdentifier().toString());
+                "5", featureModel.getRootFeatures().get(0).getNewIdentifier().toString());
         featureModel = new FeatureModel(identifier.getNewIdentifier());
         featureModel.mutate().addFeatureTreeRoot(featureModel.mutate().addFeature("root"));
-        assertEquals("5", featureModel.getIdentifier().toString());
+        assertEquals("6", featureModel.getIdentifier().toString());
         Assertions.assertEquals(
-                "6", featureModel.getRootFeatures().get(0).getIdentifier().toString());
-        assertEquals("7", featureModel.getNewIdentifier().toString());
+                "8", featureModel.getRootFeatures().get(0).getIdentifier().toString());
+        assertEquals("9", featureModel.getNewIdentifier().toString());
         assertEquals(
-                "2",
+                "3",
                 new FeatureModel(Identifiers.newCounterIdentifier())
                         .getNewIdentifier()
                         .toString());

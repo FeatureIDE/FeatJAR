@@ -21,13 +21,11 @@
 package de.featjar.feature.model;
 
 import de.featjar.base.data.Attribute;
+import de.featjar.base.data.Attributes;
 import de.featjar.base.data.Sets;
 import de.featjar.base.data.identifier.IIdentifiable;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
-import java.util.Set;
 
 /**
  * Defines useful {@link Attribute attributes} for {@link FeatureModel feature models},
@@ -36,13 +34,12 @@ import java.util.Set;
  * @author Elias Kuiter
  * @author Sebastian Krieter
  */
-public class Attributes {
+public class FeatureModelAttributes {
 
-    private static final LinkedHashMap<Attribute<?>, Attribute<?>> attributeSet = new LinkedHashMap<>();
+    public static final String ATTRIBUTE_NAMESPACE = FeatureModelAttributes.class.getCanonicalName() + ".attributes";
+    public static final String FM_PROPERTY_NAMESPACE = FeatureModelAttributes.class.getCanonicalName() + ".properties";
 
-    public static final String NAMESPACE = Attributes.class.getCanonicalName();
-
-    public static final Attribute<String> NAME = get(NAMESPACE, "name", String.class)
+    public static final Attribute<String> NAME = Attributes.get(FM_PROPERTY_NAMESPACE, "name", String.class)
             .setDefaultValueFunction(identifiable ->
                     "@" + ((IIdentifiable) identifiable).getIdentifier().toString())
             .setValidator(
@@ -53,46 +50,31 @@ public class Attributes {
                                     .getFeature((String) name)
                                     .isEmpty());
 
-    public static final Attribute<String> DESCRIPTION = get(NAMESPACE, "description", String.class);
+    public static final Attribute<String> DESCRIPTION =
+            Attributes.get(FM_PROPERTY_NAMESPACE, "description", String.class);
 
     @SuppressWarnings({"rawtypes", "unchecked"})
-    public static final Attribute<LinkedHashSet<String>> TAGS = getRaw(NAMESPACE, "tags", LinkedHashSet.class)
+    public static final Attribute<LinkedHashSet<String>> TAGS = Attributes.getRaw(
+                    FM_PROPERTY_NAMESPACE, "tags", LinkedHashSet.class)
             .setDefaultValueFunction(attributable -> Sets.<String>empty())
             .setCopyValueFunction(set -> new LinkedHashSet((Collection) set));
 
     public static final Attribute<Boolean> HIDDEN =
-            get(NAMESPACE, "hidden", Boolean.class).setDefaultValue(false);
+            Attributes.get(FM_PROPERTY_NAMESPACE, "hidden", Boolean.class).setDefaultValue(false);
 
     public static final Attribute<Boolean> ABSTRACT =
-            get(NAMESPACE, "abstract", Boolean.class).setDefaultValue(false);
+            Attributes.get(FM_PROPERTY_NAMESPACE, "abstract", Boolean.class).setDefaultValue(false);
 
-    public static Set<Attribute<?>> getAllAttributes() {
-        return Collections.unmodifiableSet(attributeSet.keySet());
-    }
-
+    /**
+     * Convenience method to get a feature model attribute with the appropriate name space.
+     * Equivalent to: {@code Attributes.get(FeatureModelAttributes.ATTRIBUTE_NAMESPACE, name, type);}
+     *
+     * @param <T> the attribute class type
+     * @param name the name of the attribute
+     * @param type the value type of the attribute
+     * @return the attribute instance
+     */
     public static <T> Attribute<T> get(String name, Class<T> type) {
-        return get(NAMESPACE, name, type);
-    }
-
-    @SuppressWarnings("unchecked")
-    public static <T> Attribute<T> get(String namespace, String name, Class<T> type) {
-        return getRaw(namespace, name, type);
-    }
-
-    @SuppressWarnings("rawtypes")
-    public static Attribute getRaw(String namespace, String name, Class<?> type) {
-        Attribute attribute = new Attribute<>(namespace, name, type);
-        Attribute cachedAttribute = attributeSet.get(attribute);
-        if (cachedAttribute == null) {
-            attributeSet.put(attribute, attribute);
-            return attribute;
-        } else {
-            if (type != cachedAttribute.getType()) {
-                throw new IllegalArgumentException(String.format(
-                        "Cannot create attribute for type %s. Attribute already defined for type %s.",
-                        type.toString(), cachedAttribute.getType()));
-            }
-            return cachedAttribute;
-        }
+        return Attributes.get(ATTRIBUTE_NAMESPACE, name, type);
     }
 }

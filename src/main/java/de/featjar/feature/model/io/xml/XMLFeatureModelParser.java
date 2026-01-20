@@ -36,7 +36,7 @@ import static de.featjar.formula.io.xml.XMLFeatureModelConstants.TAGS;
 import static de.featjar.formula.io.xml.XMLFeatureModelConstants.VALUE;
 
 import de.featjar.base.FeatJAR;
-import de.featjar.base.data.Attribute;
+import de.featjar.base.data.Name;
 import de.featjar.base.data.Problem;
 import de.featjar.base.data.Result;
 import de.featjar.base.data.Sets;
@@ -206,12 +206,12 @@ public class XMLFeatureModelParser extends AXMLFeatureModelParser<IFeatureModel,
             addParseProblem("Missing required attributes: " + VALUE, e, Problem.Severity.WARNING);
         } else {
             String typeString = e.hasAttribute(DATA_TYPE) ? e.getAttribute(DATA_TYPE) : "string";
-            final String namespace =
-                    e.hasAttribute(NAMESPACE_TAG) ? e.getAttribute(NAMESPACE_TAG) : Attribute.DEFAULT_NAMESPACE;
-            final String name = e.getAttribute(KEY);
+            final Name name = new Name(
+                    e.hasAttribute(NAMESPACE_TAG) ? e.getAttribute(NAMESPACE_TAG) : Name.DEFAULT_NAMESPACE,
+                    e.getAttribute(KEY));
             final String valueString = e.getAttribute(VALUE);
-            parseProblems.addAll(AttributeIO.parseAndSetAttributeValue(
-                    featureModelElement, namespace, name, typeString, valueString));
+            parseProblems.addAll(
+                    AttributeIO.parseAndSetAttributeValue(featureModelElement, name, typeString, valueString));
         }
     }
 

@@ -106,7 +106,7 @@ public class ComputeFeatureModelSlice extends AComputation<IFeatureModel> {
 
         List<IFeatureTree> newRoots = new ArrayList<>(slicedModel.getRoots().size());
         for (IFeatureTree rootFeature : slicedModel.getRoots()) {
-            PseudoFeatureTreeRoot pseudoRoot = new PseudoFeatureTreeRoot();
+            PseudoFeatureTreeRoot pseudoRoot = new PseudoFeatureTreeRoot(slicedModel);
             pseudoRoot.addChild(rootFeature);
             pseudoRoot.postOrderStream().forEach(node -> {
                 if (!featureFilter.test(node.getFeature())) {
@@ -145,7 +145,7 @@ public class ComputeFeatureModelSlice extends AComputation<IFeatureModel> {
                             new Literal(true, cnf.getVariableMap().get(literal).get()));
                 }
             }
-            if (solver.hasSolution(disjunction.negate()).orElse(Boolean.TRUE)) {
+            if (solver.hasSolution(disjunction.negateInts()).orElse(Boolean.TRUE)) {
                 clauseList.add(disjunction);
                 slicedModel.mutate().addConstraint(new Or(clause));
             }

@@ -24,7 +24,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import de.featjar.base.FeatJAR;
-import de.featjar.base.data.Attribute;
+import de.featjar.base.data.Attributes;
 import de.featjar.base.data.Problem;
 import de.featjar.base.data.Range;
 import de.featjar.base.data.Result;
@@ -89,17 +89,17 @@ public class LatexFeatureModelFormatTest {
         IFeature featureRootS = featureModel.mutate().addFeature("Hello");
         IFeature feature = featureModel.mutate().addFeature("Feature");
         IFeature world1 = featureModel.mutate().addFeature("World1");
-        world1.mutate().setAttributeValue(new Attribute<>("size", Double.class), 6000.0);
-        world1.mutate().setAttributeValue(new Attribute<>("population", Integer.class), 1);
+        world1.mutate().setAttributeValue(Attributes.get("size", Double.class), 6000.0);
+        world1.mutate().setAttributeValue(Attributes.get("population", Integer.class), 1);
         IFeature world2 = featureModel.mutate().addFeature("World2");
         IFeature wonderful1 = featureModel.mutate().addFeature("Wonderful1");
-        wonderful1.mutate().setAttributeValue(new Attribute<>("who", String.class), "you");
-        wonderful1.mutate().setAttributeValue(new Attribute<>("when", String.class), "now");
+        wonderful1.mutate().setAttributeValue(Attributes.get("who", String.class), "you");
+        wonderful1.mutate().setAttributeValue(Attributes.get("when", String.class), "now");
         IFeature beautiful1 = featureModel.mutate().addFeature("Beautiful1");
         IFeature wonderful2 = featureModel.mutate().addFeature("Wonderful2");
         IFeature beautiful2 = featureModel.mutate().addFeature("Beautiful2");
         IFeature wonderful3 = featureModel.mutate().addFeature("Wonderful3");
-        wonderful3.mutate().setAttributeValue(new Attribute<>("who", String.class), "you");
+        wonderful3.mutate().setAttributeValue(Attributes.get("who", String.class), "you");
         IFeature beautiful3 = featureModel.mutate().addFeature("Beautiful3");
         IFeature meaningful1 = featureModel.mutate().addFeature("Meaningful1");
         IFeature meaningful2 = featureModel.mutate().addFeature("Meaningful2");
@@ -109,6 +109,7 @@ public class LatexFeatureModelFormatTest {
 
         // first tree
         IFeatureTree rootTree = featureModel.mutate().addFeatureTreeRoot(featureRootS);
+        rootTree.mutate().makeMandatory();
         rootTree.mutate().toAndGroup();
 
         IFeatureTree firstFeatureTree = rootTree.mutate().addFeatureBelow(feature);

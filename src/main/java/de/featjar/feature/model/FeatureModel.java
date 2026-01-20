@@ -30,10 +30,8 @@ import de.featjar.base.data.identifier.UUIDIdentifier;
 import de.featjar.base.tree.Trees;
 import de.featjar.feature.model.IFeatureModel.IMutableFeatureModel;
 import de.featjar.formula.structure.IFormula;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -44,7 +42,7 @@ public class FeatureModel implements IMutableFeatureModel, IMutatableAttributabl
 
     protected final IIdentifier identifier;
 
-    protected final List<IFeatureTree> featureTreeRoots;
+    protected final PseudoFeatureTreeRoot pseudoFeatureTreeRoot;
     protected final LinkedHashMap<IIdentifier, IFeature> features;
     protected final LinkedHashMap<IIdentifier, IConstraint> constraints;
 
@@ -56,7 +54,7 @@ public class FeatureModel implements IMutableFeatureModel, IMutatableAttributabl
 
     public FeatureModel(IIdentifier identifier) {
         this.identifier = Objects.requireNonNull(identifier);
-        featureTreeRoots = new ArrayList<>(1);
+        pseudoFeatureTreeRoot = new PseudoFeatureTreeRoot(this);
         features = Maps.empty();
         constraints = Maps.empty();
         attributeValues = new LinkedHashMap<>(4);
@@ -65,8 +63,7 @@ public class FeatureModel implements IMutableFeatureModel, IMutatableAttributabl
     protected FeatureModel(FeatureModel otherFeatureModel) {
         identifier = otherFeatureModel.getNewIdentifier();
 
-        featureTreeRoots = new ArrayList<>(otherFeatureModel.featureTreeRoots.size());
-        otherFeatureModel.featureTreeRoots.stream().forEach(t -> featureTreeRoots.add(Trees.clone(t)));
+        pseudoFeatureTreeRoot = Trees.clone(otherFeatureModel.pseudoFeatureTreeRoot);
 
         features = new LinkedHashMap<>((int) (otherFeatureModel.features.size() * 1.5));
         otherFeatureModel.features.entrySet().stream()
@@ -92,8 +89,13 @@ public class FeatureModel implements IMutableFeatureModel, IMutatableAttributabl
     }
 
     @Override
-    public List<IFeatureTree> getRoots() {
-        return featureTreeRoots;
+    public List<? extends IFeatureTree> getRoots() {
+        return pseudoFeatureTreeRoot.getChildren();
+    }
+
+    @Override
+    public PseudoFeatureTreeRoot getPseudoRoot() {
+        return pseudoFeatureTreeRoot;
     }
 
     @Override
@@ -172,53 +174,51 @@ public class FeatureModel implements IMutableFeatureModel, IMutatableAttributabl
 
     @Override
     public String toString() {
-        StringBuilder featureString = new StringBuilder();
-        for (IFeatureTree root : featureTreeRoots) {
-            featureString.append(root.print());
-            featureString.append('\n');
-        }
         return String.format(
-                "FeatureModel{features=%s, constraints=%s}", featureString.toString(), constraints.toString());
+                "FeatureModel{features=%s, constraints=%s}", pseudoFeatureTreeRoot.print(), constraints.toString());
     }
 
     @Override
     public void setName(String name) {
-        attributeValues.put(Attributes.NAME, name);
+        attributeValues.put(FeatureModelAttributes.NAME, name);
     }
 
     @Override
     public void setDescription(String description) {
-        attributeValues.put(Attributes.DESCRIPTION, description);
+        attributeValues.put(FeatureModelAttributes.DESCRIPTION, description);
     }
 
     @Override
     public IFeatureTree addFeatureTreeRoot(IFeature feature) {
         FeatureTree newTree = new FeatureTree(feature);
-        featureTreeRoots.add(newTree);
+        pseudoFeatureTreeRoot.addChild(newTree);
         return newTree;
     }
 
     @Override
     public void addFeatureTreeRoot(IFeatureTree featureTree) {
-        featureTreeRoots.add(featureTree);
+        pseudoFeatureTreeRoot.addChild(featureTree);
     }
 
     @Override
     public void removeFeatureTreeRoot(IFeature feature) {
-        for (Iterator<IFeatureTree> it = featureTreeRoots.listIterator(); it.hasNext(); ) {
-            if (it.next().getFeature().equals(feature)) {
-                it.remove();
+        int index = 0;
+        int removeIndex = -1;
+        for (IFeatureTree child : pseudoFeatureTreeRoot.getChildren()) {
+            if (child.getFeature().equals(feature)) {
+                removeIndex = index;
+                break;
             }
+            index++;
+        }
+        if (removeIndex >= 0) {
+            pseudoFeatureTreeRoot.removeChild(removeIndex);
         }
     }
 
     @Override
     public void removeFeatureTreeRoot(IFeatureTree featureTree) {
-        for (Iterator<IFeatureTree> it = featureTreeRoots.listIterator(); it.hasNext(); ) {
-            if (it.next() == featureTree) {
-                it.remove();
-            }
-        }
+        pseudoFeatureTreeRoot.removeChild(featureTree);
     }
 
     @Override

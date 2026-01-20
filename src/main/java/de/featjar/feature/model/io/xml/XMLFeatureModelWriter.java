@@ -51,6 +51,7 @@ import static de.featjar.formula.io.xml.XMLFeatureModelConstants.VAR;
 import de.featjar.base.FeatJAR;
 import de.featjar.base.data.IAttribute;
 import de.featjar.base.io.xml.AXMLWriter;
+import de.featjar.feature.model.FeatureModelAttributes;
 import de.featjar.feature.model.IConstraint;
 import de.featjar.feature.model.IFeatureModel;
 import de.featjar.feature.model.IFeatureTree;
@@ -114,7 +115,8 @@ public class XMLFeatureModelWriter extends AXMLWriter<IFeatureModel> {
     }
 
     /**
-     * Inserts the tags concerning propositional constraints into the DOM document representation
+     * Inserts the tags concerning propositional constraints into the DOM document
+     * representation
      *
      * @param doc
      * @param node Parent node for the propositional nodes
@@ -162,7 +164,7 @@ public class XMLFeatureModelWriter extends AXMLWriter<IFeatureModel> {
     /**
      * Creates document based on feature model step by step
      *
-     * @param doc document to write
+     * @param doc  document to write
      * @param node parent node
      * @param feat current feature
      */
@@ -215,16 +217,19 @@ public class XMLFeatureModelWriter extends AXMLWriter<IFeatureModel> {
 
     protected void addProperties(Document doc, Map<IAttribute<?>, Object> attributes, Element fnod) {
         for (final Entry<IAttribute<?>, Object> property : attributes.entrySet()) {
-            final Element propNode;
-            propNode = doc.createElement(PROPERTY);
-            propNode.setAttribute(NAMESPACE_TAG, property.getKey().getNamespace());
-            propNode.setAttribute(
-                    DATA_TYPE,
-                    AttributeIO.getTypeString(property.getKey().getType())
-                            .orElseThrow(p -> new IllegalArgumentException()));
-            propNode.setAttribute(KEY, property.getKey().getName());
-            propNode.setAttribute(VALUE, property.getValue().toString()); // TODO
-            fnod.appendChild(propNode);
+            IAttribute<?> attribute = property.getKey();
+            if (FeatureModelAttributes.ATTRIBUTE_NAMESPACE.equals(attribute.getNamespace())) {
+                final Element propNode;
+                propNode = doc.createElement(PROPERTY);
+                propNode.setAttribute(NAMESPACE_TAG, attribute.getNamespace());
+                propNode.setAttribute(
+                        DATA_TYPE,
+                        AttributeIO.getTypeString(attribute.getType())
+                                .orElseThrow(p -> new IllegalArgumentException()));
+                propNode.setAttribute(KEY, attribute.getSimpleName());
+                propNode.setAttribute(VALUE, attribute.serialize(property.getValue()));
+                fnod.appendChild(propNode);
+            }
         }
     }
 

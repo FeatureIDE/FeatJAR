@@ -74,11 +74,11 @@ public class Constraint extends AFeatureModelElement implements IMutableConstrai
 
     @Override
     public void setName(String name) {
-        attributeValues.put(Attributes.NAME, name);
+        attributeValues.put(FeatureModelAttributes.NAME, name);
     }
 
     @Override
     public void setDescription(String description) {
-        attributeValues.put(Attributes.DESCRIPTION, description);
+        attributeValues.put(FeatureModelAttributes.DESCRIPTION, description);
     }
 }

@@ -21,14 +21,19 @@
 package de.featjar.feature.model;
 
 import de.featjar.base.data.IAttributable;
+import de.featjar.base.data.Pair;
 import de.featjar.base.data.Range;
 import de.featjar.base.data.Result;
 import de.featjar.base.tree.structure.ARootedTree;
 import de.featjar.base.tree.structure.IRootedTree;
 import de.featjar.feature.model.FeatureTree.Group;
 import de.featjar.feature.model.mixins.IHasFeatureTree;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * An ordered {@link ARootedTree} labeled with {@link Feature features}.
@@ -40,6 +45,7 @@ import java.util.Optional;
  */
 public interface IFeatureTree extends IRootedTree<IFeatureTree>, IAttributable, IHasFeatureTree {
 
+    // TODO the FeatureTreeRoot has no feature, this should return an Optional
     IFeature getFeature();
 
     /**
@@ -52,7 +58,19 @@ public interface IFeatureTree extends IRootedTree<IFeatureTree>, IAttributable, 
      * {@return the group of this feature's children with the given id.}
      * @param groupID the groupID
      */
-    Optional<Group> getChildrenGroup(int groupID);
+    default Optional<Group> getChildrenGroup(int groupID) {
+        return isValidGroupID(groupID) ? Optional.of(getChildrenGroups().get(groupID)) : Optional.empty();
+    }
+
+    default List<Pair<Group, List<IFeatureTree>>> getGroupedChildren() {
+        Map<Integer, List<IFeatureTree>> groupedFeatures =
+                getChildren().stream().collect(Collectors.groupingBy(IFeatureTree::getParentGroupID));
+        List<Pair<Group, List<IFeatureTree>>> featureGroups = new ArrayList<>(groupedFeatures.size());
+        for (Entry<Integer, List<IFeatureTree>> entry : groupedFeatures.entrySet()) {
+            featureGroups.add(new Pair<>(getChildrenGroup(entry.getKey()).get(), entry.getValue()));
+        }
+        return featureGroups;
+    }
 
     /**
      * {@return the group IDs of this feature's children.}
@@ -66,7 +84,25 @@ public interface IFeatureTree extends IRootedTree<IFeatureTree>, IAttributable, 
      * {@return all children within the group with the given id.}
      * @param groupID the groupID
      */
-    List<IFeatureTree> getChildren(int groupID);
+    default List<IFeatureTree> getChildren(int groupID) {
+        return getChildren().stream()
+                .filter(c -> c.getParentGroupID() == groupID)
+                .collect(Collectors.toList());
+    }
+
+    default IFeatureTree getFeatureTreeRoot() {
+        IFeatureTree currentTree = null;
+        IFeatureTree parentTree = (IFeatureTree) this;
+        while (!(parentTree instanceof PseudoFeatureTreeRoot)) {
+            currentTree = parentTree;
+            if (currentTree.hasParent()) {
+                parentTree = currentTree.getParent().get();
+            } else {
+                break;
+            }
+        }
+        return currentTree;
+    }
 
     /**
      * {@return the group of this feature. (The group of this feature's parent, in which this feature is contained.)}
@@ -84,12 +120,16 @@ public interface IFeatureTree extends IRootedTree<IFeatureTree>, IAttributable, 
 
     int getFeatureCardinalityUpperBound();
 
+    default boolean isOptional() {
+        return getFeatureCardinalityLowerBound() <= 0;
+    }
+
     default boolean isMandatory() {
         return getFeatureCardinalityLowerBound() > 0;
     }
 
-    default boolean isOptional() {
-        return getFeatureCardinalityLowerBound() <= 0;
+    default boolean isMultiple() {
+        return getFeatureCardinalityUpperBound() > 1;
     }
 
     default IMutableFeatureTree mutate() {

@@ -36,7 +36,7 @@ import java.util.stream.Stream;
  * @author Elias Kuiter
  */
 public interface IHasFeatureTree {
-    List<IFeatureTree> getRoots();
+    List<? extends IFeatureTree> getRoots();
 
     default Stream<IFeatureTree> getFeatureTreeStream() {
         return getRoots().stream().flatMap(Trees::preOrderStream);
