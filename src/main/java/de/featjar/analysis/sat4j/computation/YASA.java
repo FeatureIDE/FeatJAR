@@ -29,6 +29,7 @@ import de.featjar.analysis.sat4j.solver.ModalImplicationGraph;
 import de.featjar.analysis.sat4j.solver.SAT4JAssignment;
 import de.featjar.analysis.sat4j.solver.SAT4JSolutionSolver;
 import de.featjar.analysis.sat4j.solver.SAT4JSolver;
+import de.featjar.base.FeatJAR;
 import de.featjar.base.computation.Computations;
 import de.featjar.base.computation.Dependency;
 import de.featjar.base.computation.IComputation;
@@ -168,20 +169,20 @@ public class YASA extends ATWiseSampleComputation {
         mig = MIG.get(dependencyList);
 
         BooleanAssignmentList clauseList = BOOLEAN_CLAUSE_LIST.get(dependencyList);
-        combinationSets.adapt(clauseList.getVariableMap());
-        variableMap = clauseList.getVariableMap();
-
         BooleanAssignment assumedAssignment = ASSUMED_ASSIGNMENT.get(dependencyList);
         BooleanAssignmentList assumedClauseList = ASSUMED_CLAUSE_LIST.get(dependencyList);
-        assumedClauseList.adapt(clauseList.getVariableMap());
-
-        includeFilter = includeFilter.adapt(variableMap);
-        excludeFilter = excludeFilter.adapt(variableMap);
+        assumedClauseList = assumedClauseList.remap(clauseList.getVariableMap());
 
         Duration timeout = SAT_TIMEOUT.get(dependencyList);
 
         solver = new SAT4JSolutionSolver(clauseList);
         SAT4JSolver.initializeSolver(solver, clauseList, assumedAssignment, assumedClauseList, timeout);
+
+        solver.setSelectionStrategy(ISelectionStrategy.original());
+
+        initialFixedSample = checkInitialSample(initialFixedSample);
+        initialVariableSample = checkInitialSample(initialVariableSample);
+
         solver.setSelectionStrategy(ISelectionStrategy.random(random));
 
         progress.setTotalSteps((iterations + 1) * combinationSets.loopCount());
@@ -398,6 +399,27 @@ public class YASA extends ATWiseSampleComputation {
 
     private boolean canBeModified(PartialConfiguration configuration) {
         return configuration.allowChange && configuration.visitor.getAddedLiteralCount() != variableCount;
+    }
+
+    private BooleanAssignmentList checkInitialSample(BooleanAssignmentList initialSample) {
+        BooleanAssignmentList checkedInitialSample = new BooleanAssignmentList(variableMap);
+        for (BooleanAssignment config : initialSample) {
+            if (checkInitialConfiguration(config)) {
+                checkedInitialSample.add(config);
+            } else {
+                FeatJAR.log().warning("Initial configuration is invalid and will be skipped:\n" + config);
+            }
+        }
+        return checkedInitialSample;
+    }
+
+    private boolean checkInitialConfiguration(BooleanAssignment configuration) {
+        final int orgAssignmentSize = setUpSolver(configuration.get());
+        try {
+            return solver.hasSolution().orElse(Boolean.FALSE);
+        } finally {
+            solver.getAssignment().clear(orgAssignmentSize);
+        }
     }
 
     private boolean trySelectSat(PartialConfiguration configuration, final int[] literals) {

@@ -138,7 +138,7 @@ public class ProjectionCommand extends ACommand {
         }
 
         if (result.isPresent()) {
-            BooleanAssignmentList clauseList = result.get().adapt(slicedVariableMap);
+            BooleanAssignmentList clauseList = result.get().remap(slicedVariableMap);
             try {
                 if (outputPath == null || outputPath.toString().equals("results")) {
                     String string = format.serialize(new BooleanAssignmentGroups(slicedVariableMap, clauseList))

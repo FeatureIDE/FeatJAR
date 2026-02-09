@@ -100,9 +100,9 @@ public class ComputeConstraintedTWiseCoverage extends AComputeTWiseCoverage {
     @Override
     protected void adaptToMergedVariableMap(VariableMap mergedVariableMap) {
         super.adaptToMergedVariableMap(mergedVariableMap);
-        assumedAssignment.adapt(clauseList.getVariableMap(), mergedVariableMap);
-        assumedClauseList.adapt(mergedVariableMap);
-        clauseList.adapt(mergedVariableMap);
+        assumedAssignment = assumedAssignment.remap(clauseList.getVariableMap(), mergedVariableMap);
+        assumedClauseList = assumedClauseList.remap(mergedVariableMap);
+        clauseList = clauseList.remap(mergedVariableMap);
     }
 
     @Override

@@ -95,18 +95,18 @@ public abstract class ATWiseSampleComputation extends AComputation<BooleanAssign
                     "Configuration limit must be greater than 0. Value was " + maxSampleSize);
         }
 
-        initialFixedSample = INITIAL_FIXED_SAMPLE.get(dependencyList);
-        initialVariableSample = INITIAL_VARIABLE_SAMPLE.get(dependencyList);
-
         random = new Random(RANDOM_SEED.get(dependencyList));
 
         combinationSets = COMBINATION_SET.get(dependencyList);
-
         variableMap = combinationSets.variableMap();
-        variableCount = variableMap.size();
 
-        excludeFilter = EXCLUDE_INTERACTIONS.get(dependencyList);
-        includeFilter = INCLUDE_INTERACTIONS.get(dependencyList);
+        initialFixedSample = INITIAL_FIXED_SAMPLE.get(dependencyList).remap(variableMap);
+        initialVariableSample = INITIAL_VARIABLE_SAMPLE.get(dependencyList).remap(variableMap);
+
+        excludeFilter = EXCLUDE_INTERACTIONS.get(dependencyList).remap(variableMap);
+        includeFilter = INCLUDE_INTERACTIONS.get(dependencyList).remap(variableMap);
+
+        variableCount = variableMap.size();
 
         return computeSample(dependencyList, progress);
     }
