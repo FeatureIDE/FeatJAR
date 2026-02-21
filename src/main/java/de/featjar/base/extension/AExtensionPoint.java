@@ -20,19 +20,8 @@
  */
 package de.featjar.base.extension;
 
-import de.featjar.base.FeatJAR;
-import de.featjar.base.data.Maps;
-import de.featjar.base.data.Problem;
 import de.featjar.base.data.Result;
-import de.featjar.base.data.Sets;
-import de.featjar.base.log.IndentFormatter;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Objects;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 /**
  * An extension point installs {@link IExtension extensions} of a given type.
@@ -45,130 +34,41 @@ import java.util.stream.Collectors;
  * @author Sebastian Krieter
  * @author Elias Kuiter
  */
-public abstract class AExtensionPoint<T extends IExtension> {
-    private final LinkedHashMap<String, Integer> indexMap = Maps.empty();
-    private final List<T> extensions = new CopyOnWriteArrayList<>();
+public abstract class AExtensionPoint<T extends IExtension> implements IExtensionPoint<T> {
+    private final ExtensionList<T> extensions = new ExtensionList<>();
 
-    /**
-     * {@return a unique identifier for this extension point}
-     */
-    public String getIdentifier() {
-        return getClass().getCanonicalName();
+    @Override
+    public boolean installExtension(T extension) {
+        return extensions.addExtension(extension);
     }
 
-    /**
-     * Installs a new extension at this extension point.
-     *
-     * @param extension the extension
-     * @return whether this extension is new and was installed correctly
-     */
-    public synchronized boolean installExtension(T extension) {
-        if ((extension != null) && !indexMap.containsKey(extension.getIdentifier())) {
-            indexMap.put(extension.getIdentifier(), extensions.size());
-            extensions.add(extension);
-            return true;
-        }
-        return false;
+    @Override
+    public boolean uninstallExtension(T extension) {
+        return extensions.removeExtension(extension);
     }
 
-    /**
-     * Uninstalls an extension installed at this extension point.
-     *
-     * @param extension the extension
-     * @return whether this extension was installed before
-     */
-    public synchronized boolean uninstallExtension(T extension) {
-        FeatJAR.log().debug("uninstalling extension " + extension.getClass().getName());
-        if (indexMap.containsKey(extension.getIdentifier())) {
-            indexMap.remove(extension.getIdentifier());
-            extensions.remove(extension);
-            extension.close();
-            return true;
-        }
-        return false;
+    @Override
+    public void uninstallExtensions() {
+        extensions.removeAll();
     }
 
-    /**
-     * Uninstalls all extensions installed at this extension point.
-     */
-    public synchronized void uninstallExtensions() {
-        extensions.forEach(this::uninstallExtension);
+    @Override
+    public List<T> getExtensions() {
+        return extensions.getExtensions();
     }
 
-    /**
-     * De-initializes this extension point, called by {@link ExtensionManager}.
-     * Similar to {@link AutoCloseable#close()}, but called explicitly instead of implicitly in a try...with block.
-     */
-    public void close() {
-        FeatJAR.log().debug("uninstalling extension point " + getClass().getName());
-        uninstallExtensions();
-    }
-
-    /**
-     * {@return all extensions installed at this extension point}
-     * The list is in the same order as the extensions were installed with {@link #installExtension(IExtension)}.
-     */
-    public synchronized List<T> getExtensions() {
-        return extensions;
-    }
-
-    /**
-     * {@return the installed extension with a given identifier, if any}
-     *
-     * @param identifier the identifier
-     */
+    @Override
     public Result<T> getExtension(String identifier) {
-        Objects.requireNonNull(identifier, "identifier must not be null!");
-        final Integer index = indexMap.get(identifier);
-        return index != null
-                ? Result.of(extensions.get(index))
-                : Result.empty(new Problem("no extension found for identifier " + identifier, Problem.Severity.ERROR));
+        return extensions.getExtension(identifier);
     }
 
-    /**
-     * {@return the installed extension matching the given part of its identifier, if any}
-     * The matching is case-insensitive.
-     * If no extensions match or the match is ambiguous, an empty result is returned.
-     *
-     * @param partOfIdentifier the part of the extension's identifier
-     */
+    @Override
     public Result<T> getMatchingExtension(String partOfIdentifier) {
-        final String identifierPart = partOfIdentifier.toLowerCase();
-        LinkedHashSet<String> matchingIdentifiers = indexMap.keySet().stream()
-                .filter(identifier -> identifier.toLowerCase().contains(identifierPart))
-                .collect(Sets.toSet());
-        if (matchingIdentifiers.isEmpty())
-            return Result.empty(
-                    new Problem("found no extensions matching " + partOfIdentifier, Problem.Severity.ERROR));
-        if (matchingIdentifiers.size() > 1)
-            return Result.empty(new Problem(
-                    "found more than one extensions matching " + partOfIdentifier + ": \n"
-                            + IndentFormatter.formatList(matchingIdentifiers),
-                    Problem.Severity.ERROR));
-        return getExtension(matchingIdentifiers.iterator().next());
+        return extensions.getMatchingExtension(partOfIdentifier);
     }
 
-    /**
-     * {@return all installed extensions matching the given regular expression}
-     * The matching is case-insensitive.
-     * If no extensions match, an empty list is returned.
-     *
-     * @param regex the regular expression
-     */
+    @Override
     public List<T> getMatchingExtensions(String regex) {
-        Pattern pattern = Pattern.compile(regex);
-        return indexMap.entrySet().stream()
-                .filter(e -> pattern.matcher(e.getKey()).matches())
-                .map(e -> extensions.get(e.getValue()))
-                .collect(Collectors.toList());
-    }
-
-    /**
-     * {@return the installed extension point for a given class, if any}
-     *
-     * @param klass the class
-     */
-    public Result<T> getExtension(Class<? extends IExtension> klass) {
-        return getExtension(klass.getCanonicalName());
+        return extensions.getMatchingExtensions(regex);
     }
 }
