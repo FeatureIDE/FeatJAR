@@ -20,7 +20,9 @@
  */
 package de.featjar.feature.model.io.uvl.visitor;
 
-import static de.vill.model.FeatureType.*;
+import static de.vill.model.FeatureType.BOOL;
+import static de.vill.model.FeatureType.INT;
+import static de.vill.model.FeatureType.REAL;
 import static de.vill.model.FeatureType.STRING;
 
 import de.featjar.base.data.Name;
