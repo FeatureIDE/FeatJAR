@@ -37,7 +37,7 @@ public class SolutionCommand extends AJavasmtAnalysisCommand<ValueAssignment> {
     }
 
     @Override
-    public IComputation<ValueAssignment> newAnalysis(IComputation<IFormula> formula) {
+    public IComputation<ValueAssignment> newAnalysis(IComputation<? extends IFormula> formula) {
         return formula.map(ComputeSolution::new);
     }
 
