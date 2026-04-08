@@ -34,7 +34,7 @@ public class CountCommand extends ASharpsatAnalysisCommand<BigInteger> {
     }
 
     @Override
-    public IComputation<BigInteger> newAnalysis(IComputation<IFormula> formula) {
+    public IComputation<BigInteger> newAnalysis(IComputation<? extends IFormula> formula) {
         return formula.map(ComputeSolutionCountSharpSAT::new);
     }
 

@@ -28,7 +28,7 @@ import java.math.BigInteger;
 import java.util.List;
 
 public class ComputeSolutionCountSharpSAT extends ASharpSATAnalysis<BigInteger> {
-    public ComputeSolutionCountSharpSAT(IComputation<IFormula> cnfFormula) {
+    public ComputeSolutionCountSharpSAT(IComputation<? extends IFormula> cnfFormula) {
         super(cnfFormula);
     }
 

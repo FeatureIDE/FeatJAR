@@ -34,7 +34,7 @@ public abstract class ASharpSATAnalysis<T> extends AComputation<T> {
     public static final Dependency<IFormula> FORMULA = Dependency.newDependency(IFormula.class);
     public static final Dependency<Duration> TIMEOUT = Dependency.newDependency(Duration.class);
 
-    public ASharpSATAnalysis(IComputation<IFormula> formula, Object... dependencies) {
+    public ASharpSATAnalysis(IComputation<? extends IFormula> formula, Object... dependencies) {
         super(formula, Computations.of(Duration.ZERO), dependencies);
     }
 

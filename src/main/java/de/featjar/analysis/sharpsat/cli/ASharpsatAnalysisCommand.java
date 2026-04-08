@@ -44,5 +44,5 @@ public abstract class ASharpsatAnalysisCommand<T> extends AAnalysisCommand<T> {
                 Computations.of(inputFormula).map(ComputeNNFFormula::new).map(ComputeCNFFormula::new));
     }
 
-    protected abstract IComputation<T> newAnalysis(IComputation<IFormula> formula);
+    protected abstract IComputation<T> newAnalysis(IComputation<? extends IFormula> formula);
 }
