@@ -34,4 +34,9 @@ public class FeatureModelFormats extends AFormats<IFeatureModel> {
     public static FeatureModelFormats getInstance() {
         return FeatJAR.extensionPoint(FeatureModelFormats.class);
     }
+
+    @Override
+    public Class<IFeatureModel> getType() {
+        return IFeatureModel.class;
+    }
 }
