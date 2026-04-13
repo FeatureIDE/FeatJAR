@@ -18,43 +18,34 @@
  *
  * See <https://github.com/FeatureIDE/FeatJAR-feature-model> for further information.
  */
-package de.featjar.feature.model;
+package de.featjar.shell.type;
 
-import de.featjar.base.shell.ShellSession;
+import de.featjar.base.data.Result;
+import de.featjar.base.io.IO;
+import de.featjar.base.shell.type.IVariableType;
 import de.featjar.formula.assignment.BooleanAssignmentList;
 import de.featjar.formula.io.BooleanAssignmentGroupsFormats;
-import java.util.List;
-import java.util.Optional;
+import java.nio.file.Path;
 
 /**
  * Loads a sample list {@link BooleanAssignmentList} into the shell.
  *
  * @author Niclas Kleinert
  */
-public class LoadSample extends ALoadShellCommand {
+public class SampleType implements IVariableType<BooleanAssignmentList> {
 
     @Override
-    public void execute(ShellSession session, List<String> cmdParams) {
-        parseArguments(session, cmdParams, BooleanAssignmentGroupsFormats.getInstance());
+    public Class<BooleanAssignmentList> getClassType() {
+        return BooleanAssignmentList.class;
     }
 
     @Override
-    public Optional<String> getShortName() {
-        return Optional.of("loadSample");
+    public Result<BooleanAssignmentList> load(Path path) {
+        return IO.load(path, BooleanAssignmentGroupsFormats.getInstance()).map(g -> g.getMergedGroups());
     }
 
     @Override
-    public Optional<String> getDescription() {
-        return Optional.of("<var> <path> - load a sample");
-    }
-
-    @Override
-    public Optional<String> getFormatName() {
-        return Optional.of("sample");
-    }
-
-    @Override
-    public Optional<String> getDefaultName() {
-        return Optional.of("sam");
+    public String getName() {
+        return "sample";
     }
 }

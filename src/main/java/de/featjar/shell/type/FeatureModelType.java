@@ -18,42 +18,35 @@
  *
  * See <https://github.com/FeatureIDE/FeatJAR-feature-model> for further information.
  */
-package de.featjar.feature.model;
+package de.featjar.shell.type;
 
-import de.featjar.base.shell.ShellSession;
+import de.featjar.base.data.Result;
+import de.featjar.base.io.IO;
+import de.featjar.base.shell.type.IVariableType;
+import de.featjar.feature.model.FeatureModel;
+import de.featjar.feature.model.IFeatureModel;
 import de.featjar.feature.model.io.FeatureModelFormats;
-import java.util.List;
-import java.util.Optional;
+import java.nio.file.Path;
 
 /**
  * Loads a {@link FeatureModel} into the shell.
  *
  * @author Niclas Kleinert
  */
-public class LoadFeatureModel extends ALoadShellCommand {
+public class FeatureModelType implements IVariableType<IFeatureModel> {
 
     @Override
-    public void execute(ShellSession session, List<String> cmdParams) {
-        parseArguments(session, cmdParams, FeatureModelFormats.getInstance());
+    public Class<IFeatureModel> getClassType() {
+        return IFeatureModel.class;
     }
 
     @Override
-    public Optional<String> getShortName() {
-        return Optional.of("loadFeatureModel");
+    public Result<IFeatureModel> load(Path path) {
+        return IO.load(path, FeatureModelFormats.getInstance());
     }
 
     @Override
-    public Optional<String> getDescription() {
-        return Optional.of("<var> <path> - load a feature model");
-    }
-
-    @Override
-    public Optional<String> getFormatName() {
-        return Optional.of("FeatureModel");
-    }
-
-    @Override
-    public Optional<String> getDefaultName() {
-        return Optional.of("fm");
+    public String getName() {
+        return "fm";
     }
 }

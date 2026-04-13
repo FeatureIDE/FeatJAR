@@ -18,43 +18,34 @@
  *
  * See <https://github.com/FeatureIDE/FeatJAR-feature-model> for further information.
  */
-package de.featjar.feature.model;
+package de.featjar.shell.type;
 
-import de.featjar.base.shell.ShellSession;
-import de.featjar.formula.assignment.BooleanAssignmentGroups;
-import de.featjar.formula.io.BooleanAssignmentGroupsFormats;
-import java.util.List;
-import java.util.Optional;
+import de.featjar.base.data.Result;
+import de.featjar.base.io.IO;
+import de.featjar.base.shell.type.IVariableType;
+import de.featjar.formula.io.FormulaFormats;
+import de.featjar.formula.structure.IFormula;
+import java.nio.file.Path;
 
 /**
- * Loads a sample group {@link BooleanAssignmentGroups} into the shell.
+ * Loads a {@link IFormula} into the shell.
  *
  * @author Niclas Kleinert
  */
-public class LoadSampleGroup extends ALoadShellCommand {
+public class FormulaType implements IVariableType<IFormula> {
 
     @Override
-    public void execute(ShellSession session, List<String> cmdParams) {
-        parseArguments(session, cmdParams, BooleanAssignmentGroupsFormats.getInstance());
+    public Class<IFormula> getClassType() {
+        return IFormula.class;
     }
 
     @Override
-    public Optional<String> getShortName() {
-        return Optional.of("loadGroupOfSamples");
+    public Result<IFormula> load(Path path) {
+        return IO.load(path, FormulaFormats.getInstance());
     }
 
     @Override
-    public Optional<String> getDescription() {
-        return Optional.of("<var> <path> - load a sample group");
-    }
-
-    @Override
-    public Optional<String> getFormatName() {
-        return Optional.of("sampleGroup");
-    }
-
-    @Override
-    public Optional<String> getDefaultName() {
-        return Optional.of("sg");
+    public String getName() {
+        return "formula";
     }
 }
