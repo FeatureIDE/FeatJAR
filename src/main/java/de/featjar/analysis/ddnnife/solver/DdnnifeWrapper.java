@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 FeatJAR-Development-Team
+ * Copyright (C) 2026 FeatJAR-Development-Team
  *
  * This file is part of FeatJAR-formula-analysis-ddnnife.
  *
@@ -74,12 +74,7 @@ public class DdnnifeWrapper implements ISolver, AutoCloseable {
             computeDdnnf(formula);
 
             process = FeatJAR.extension(DdnnifeBinary.class)
-                    .getProcess(
-                            "-t",
-                            Integer.toString(variableMap.size()),
-                            "-i",
-                            ddnifeFile.toString(),
-                            "stream")
+                    .getProcess("-t", Integer.toString(variableMap.size()), "-i", ddnifeFile.toString(), "stream")
                     .start();
 
             prcErr = new BufferedReader(new InputStreamReader(process.getErrorStream(), StandardCharsets.UTF_8));
