@@ -131,7 +131,7 @@ public class CadiCalSolver implements ISolver {
                     String.valueOf(timeout.toSeconds()),
                     tempFile.getPath().toString());
 
-            return process.get().flatMap(this::parseSatisfiable);
+            return process.get().mapResult(this::parseSatisfiable);
         } catch (Exception e) {
             FeatJAR.log().error(e);
             return Result.empty(e);

@@ -26,7 +26,7 @@ import de.featjar.base.computation.IComputation;
 import de.featjar.base.io.format.IFormat;
 import de.featjar.formula.assignment.BooleanAssignmentGroups;
 import de.featjar.formula.assignment.BooleanAssignmentList;
-import de.featjar.formula.io.csv.BooleanAssignmentGroupsUngroupedCSVFormat;
+import de.featjar.formula.io.csv.BooleanAssignmentGroupsCSVFormat;
 import java.util.Optional;
 
 public class SolutionCommand extends ACadicalAnalysisCommand<BooleanAssignmentGroups> {
@@ -45,7 +45,7 @@ public class SolutionCommand extends ACadicalAnalysisCommand<BooleanAssignmentGr
 
     @Override
     protected IFormat<BooleanAssignmentGroups> getOuputFormat(OptionList optionaParser) {
-        return new BooleanAssignmentGroupsUngroupedCSVFormat();
+        return new BooleanAssignmentGroupsCSVFormat();
     }
 
     @Override
