@@ -20,7 +20,6 @@
  */
 package de.featjar.feature.model.computation;
 
-import de.featjar.base.FeatJAR;
 import de.featjar.base.computation.IComputation;
 import de.featjar.base.computation.Progress;
 import de.featjar.base.data.Result;
@@ -56,7 +55,6 @@ public class ComputeConstraintNumberOfConnectives extends AFeatureModelComputati
                     Long.class,
                     Trees.preOrderStream(constraint.getFormula())
                             .filter(n -> n instanceof IConnective)
-                            .peek(n -> FeatJAR.log().error(n.getName()))
                             .collect(Collectors.groupingBy(IExpression::getName, Collectors.counting())),
                     Long::sum,
                     () -> 0L));
