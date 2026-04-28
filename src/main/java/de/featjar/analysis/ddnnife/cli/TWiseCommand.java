@@ -27,7 +27,7 @@ import de.featjar.base.cli.OptionList;
 import de.featjar.base.computation.IComputation;
 import de.featjar.base.io.format.IFormat;
 import de.featjar.formula.assignment.BooleanAssignmentGroups;
-import de.featjar.formula.io.csv.BooleanAssignmentGroupsUngroupedCSVFormat;
+import de.featjar.formula.io.csv.BooleanAssignmentGroupsCSVFormat;
 import java.util.Optional;
 
 public class TWiseCommand extends ADdnnifeAnalysisCommand<BooleanAssignmentGroups> {
@@ -51,7 +51,7 @@ public class TWiseCommand extends ADdnnifeAnalysisCommand<BooleanAssignmentGroup
 
     @Override
     protected IFormat<BooleanAssignmentGroups> getOuputFormat(OptionList optionaParser) {
-        return new BooleanAssignmentGroupsUngroupedCSVFormat();
+        return new BooleanAssignmentGroupsCSVFormat();
     }
 
     @Override

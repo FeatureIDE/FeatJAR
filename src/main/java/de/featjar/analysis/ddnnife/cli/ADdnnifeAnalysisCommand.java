@@ -26,7 +26,6 @@ import de.featjar.base.cli.Option;
 import de.featjar.base.cli.OptionList;
 import de.featjar.base.computation.Computations;
 import de.featjar.base.computation.IComputation;
-import de.featjar.base.io.IO;
 import de.featjar.formula.VariableMap;
 import de.featjar.formula.assignment.conversion.ComputeBooleanRepresentation;
 import de.featjar.formula.computation.ComputeCNFFormula;
@@ -48,10 +47,7 @@ public abstract class ADdnnifeAnalysisCommand<T> extends AAnalysisCommand<T> {
 
     @Override
     protected IComputation<T> newComputation(OptionList optionParser) {
-        inputFormula = optionParser
-                .getResult(INPUT_OPTION)
-                .flatMap(p -> IO.load(p, FormulaFormats.getInstance()))
-                .orElseThrow();
+        inputFormula = readFromInput(optionParser, FormulaFormats.getInstance()).orElseThrow();
         return newAnalysis(
                 optionParser,
                 Computations.of(inputFormula)
