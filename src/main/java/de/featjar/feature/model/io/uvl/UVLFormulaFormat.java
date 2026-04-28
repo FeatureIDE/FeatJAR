@@ -33,7 +33,6 @@ import de.featjar.formula.structure.IFormula;
 import de.featjar.formula.structure.connective.And;
 import de.featjar.formula.structure.connective.Reference;
 import de.featjar.formula.structure.predicate.True;
-import de.vill.main.UVLModelFactory;
 import de.vill.model.Attribute;
 import de.vill.model.Feature;
 import de.vill.model.FeatureType;
@@ -47,20 +46,40 @@ import java.util.List;
  * @author Sebastian Krieter
  * @author Andreas Gerasimow
  */
-public class UVLFormulaFormat implements IFormulaFormat {
+public class UVLFormulaFormat extends AUVLFormat<IFormula> implements IFormulaFormat {
 
     /**
      * Name of the root element.
      */
     public static final String ROOT_FEATURE_NAME = "Formula";
 
+    public static final String ID = UVLFormulaFormat.class.getCanonicalName();
+
+    @Override
+    public String getIdentifier() {
+        return ID;
+    }
+
+    @Override
+    public UVLFormulaFormat getInstance() {
+        return this;
+    }
+
+    @Override
+    public boolean supportsParse() {
+        return true;
+    }
+
+    @Override
+    public boolean supportsWrite() {
+        return true;
+    }
+
     @Override
     public Result<IFormula> parse(AInputMapper inputMapper) {
         List<Problem> problems = new ArrayList<>();
+        de.vill.model.FeatureModel uvlModel = parseUVLModel(inputMapper);
         try {
-            String content = inputMapper.get().text();
-            UVLModelFactory uvlModelFactory = new UVLModelFactory();
-            de.vill.model.FeatureModel uvlModel = uvlModelFactory.parse(content);
             IFeatureModel featureModel = UVLFeatureModelToFeatureTree.createFeatureModel(uvlModel);
 
             List<? extends IFeatureTree> roots = featureModel.getRoots();
@@ -130,25 +149,5 @@ public class UVLFormulaFormat implements IFormulaFormat {
 
         uvlModel.getOwnConstraints().add(uvlConstraint.get());
         return Result.of(uvlModel.toString(), problems);
-    }
-
-    @Override
-    public boolean supportsParse() {
-        return true;
-    }
-
-    @Override
-    public boolean supportsWrite() {
-        return true;
-    }
-
-    @Override
-    public String getFileExtension() {
-        return "uvl";
-    }
-
-    @Override
-    public String getName() {
-        return "Universal Variability Language";
     }
 }

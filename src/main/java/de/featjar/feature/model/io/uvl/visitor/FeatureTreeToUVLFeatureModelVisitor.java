@@ -36,7 +36,9 @@ import de.featjar.feature.model.IFeature;
 import de.featjar.feature.model.IFeatureTree;
 import de.vill.model.Attribute;
 import de.vill.model.FeatureModel;
+import de.vill.model.FeatureType;
 import de.vill.model.Group;
+import de.vill.model.Group.GroupType;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -92,7 +94,10 @@ public class FeatureTreeToUVLFeatureModelVisitor implements ITreeVisitor<IFeatur
 
             uvlFeature.setNameSpace(namespace);
             try {
-                uvlFeature.setFeatureType(getUVLFeatureType(node.getFeature()));
+                FeatureType uvlFeatureType = getUVLFeatureType(node.getFeature());
+                if (uvlFeatureType != BOOL) {
+                    uvlFeature.setFeatureType(uvlFeatureType);
+                }
             } catch (ParseException e) {
                 problemList.add(new Problem(
                         "Type of feature " + node.getFeature().getName().get() + " cannot be parsed."));
@@ -103,13 +108,22 @@ public class FeatureTreeToUVLFeatureModelVisitor implements ITreeVisitor<IFeatur
                     .filter((entry) -> !entry.getKey().equals(FeatureModelAttributes.NAME))
                     .forEach(entry -> {
                         Name attributeName = entry.getKey().getName();
-                        String uvlAttributeName = (entry.getKey().equals(FeatureModelAttributes.ABSTRACT))
-                                ? escapeSeparator(attributeName.getName())
-                                : escapeSeparator(attributeName.getNamespace()) + ":"
-                                        + escapeSeparator(attributeName.getName());
-                        uvlFeature
-                                .getAttributes()
-                                .put(uvlAttributeName, new Attribute<>(uvlAttributeName, entry.getValue()));
+                        if (entry.getKey().equals(FeatureModelAttributes.ABSTRACT)) {
+                            if (entry.getValue() == Boolean.TRUE) {
+                                uvlFeature.getAttributes().put("abstract", new Attribute<>("abstract", Boolean.TRUE));
+                            }
+                        } else if (entry.getKey().equals(FeatureModelAttributes.HIDDEN)) {
+                            if (entry.getValue() == Boolean.TRUE) {
+                                uvlFeature.getAttributes().put("hidden", new Attribute<>("hidden", Boolean.TRUE));
+                            }
+                        } else {
+                            String uvlAttributeName = escapeSeparator(attributeName.getNamespace())
+                                    + ":"
+                                    + escapeSeparator(attributeName.getName());
+                            uvlFeature
+                                    .getAttributes()
+                                    .put(uvlAttributeName, new Attribute<>(uvlAttributeName, entry.getValue()));
+                        }
                     });
 
             List<FeatureTree.Group> groups = node.getChildrenGroups();
@@ -140,18 +154,23 @@ public class FeatureTreeToUVLFeatureModelVisitor implements ITreeVisitor<IFeatur
                         optionalGroup.getFeatures().addAll(getUVLChildrenFeatures(optionalChildren));
                         uvlFeature.addChildren(optionalGroup);
                     }
-                } else {
+                } else if (groupType == GroupType.GROUP_CARDINALITY) {
                     de.vill.model.Group uvlGroup = new de.vill.model.Group(groupType);
                     uvlGroup.setParentFeature(uvlFeature);
                     uvlGroup.setLowerBound(String.valueOf(group.getLowerBound()));
                     uvlGroup.setUpperBound(String.valueOf(group.getUpperBound()));
                     uvlGroup.getFeatures().addAll(getUVLChildrenFeatures(children));
                     uvlFeature.addChildren(uvlGroup);
+                } else {
+                    de.vill.model.Group uvlGroup = new de.vill.model.Group(groupType);
+                    uvlGroup.setParentFeature(uvlFeature);
+                    uvlGroup.getFeatures().addAll(getUVLChildrenFeatures(children));
+                    uvlFeature.addChildren(uvlGroup);
                 }
             }
 
             uvlModel.getFeatureMap().put(name, uvlFeature);
-            if (node.getParent().isEmpty()) {
+            if (path.size() == 1) {
                 uvlModel.setRootFeature(uvlFeature);
             }
         } catch (Exception e) {

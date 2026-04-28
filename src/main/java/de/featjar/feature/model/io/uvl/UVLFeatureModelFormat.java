@@ -32,7 +32,7 @@ import de.featjar.feature.model.io.IFeatureModelFormat;
 import de.featjar.feature.model.io.uvl.visitor.FeatureTreeToUVLFeatureModelVisitor;
 import de.featjar.feature.model.io.uvl.visitor.FormulaToUVLConstraintVisitor;
 import de.featjar.formula.structure.IFormula;
-import de.vill.main.UVLModelFactory;
+import de.vill.model.FeatureModel;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -42,15 +42,34 @@ import java.util.List;
  * @author Sebastian Krieter
  * @author Andreas Gerasimow
  */
-public class UVLFeatureModelFormat implements IFeatureModelFormat {
+public class UVLFeatureModelFormat extends AUVLFormat<IFeatureModel> implements IFeatureModelFormat {
+
+    public static final String ID = UVLFeatureModelFormat.class.getCanonicalName();
+
+    @Override
+    public String getIdentifier() {
+        return ID;
+    }
+
+    @Override
+    public UVLFeatureModelFormat getInstance() {
+        return this;
+    }
+
+    @Override
+    public boolean supportsWrite() {
+        return true;
+    }
+
+    @Override
+    public boolean supportsParse() {
+        return true;
+    }
 
     @Override
     public Result<IFeatureModel> parse(AInputMapper inputMapper) {
+        FeatureModel uvlModel = parseUVLModel(inputMapper);
         try {
-            String content = inputMapper.get().text();
-            UVLModelFactory uvlModelFactory = new UVLModelFactory();
-            de.vill.model.FeatureModel uvlModel = uvlModelFactory.parse(content);
-
             IFeatureModel featureModel = UVLFeatureModelToFeatureTree.createFeatureModel(uvlModel);
 
             List<IFormula> formulas = UVLFeatureModelToFeatureTree.uvlConstraintToFormula(uvlModel.getConstraints());
@@ -72,9 +91,11 @@ public class UVLFeatureModelFormat implements IFeatureModelFormat {
             }
 
             IFeature rootFeature = fm.getRootFeatures().get(0);
-            problems.add(new Problem(
-                    "UVL supports only one root feature. If there are more than one root features in the model, the first one will be used.",
-                    Problem.Severity.WARNING));
+            if (fm.getRootFeatures().size() > 1) {
+                problems.add(new Problem(
+                        "UVL supports only one root feature. If there are more than one root features in the model, the first one will be used.",
+                        Problem.Severity.WARNING));
+            }
 
             Result<IFeatureTree> featureTree = fm.getFeatureTree(rootFeature);
             problems.addAll(featureTree.getProblems());
@@ -82,12 +103,13 @@ public class UVLFeatureModelFormat implements IFeatureModelFormat {
                 return Result.empty(problems);
             }
 
-            Result<de.vill.model.FeatureModel> uvlModel =
+            Result<FeatureModel> uvlModel =
                     Trees.traverse(featureTree.get(), new FeatureTreeToUVLFeatureModelVisitor());
             problems.addAll(uvlModel.getProblems());
             if (uvlModel.isEmpty()) {
                 return Result.empty(problems);
             }
+            FeatureModel model = uvlModel.get();
 
             for (IConstraint constraint : fm.getConstraints()) {
                 Result<de.vill.model.constraint.Constraint> uvlConstraint =
@@ -96,32 +118,11 @@ public class UVLFeatureModelFormat implements IFeatureModelFormat {
                 if (uvlConstraint.isEmpty()) {
                     return Result.empty(problems);
                 }
-                uvlModel.get().getOwnConstraints().add(uvlConstraint.get());
+                model.getOwnConstraints().add(uvlConstraint.get());
             }
-
-            return Result.of(uvlModel.get().toString(), problems);
+            return Result.of(model.toString(), problems);
         } catch (Exception e) {
             return Result.empty(e);
         }
-    }
-
-    @Override
-    public boolean supportsParse() {
-        return true;
-    }
-
-    @Override
-    public boolean supportsWrite() {
-        return true;
-    }
-
-    @Override
-    public String getFileExtension() {
-        return "uvl";
-    }
-
-    @Override
-    public String getName() {
-        return "Universal Variability Language";
     }
 }
