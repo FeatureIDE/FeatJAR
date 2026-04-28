@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 FeatJAR-Development-Team
+ * Copyright (C) 2026 FeatJAR-Development-Team
  *
  * This file is part of FeatJAR-feature-model-assistance.
  *
@@ -26,6 +26,7 @@ import de.featjar.analysis.sat4j.computation.ComputeSAT4JSolver;
 import de.featjar.analysis.sat4j.computation.ComputeSatisfiableSAT4J;
 import de.featjar.analysis.sat4j.computation.ComputeSolutionsSAT4J;
 import de.featjar.analysis.sat4j.solver.SAT4JSolver;
+import de.featjar.analysis.sharpsat.computation.ComputeSolutionCountSharpSAT;
 import de.featjar.base.computation.Computations;
 import de.featjar.base.data.IntegerList;
 import de.featjar.base.data.Pair;
@@ -43,10 +44,12 @@ import de.featjar.formula.computation.ComputeCNFFormula;
 import de.featjar.formula.computation.ComputeNNFFormula;
 import de.featjar.formula.io.BooleanAssignmentListFormats;
 import de.featjar.formula.structure.IFormula;
+import de.featjar.formula.structure.connective.Reference;
 import de.featjar.formula.structure.predicate.Literal;
-import de.featjar.formula.structure.predicate.NonBooleanPositiveLiteral;
+import de.featjar.formula.structure.predicate.NonBooleanLiteral;
 import de.featjar.formula.structure.term.value.Variable;
 import java.io.IOException;
+import java.math.BigInteger;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Objects;
@@ -64,19 +67,17 @@ public class Wrapper {
         return IO.load(path, FeatureModelFormats.getInstance());
     }
 
-    public static Result<List<Pair<List<IFeature>, List<IFeature>>>> loadConfigurations(
-            Path path, IFeatureModel featureModel) {
-        return IO.load(path, BooleanAssignmentListFormats.getInstance())
-                .map(list -> convertToFeatureList(list, featureModel));
-    }
-
     public static void storeFeatureModel(IFeatureModel featureModel, Path path) throws IOException {
         IO.save(
                 featureModel,
                 path,
-                FeatureModelFormats.getInstance()
-                        .getFormatByName("UVLFeatureModelFormat")
-                        .orElseThrow());
+                FeatureModelFormats.getInstance().getFormatByName("UVL").orElseThrow());
+    }
+
+    public static Result<List<Pair<List<IFeature>, List<IFeature>>>> loadConfigurations(
+            Path path, IFeatureModel featureModel) {
+        return IO.load(path, BooleanAssignmentListFormats.getInstance())
+                .map(list -> convertToFeatureList(list, featureModel));
     }
 
     public static void storeConfigurations(
@@ -107,7 +108,7 @@ public class Wrapper {
         if (type == Boolean.class) {
             return new Literal(variable);
         } else {
-            return new NonBooleanPositiveLiteral(variable);
+            return new NonBooleanLiteral(variable);
         }
     }
 
@@ -189,6 +190,15 @@ public class Wrapper {
                 .map(a -> convertToFeatureList(a, featureModel));
     }
 
+    public static Result<BigInteger> numberOfConfigurations(IFeatureModel featureModel) {
+        return Computations.of(featureModel)
+                .map(ComputeFormula::new)
+                .map(ComputeNNFFormula::new)
+                .map(ComputeCNFFormula::new)
+                .map(ComputeSolutionCountSharpSAT::new)
+                .computeResult();
+    }
+
     private static List<Pair<List<IFeature>, List<IFeature>>> convertToFeatureList(
             BooleanAssignmentList assignments, IFeatureModel featureModel) {
         return assignments.stream()
@@ -206,7 +216,7 @@ public class Wrapper {
     private static List<IFeature> convertToFeatureList(
             IntStream filter, VariableMap variableMap, IFeatureModel featureModel) {
         return filter.mapToObj(v ->
-                        variableMap.get(v).flatMap(featureModel::getFeature).orElse(null))
+                        variableMap.get(v).mapResult(featureModel::getFeature).orElse(null))
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
     }
