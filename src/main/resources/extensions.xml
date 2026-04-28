@@ -1,21 +1,29 @@
 <?xml version="1.0"?>
 <extensions>
 	<point id="de.featjar.formula.io.FormulaFormats" priority="10">
+		<extension id="de.featjar.formula.io.binary.CNFFormulaBinaryFormat" />
+		<extension id="de.featjar.formula.io.binary.FormulaBinaryFormat" />
+		<extension id="de.featjar.formula.io.dimacs.CNFFormulaDimacsFormat" />
 		<extension id="de.featjar.formula.io.dimacs.FormulaDimacsFormat" />
-		<extension id="de.featjar.formula.io.dimacs.FormulaCNFDimacsFormat" />
+		<extension id="de.featjar.formula.io.textual.FormulaStringFormat" />
 	    <extension id="de.featjar.formula.io.xml.XMLFeatureModelFormulaFormat" />
+	</point>
+	<point id="de.featjar.formula.io.ExpressionFormats" priority="10">
 	    <extension id="de.featjar.formula.io.KConfigReaderFormat" />
+		<extension id="de.featjar.formula.io.textual.ExpressionFormat" />
 	</point>
 	<point id="de.featjar.formula.io.BooleanAssignmentGroupsFormats" priority="10">
-		<extension id="de.featjar.formula.io.binary.BooleanAssignmentGroupsBinaryFormat" />
+		<extension id="de.featjar.formula.io.binary.BooleanAssignmentGroupsGroupedBinaryFormat" />
+		<extension id="de.featjar.formula.io.binary.BooleanAssignmentGroupsSimpleBinaryFormat" />
 		<extension id="de.featjar.formula.io.csv.BooleanAssignmentGroupsCSVFormat" />
-		<extension id="de.featjar.formula.io.csv.BooleanAssignmentGroupsUngroupedCSVFormat" />
+		<extension id="de.featjar.formula.io.csv.BooleanAssignmentGroupsGroupedCSVFormat" />
 		<extension id="de.featjar.formula.io.dimacs.BooleanAssignmentGroupsDimacsFormat" />
-		<extension id="de.featjar.formula.io.dimacs.BooleanAssignmentGroupsDimacsListFormat" />
 	</point>
 	<point id="de.featjar.formula.io.BooleanAssignmentListFormats" priority="10">
-		<extension id="de.featjar.formula.io.binary.BooleanAssignmentListBinaryFormat" />
+		<extension id="de.featjar.formula.io.binary.BooleanAssignmentListGroupedBinaryFormat" />
+		<extension id="de.featjar.formula.io.binary.BooleanAssignmentListSimpleBinaryFormat" />
 		<extension id="de.featjar.formula.io.csv.BooleanAssignmentListCSVFormat" />
+		<extension id="de.featjar.formula.io.csv.BooleanAssignmentListGroupedCSVFormat" />
 		<extension id="de.featjar.formula.io.dimacs.BooleanAssignmentListDimacsFormat" />
 		<extension id="de.featjar.formula.io.textual.BooleanAssignmentListSimpleTextFormat" />
 		<extension id="de.featjar.formula.io.textual.BooleanAssignmentListTextFormat" />
@@ -23,8 +31,8 @@
 	<point id="de.featjar.formula.io.BooleanAssignmentFormats" priority="10" />
 	<point id="de.featjar.base.cli.Commands">
 		<extension id="de.featjar.composition.cli.PreprocessorCommand" />
-		<extension id="de.featjar.formula.cli.ConvertCNFFormatCommand" />
-		<extension id="de.featjar.formula.cli.ConvertFormatCommand" />
+		<extension id="de.featjar.formula.cli.ConvertAssignmentFormatCommand" />
+		<extension id="de.featjar.formula.cli.ConvertFormulaFormatCommand" />
 		<extension id="de.featjar.formula.cli.PrintCommand" />
 	</point>
 </extensions>

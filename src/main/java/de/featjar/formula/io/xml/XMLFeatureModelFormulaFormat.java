@@ -21,9 +21,9 @@
 package de.featjar.formula.io.xml;
 
 import de.featjar.base.data.Result;
-import de.featjar.base.io.format.IFormat;
 import de.featjar.base.io.input.AInputMapper;
 import de.featjar.base.io.input.InputHeader;
+import de.featjar.formula.io.IFormulaFormat;
 import de.featjar.formula.structure.IFormula;
 
 /**
@@ -32,7 +32,7 @@ import de.featjar.formula.structure.IFormula;
  * @author Sebastian Krieter
  * @author Elias Kuiter
  */
-public class XMLFeatureModelFormulaFormat implements IFormat<IFormula> {
+public class XMLFeatureModelFormulaFormat implements IFormulaFormat {
 
     @Override
     public String getName() {

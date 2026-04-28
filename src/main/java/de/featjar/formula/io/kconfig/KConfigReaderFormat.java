@@ -18,12 +18,12 @@
  *
  * See <https://github.com/FeatureIDE/FeatJAR-formula> for further information.
  */
-package de.featjar.formula.io;
+package de.featjar.formula.io.kconfig;
 
 import de.featjar.base.data.Problem;
 import de.featjar.base.data.Result;
-import de.featjar.base.io.format.IFormat;
 import de.featjar.base.io.input.AInputMapper;
+import de.featjar.formula.io.IExpressionFormat;
 import de.featjar.formula.io.textual.ExpressionParser;
 import de.featjar.formula.io.textual.PropositionalModelSymbols;
 import de.featjar.formula.structure.IExpression;
@@ -45,7 +45,7 @@ import java.util.stream.Collectors;
  * @author Andreas Gerasimow
  * @see <a href="https://github.com/ekuiter/torte-FeatJAR/blob/main/src/main/java/KConfigReaderFormat.java">KConfigReaderFormat</a>
  */
-public class KConfigReaderFormat implements IFormat<IExpression> {
+public class KConfigReaderFormat implements IExpressionFormat {
     private static final Pattern equivalencePattern = Pattern.compile("(?<!\\w)def\\(([^()]*?)==CONFIG_(.*?)\\)");
     private static final Pattern definePattern = Pattern.compile("(?<!\\w)def\\(([^()]+)\\)");
 

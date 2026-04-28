@@ -26,6 +26,7 @@ import de.featjar.base.io.binary.ABinaryFormat;
 import de.featjar.base.io.format.ParseProblem;
 import de.featjar.base.io.input.AInput;
 import de.featjar.base.io.input.AInputMapper;
+import de.featjar.base.io.input.InputHeader;
 import de.featjar.base.io.output.AOutput;
 import de.featjar.base.io.output.AOutputMapper;
 import de.featjar.formula.VariableMap;
@@ -33,7 +34,6 @@ import de.featjar.formula.assignment.BooleanAssignment;
 import de.featjar.formula.assignment.BooleanAssignmentList;
 import de.featjar.formula.assignment.BooleanClause;
 import de.featjar.formula.assignment.BooleanSolution;
-import de.featjar.formula.io.IBooleanAssignmentListFormat;
 import java.io.IOException;
 import java.util.BitSet;
 
@@ -42,19 +42,49 @@ import java.util.BitSet;
  *
  * @author Sebastian Krieter
  */
-public class BooleanAssignmentListBinaryFormat extends ABinaryFormat<BooleanAssignmentList>
-        implements IBooleanAssignmentListFormat {
+public abstract class ASimpleAssignmentBinaryFormat<T> extends ABinaryFormat<T> {
+
+    private static final int MAGIC_NUMBER = 0x089DFDF4;
 
     private static final byte BooleanSolutionType = 0b0000_0001;
     private static final byte BooleanClauseType = 0b0000_0010;
     private static final byte BooleanAssignmentType = 0b0000_0100;
 
     @Override
-    public void write(BooleanAssignmentList assignmentList, AOutputMapper outputMapper) throws IOException {
+    public String getName() {
+        return "SimpleBinary";
+    }
+
+    @Override
+    public boolean supportsWrite() {
+        return true;
+    }
+
+    @Override
+    public boolean supportsParse() {
+        return true;
+    }
+
+    @Override
+    public boolean supportsContent(InputHeader inputHeader) {
+        byte[] bytes = inputHeader.getBytes();
+        if (bytes.length < 4) {
+            return false;
+        }
+        return MAGIC_NUMBER
+                == (((bytes[0] & 0xff) << 24)
+                        | ((bytes[1] & 0xff) << 16)
+                        | ((bytes[2] & 0xff) << 8)
+                        | ((bytes[3] & 0xff)));
+    }
+
+    public void writeList(BooleanAssignmentList assignmentList, AOutputMapper outputMapper) throws IOException {
         final VariableMap variableMap = assignmentList.getVariableMap();
         final int maxIndex = variableMap.maxIndex();
 
         AOutput out = outputMapper.get();
+
+        out.writeInt(MAGIC_NUMBER);
 
         out.writeInt(maxIndex);
         for (int i = 1; i <= maxIndex; i++) {
@@ -96,12 +126,17 @@ public class BooleanAssignmentListBinaryFormat extends ABinaryFormat<BooleanAssi
         out.flush();
     }
 
-    @Override
-    public Result<BooleanAssignmentList> parse(AInputMapper inputMapper) {
+    public Result<BooleanAssignmentList> parseList(AInputMapper inputMapper) {
         final AInput in = inputMapper.get();
         try {
             final VariableMap variableMap = new VariableMap();
-            final int maxIndex = in.readInt();
+            int firstInt = in.readInt();
+            final int maxIndex;
+            if (firstInt == MAGIC_NUMBER) {
+                maxIndex = in.readInt();
+            } else {
+                maxIndex = firstInt;
+            }
             for (int i = 1; i <= maxIndex; i++) {
                 final String name = readString(in);
                 if (!name.isEmpty()) {
@@ -158,25 +193,5 @@ public class BooleanAssignmentListBinaryFormat extends ABinaryFormat<BooleanAssi
         } catch (final IOException e) {
             return Result.empty(e);
         }
-    }
-
-    @Override
-    public boolean supportsWrite() {
-        return true;
-    }
-
-    @Override
-    public boolean supportsParse() {
-        return true;
-    }
-
-    @Override
-    public String getName() {
-        return "Binary";
-    }
-
-    @Override
-    public String getFileExtension() {
-        return "bin";
     }
 }

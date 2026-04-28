@@ -21,7 +21,8 @@
 package de.featjar.formula.io.dimacs;
 
 import de.featjar.formula.VariableMap;
-import java.util.Collection;
+import java.util.Arrays;
+import java.util.List;
 import java.util.function.Function;
 
 /**
@@ -32,7 +33,8 @@ import java.util.function.Function;
 public class DimacsSerializer {
     /** Token leading a (single-line) comment. */
     public static final String COMMENT = "c";
-
+    /** Token identifying a special comment marking a group of clauses. */
+    public static final String GROUP = "group";
     /** Token leading the problem definition. */
     public static final String PROBLEM = "p";
     /** Token identifying the problem type as CNF. */
@@ -40,16 +42,37 @@ public class DimacsSerializer {
     /** Token denoting the end of a clause. */
     public static final String CLAUSE_END = "0";
 
-    public static <C> String serialize(VariableMap variableMap, Collection<C> clauses, Function<C, int[]> serializer) {
+    public static <C> String serialize(VariableMap variableMap, List<C> clauses, Function<C, int[]> serializer) {
+        return serializeGroups(variableMap, Arrays.asList(clauses), serializer);
+    }
+
+    public static <C> String serializeGroups(
+            VariableMap variableMap, List<List<C>> clauseGroups, Function<C, int[]> serializer) {
         final StringBuilder sb = new StringBuilder();
         writeVariables(sb, variableMap);
-        writeProblem(sb, variableMap.size(), clauses.size());
-        writeClauses(sb, clauses, serializer);
+        writeProblem(
+                sb,
+                variableMap.size(),
+                clauseGroups.stream().mapToInt(List::size).sum());
+        writeClauseGroups(sb, clauseGroups, serializer);
         return sb.toString();
     }
 
-    public static <C> void writeClauses(final StringBuilder sb, Collection<C> clauses, Function<C, int[]> serializer) {
-        for (final C clause : clauses) {
+    public static <C> void writeClauseGroups(
+            final StringBuilder sb, List<List<C>> clauseGroups, Function<C, int[]> serializer) {
+        if (clauseGroups.size() == 1) {
+            writeClauses(sb, serializer, clauseGroups.get(0));
+        } else {
+            for (final List<C> clauseList : clauseGroups) {
+                writeGroup(sb, clauseList.size());
+                writeClauses(sb, serializer, clauseList);
+            }
+        }
+    }
+
+    private static <C> void writeClauses(
+            final StringBuilder sb, Function<C, int[]> serializer, final List<C> clauseList) {
+        for (final C clause : clauseList) {
             for (final int l : serializer.apply(clause)) {
                 sb.append(l);
                 sb.append(' ');
@@ -65,6 +88,22 @@ public class DimacsSerializer {
         sb.append(TYPE);
         sb.append(' ');
         sb.append(variableCount);
+        sb.append(' ');
+        sb.append(clauseCount);
+        sb.append(System.lineSeparator());
+    }
+
+    public static void writeComment(final StringBuilder sb, String message) {
+        sb.append(COMMENT);
+        sb.append(' ');
+        sb.append(message);
+        sb.append(System.lineSeparator());
+    }
+
+    public static void writeGroup(final StringBuilder sb, int clauseCount) {
+        sb.append(COMMENT);
+        sb.append(' ');
+        sb.append(GROUP);
         sb.append(' ');
         sb.append(clauseCount);
         sb.append(System.lineSeparator());

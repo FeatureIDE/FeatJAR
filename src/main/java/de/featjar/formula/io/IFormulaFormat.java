@@ -18,33 +18,14 @@
  *
  * See <https://github.com/FeatureIDE/FeatJAR-formula> for further information.
  */
-package de.featjar.formula.io.textual;
+package de.featjar.formula.io;
 
-import de.featjar.base.data.Result;
-import de.featjar.base.io.text.ATextFormat;
-import de.featjar.formula.io.IFormulaFormat;
+import de.featjar.base.io.format.IFormat;
 import de.featjar.formula.structure.IFormula;
 
 /**
- * Writes a formula to a string representation.
+ * Interface for format handling {@link IFormula formulas}.
  *
- * @author Niclas Kleinert
  * @author Sebastian Krieter
  */
-public class FormulaStringFormat extends ATextFormat<IFormula> implements IFormulaFormat {
-
-    @Override
-    public FormulaStringFormat getInstance() {
-        return this;
-    }
-
-    @Override
-    public boolean supportsWrite() {
-        return true;
-    }
-
-    @Override
-    public Result<String> serialize(IFormula formula) {
-        return Result.of(formula.print());
-    }
-}
+public interface IFormulaFormat extends IFormat<IFormula> {}

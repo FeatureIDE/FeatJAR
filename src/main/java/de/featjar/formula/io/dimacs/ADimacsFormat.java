@@ -20,41 +20,22 @@
  */
 package de.featjar.formula.io.dimacs;
 
-import de.featjar.base.data.Result;
-import de.featjar.base.io.input.AInputMapper;
-import de.featjar.formula.assignment.BooleanAssignmentGroups;
-import de.featjar.formula.io.IBooleanAssignmentGroupsFormat;
+import de.featjar.base.io.format.IFormat;
 
 /**
  * Reads / Writes a list of assignments.
  *
  * @author Sebastian Krieter
  */
-public class BooleanAssignmentGroupsDimacsFormat extends AAssignmentDimacsFormat<BooleanAssignmentGroups>
-        implements IBooleanAssignmentGroupsFormat {
-
-    /**
-     * The identifier of this format.
-     */
-    public static final String ID = BooleanAssignmentGroupsDimacsFormat.class.getCanonicalName();
+public abstract class ADimacsFormat<T> implements IFormat<T> {
 
     @Override
-    public String getIdentifier() {
-        return ID;
+    public String getFileExtension() {
+        return "dimacs";
     }
 
     @Override
-    public BooleanAssignmentGroupsDimacsFormat getInstance() {
-        return this;
-    }
-
-    @Override
-    public Result<String> serialize(BooleanAssignmentGroups assignmentGroups) {
-        return serializeGroups(assignmentGroups);
-    }
-
-    @Override
-    public Result<BooleanAssignmentGroups> parse(AInputMapper inputMapper) {
-        return parseGroups(inputMapper);
+    public String getName() {
+        return "DIMACS";
     }
 }

@@ -27,15 +27,11 @@ import de.featjar.base.cli.OptionList;
 import de.featjar.base.computation.IComputation;
 import de.featjar.base.data.Result;
 import de.featjar.base.io.IO;
-import de.featjar.base.io.IOMapperOptions;
 import de.featjar.base.io.format.IFormat;
 import de.featjar.base.io.graphviz.GraphVizComputationTreeFormat;
 import de.featjar.base.io.text.GenericTextFormat;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.StandardOpenOption;
 import java.time.Duration;
 
 /**
@@ -64,34 +60,12 @@ public abstract class AAnalysisCommand<T> extends ACommand {
     public static final Option<Path> TIME_OPTION = Option.newOption("write-time-to-file", Option.PathParser)
             .setDescription("Path to file containig the execution time");
 
-    /**
-     * ZIP compression option for saving files.
-     */
-    public static final Option<Boolean> OUTPUT_COMPRESSION_OPTION =
-            Option.newFlag("zip-output").setDescription("Stores output as zip file. (Requires to set an output path.)");
-
-    /**
-     * ZIP compression option for reading files.
-     */
-    public static final Option<Boolean> INTPUT_COMPRESSION_OPTION =
-            Option.newFlag("zip-input").setDescription("Reads input as zip file.");
-
-    protected IOMapperOptions[] ioInputOptions = new IOMapperOptions[0];
-    protected IOMapperOptions[] ioOutputOptions = new IOMapperOptions[0];
-
     @Override
     public int run(OptionList optionParser) {
         boolean browseCache = optionParser.getResult(BROWSE_CACHE_OPTION).get();
         boolean parallel = !optionParser.getResult(NON_PARALLEL).get();
         Duration timeout = optionParser.getResult(TIMEOUT_OPTION).get();
-        Path outputPath = optionParser.getResult(OUTPUT_OPTION).orElse(null);
         Path timePath = optionParser.getResult(TIME_OPTION).orElse(null);
-        if (optionParser.getResult(INTPUT_COMPRESSION_OPTION).get()) {
-            ioInputOptions = new IOMapperOptions[] {IOMapperOptions.ZIP_COMPRESSION};
-        }
-        if (optionParser.getResult(OUTPUT_COMPRESSION_OPTION).get()) {
-            ioOutputOptions = new IOMapperOptions[] {IOMapperOptions.ZIP_COMPRESSION};
-        }
 
         IComputation<T> computation;
         try {
@@ -128,51 +102,23 @@ public abstract class AAnalysisCommand<T> extends ACommand {
             }
         }
 
-        if (result.isPresent()) {
-            IFormat<T> ouputFormat = getOuputFormat(optionParser);
-            if (outputPath == null) {
-                if (ouputFormat == null || !ouputFormat.isTextual()) {
-                    FeatJAR.log().plainMessage(String.valueOf(result.get()));
-                } else {
-                    ouputFormat
-                            .serialize(result.get())
-                            .ifEmpty(FeatJAR.log()::problems)
-                            .ifPresent(FeatJAR.log()::plainMessage);
-                }
-            } else {
-                if (Files.isDirectory(outputPath)) {
-                    FeatJAR.log().error(new IOException(outputPath.toString() + " is a directory"));
-                    return FeatJAR.ERROR_WRITING_RESULT;
-                } else if (ouputFormat == null) {
-                    FeatJAR.log().warning(new IOException(outputPath.toString() + " not output format specified"));
-                    try {
-                        Files.write(
-                                outputPath,
-                                String.valueOf(result.get()).getBytes(StandardCharsets.UTF_8),
-                                StandardOpenOption.CREATE,
-                                StandardOpenOption.TRUNCATE_EXISTING);
-                    } catch (IOException e) {
-                        FeatJAR.log().error(e);
-                        return FeatJAR.ERROR_WRITING_RESULT;
-                    }
-                } else {
-                    try {
-                        IO.save(result.get(), outputPath, ouputFormat, ioOutputOptions);
-                    } catch (IOException e) {
-                        FeatJAR.log().error(e);
-                        return FeatJAR.ERROR_WRITING_RESULT;
-                    }
-                }
-            }
-        } else {
-            FeatJAR.log().problems(result.getProblems());
-            FeatJAR.log().error("Could not compute result.");
-            return FeatJAR.ERROR_TIMEOUT;
-        }
         if (browseCache) {
             FeatJAR.cache().browse(new GraphVizComputationTreeFormat());
         }
-        return 0;
+
+        if (result.isPresent()) {
+            try {
+                writeToOutput(result.get(), getOuputFormat(optionParser), optionParser);
+            } catch (IOException e) {
+                FeatJAR.log().error(e);
+                return FeatJAR.ERROR_WRITING_RESULT;
+            }
+            return 0;
+        } else {
+            FeatJAR.log().problems(result.getProblems());
+            FeatJAR.log().error("Could not compute result.");
+            return FeatJAR.ERROR_COMPUTING_RESULT;
+        }
     }
 
     protected abstract IComputation<T> newComputation(OptionList optionParser);

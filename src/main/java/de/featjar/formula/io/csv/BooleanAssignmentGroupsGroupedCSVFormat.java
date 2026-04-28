@@ -20,6 +20,7 @@
  */
 package de.featjar.formula.io.csv;
 
+import de.featjar.base.data.Pair;
 import de.featjar.base.data.Result;
 import de.featjar.base.io.NonEmptyLineIterator;
 import de.featjar.base.io.format.ParseProblem;
@@ -30,22 +31,25 @@ import de.featjar.formula.VariableMap;
 import de.featjar.formula.assignment.BooleanAssignment;
 import de.featjar.formula.assignment.BooleanAssignmentGroups;
 import de.featjar.formula.assignment.BooleanAssignmentList;
+import de.featjar.formula.assignment.BooleanSolution;
 import de.featjar.formula.io.IBooleanAssignmentGroupsFormat;
 import java.io.IOException;
 import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Reads / Writes a list of assignments.
  *
  * @author Sebastian Krieter
  */
-public class BooleanAssignmentGroupsCSVFormat extends ASimpleAssignmentCSVFormat<BooleanAssignmentGroups>
+public class BooleanAssignmentGroupsGroupedCSVFormat extends AGroupedAssignmentCSVFormat<BooleanAssignmentGroups>
         implements IBooleanAssignmentGroupsFormat {
 
     /**
      * The identifier of this format.
      */
-    public static final String ID = BooleanAssignmentGroupsCSVFormat.class.getCanonicalName();
+    public static final String ID = BooleanAssignmentGroupsGroupedCSVFormat.class.getCanonicalName();
 
     @Override
     public String getIdentifier() {
@@ -53,7 +57,7 @@ public class BooleanAssignmentGroupsCSVFormat extends ASimpleAssignmentCSVFormat
     }
 
     @Override
-    public BooleanAssignmentGroupsCSVFormat getInstance() {
+    public BooleanAssignmentGroupsGroupedCSVFormat getInstance() {
         return this;
     }
 
@@ -68,27 +72,41 @@ public class BooleanAssignmentGroupsCSVFormat extends ASimpleAssignmentCSVFormat
     }
 
     @Override
-    public void write(BooleanAssignmentGroups booleanAssignmentGroups, AOutputMapper outputMapper) throws IOException {
-        AOutput output = outputMapper.get();
+    public void write(BooleanAssignmentGroups assignmentGroups, AOutputMapper outputMapper) throws IOException {
+        AOutput out = outputMapper.get();
 
-        VariableMap variableMap = booleanAssignmentGroups.getVariableMap();
-        writeHeader(output, variableMap);
+        final VariableMap variableMap = assignmentGroups.getVariableMap();
+        writeHeader(out, variableMap);
 
-        int configurationIndex = 0;
-        for (final BooleanAssignment configuration : booleanAssignmentGroups.getMergedGroups()) {
-            writeAssignment(output, configurationIndex++, configuration.toSolution(variableMap.size()));
+        int groupIndex = 0;
+        int assignmentIndex = 0;
+        final List<BooleanAssignmentList> groups = assignmentGroups.getGroups();
+        for (BooleanAssignmentList group : groups) {
+            for (final BooleanAssignment assignment : group) {
+                writeAssignment(out, groupIndex, assignmentIndex++, assignment.toSolution(variableMap.size()));
+            }
+            groupIndex++;
         }
+        outputMapper.close();
     }
 
     @Override
-    public Result<String> serialize(BooleanAssignmentGroups booleanAssignmentGroups) {
+    public Result<String> serialize(BooleanAssignmentGroups assignmentGroups) {
         final StringBuilder csv = new StringBuilder();
-        VariableMap variableMap = booleanAssignmentGroups.getVariableMap();
+
+        final VariableMap variableMap = assignmentGroups.getVariableMap();
         serializeHeader(csv, variableMap);
-        int configurationIndex = 0;
-        for (final BooleanAssignment configuration : booleanAssignmentGroups.getMergedGroups()) {
-            serializeAssignment(csv, configurationIndex++, configuration.toSolution(variableMap.size()));
+
+        int groupIndex = 0;
+        int assignmentIndex = 0;
+        final List<? extends BooleanAssignmentList> groups = assignmentGroups.getGroups();
+        for (BooleanAssignmentList group : groups) {
+            for (final BooleanAssignment assignment : group) {
+                serializeAssignment(csv, groupIndex, assignmentIndex++, assignment.toSolution(variableMap.size()));
+            }
+            groupIndex++;
         }
+
         return Result.of(csv.toString());
     }
 
@@ -99,11 +117,17 @@ public class BooleanAssignmentGroupsCSVFormat extends ASimpleAssignmentCSVFormat
 
             final VariableMap variableMap = parseHeader(lines.get(), lines.getLineCount());
 
-            final BooleanAssignmentList group = new BooleanAssignmentList(variableMap);
+            final ArrayList<BooleanAssignmentList> groups = new ArrayList<>();
             for (String line = lines.get(); line != null; line = lines.get()) {
-                group.add(parseAssignment(line, lines.getLineCount(), variableMap));
+                Pair<Integer, BooleanSolution> parsedAssignment =
+                        parseAssignment(line, lines.getLineCount(), variableMap);
+                final int groupIndex = parsedAssignment.getFirst();
+                for (int i = groups.size() - 1; i < groupIndex; i++) {
+                    groups.add(new BooleanAssignmentList(variableMap));
+                }
+                groups.get(groupIndex).add(parsedAssignment.getSecond());
             }
-            return Result.of(new BooleanAssignmentGroups(group));
+            return Result.of(new BooleanAssignmentGroups(variableMap, groups));
         } catch (final ParseException e) {
             return Result.empty(new ParseProblem(e, e.getErrorOffset()));
         } catch (final Exception e) {

@@ -18,26 +18,24 @@
  *
  * See <https://github.com/FeatureIDE/FeatJAR-formula> for further information.
  */
-package de.featjar.formula.io.dimacs;
+package de.featjar.formula.io.binary;
 
 import de.featjar.base.data.Result;
 import de.featjar.base.io.input.AInputMapper;
-import de.featjar.formula.assignment.BooleanAssignmentGroups;
+import de.featjar.base.io.output.AOutputMapper;
 import de.featjar.formula.assignment.BooleanAssignmentList;
 import de.featjar.formula.io.IBooleanAssignmentListFormat;
+import java.io.IOException;
 
 /**
  * Reads / Writes a list of assignments.
  *
  * @author Sebastian Krieter
  */
-public class BooleanAssignmentListDimacsFormat extends AAssignmentDimacsFormat<BooleanAssignmentList>
+public class BooleanAssignmentListSimpleBinaryFormat extends ASimpleAssignmentBinaryFormat<BooleanAssignmentList>
         implements IBooleanAssignmentListFormat {
 
-    /**
-     * The identifier of this format.
-     */
-    public static final String ID = BooleanAssignmentListDimacsFormat.class.getCanonicalName();
+    public static final String ID = BooleanAssignmentListSimpleBinaryFormat.class.getCanonicalName();
 
     @Override
     public String getIdentifier() {
@@ -45,17 +43,17 @@ public class BooleanAssignmentListDimacsFormat extends AAssignmentDimacsFormat<B
     }
 
     @Override
-    public BooleanAssignmentListDimacsFormat getInstance() {
+    public BooleanAssignmentListSimpleBinaryFormat getInstance() {
         return this;
     }
 
     @Override
-    public Result<String> serialize(BooleanAssignmentList assignmentList) {
-        return serializeGroups(new BooleanAssignmentGroups(assignmentList));
+    public void write(BooleanAssignmentList assignmentList, AOutputMapper outputMapper) throws IOException {
+        writeList(assignmentList, outputMapper);
     }
 
     @Override
     public Result<BooleanAssignmentList> parse(AInputMapper inputMapper) {
-        return parseGroups(inputMapper).map(BooleanAssignmentGroups::getMergedGroups);
+        return parseList(inputMapper);
     }
 }

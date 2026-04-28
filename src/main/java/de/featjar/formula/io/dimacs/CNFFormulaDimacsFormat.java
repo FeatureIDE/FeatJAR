@@ -22,48 +22,33 @@ package de.featjar.formula.io.dimacs;
 
 import de.featjar.base.computation.Computations;
 import de.featjar.base.data.Result;
-import de.featjar.base.io.format.IFormat;
 import de.featjar.formula.VariableMap;
+import de.featjar.formula.assignment.Assignments;
 import de.featjar.formula.computation.ComputeCNFFormula;
 import de.featjar.formula.computation.ComputeNNFFormula;
-import de.featjar.formula.structure.IExpression;
+import de.featjar.formula.io.IFormulaFormat;
 import de.featjar.formula.structure.IFormula;
 import de.featjar.formula.structure.connective.Reference;
-import de.featjar.formula.structure.predicate.Literal;
 
 /**
  * Reads and writes feature models in the DIMACS CNF format.
  *
  * @author Sebastian Krieter
  */
-public class FormulaCNFDimacsFormat implements IFormat<IFormula> {
+public class CNFFormulaDimacsFormat extends ADimacsFormat<IFormula> implements IFormulaFormat {
+    /**
+     * The identifier of this format.
+     */
+    public static final String ID = CNFFormulaDimacsFormat.class.getCanonicalName();
 
     @Override
-    public Result<String> serialize(IFormula formula) {
-        Reference cnfFormula = Computations.of(formula)
-                .map(ComputeNNFFormula::new)
-                .map(ComputeCNFFormula::new)
-                .set(ComputeCNFFormula.IS_STRICT, true)
-                .compute();
-        VariableMap variableMap = new VariableMap(formula.getVariableMap().keySet());
-        return Result.of(DimacsSerializer.serialize(
-                variableMap, cnfFormula.getExpression().getChildren(), c -> writeClause(c, variableMap)));
-    }
-
-    private static int[] writeClause(IExpression clause, VariableMap variableMap) {
-        int[] literals = new int[clause.getChildrenCount()];
-        int i = 0;
-        for (final IExpression child : clause.getChildren()) {
-            final Literal l = (Literal) child;
-            final int index = variableMap.get(l.getExpression().getName()).orElseThrow();
-            literals[i++] = l.isPositive() ? index : -index;
-        }
-        return literals;
+    public String getIdentifier() {
+        return ID;
     }
 
     @Override
-    public boolean supportsWrite() {
-        return true;
+    public CNFFormulaDimacsFormat getInstance() {
+        return this;
     }
 
     @Override
@@ -72,7 +57,21 @@ public class FormulaCNFDimacsFormat implements IFormat<IFormula> {
     }
 
     @Override
-    public String getFileExtension() {
-        return "dimacs";
+    public boolean supportsWrite() {
+        return true;
+    }
+
+    @Override
+    public Result<String> serialize(IFormula formula) {
+        IFormula cnfFormula = Computations.of(formula)
+                .map(ComputeNNFFormula::new)
+                .map(ComputeCNFFormula::new)
+                .set(ComputeCNFFormula.IS_STRICT, true)
+                .compute();
+        VariableMap variableMap = new VariableMap(formula.getVariableMap().keySet());
+        return Result.of(DimacsSerializer.serialize(
+                variableMap,
+                ((Reference) cnfFormula).getExpression().getChildren(),
+                c -> Assignments.toBooleanLiterals((IFormula) c, variableMap)));
     }
 }

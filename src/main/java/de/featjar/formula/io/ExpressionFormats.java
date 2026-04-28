@@ -18,30 +18,25 @@
  *
  * See <https://github.com/FeatureIDE/FeatJAR-formula> for further information.
  */
-package de.featjar.formula.cli;
+package de.featjar.formula.io;
 
-import de.featjar.formula.structure.IFormula;
-import java.util.Optional;
+import de.featjar.base.FeatJAR;
+import de.featjar.base.io.format.AFormats;
+import de.featjar.formula.structure.IExpression;
 
 /**
- * Converts the format of a given formula.
+ * Extension point for {@link AFormats formats} for {@link IExpression}.
  *
- * @author Andreas Gerasimow
+ * @author Sebastian Krieter
  */
-public class ConvertFormatCommand extends AConvertFormatCommand {
+public class ExpressionFormats extends AFormats<IExpression> {
 
-    @Override
-    protected IFormula modifyFormula(IFormula formula) {
-        return formula;
+    public static ExpressionFormats getInstance() {
+        return FeatJAR.extensionPoint(ExpressionFormats.class);
     }
 
     @Override
-    public Optional<String> getDescription() {
-        return Optional.of("Converts the format of a given formula.");
-    }
-
-    @Override
-    public Optional<String> getShortName() {
-        return Optional.of("convert-format");
+    public Class<IExpression> getType() {
+        return IExpression.class;
     }
 }

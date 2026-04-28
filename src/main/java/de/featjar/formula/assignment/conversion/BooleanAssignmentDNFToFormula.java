@@ -27,13 +27,8 @@ import de.featjar.base.computation.Progress;
 import de.featjar.base.data.Result;
 import de.featjar.formula.VariableMap;
 import de.featjar.formula.assignment.Assignments;
-import de.featjar.formula.assignment.BooleanAssignment;
 import de.featjar.formula.assignment.BooleanAssignmentList;
 import de.featjar.formula.structure.IFormula;
-import de.featjar.formula.structure.connective.And;
-import de.featjar.formula.structure.connective.Or;
-import de.featjar.formula.structure.connective.Reference;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -57,13 +52,6 @@ public class BooleanAssignmentDNFToFormula extends AComputation<IFormula> {
 
     @Override
     public Result<IFormula> compute(List<Object> dependencyList, Progress progress) {
-        BooleanAssignmentList dnf = DNF.get(dependencyList);
-        VariableMap variableMap = VARIABLE_MAP.get(dependencyList);
-
-        List<IFormula> clauses = new ArrayList<>();
-        for (BooleanAssignment conjunction : dnf) {
-            clauses.add(new And(Assignments.toLiterals(variableMap, conjunction)));
-        }
-        return Result.of(new Reference(new Or(clauses), Assignments.variablesFromMap(variableMap)));
+        return Result.of(Assignments.toDNFFormula(DNF.get(dependencyList), VARIABLE_MAP.get(dependencyList)));
     }
 }

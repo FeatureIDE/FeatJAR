@@ -18,26 +18,24 @@
  *
  * See <https://github.com/FeatureIDE/FeatJAR-formula> for further information.
  */
-package de.featjar.formula.io.dimacs;
+package de.featjar.formula.io.binary;
 
 import de.featjar.base.data.Result;
 import de.featjar.base.io.input.AInputMapper;
+import de.featjar.base.io.output.AOutputMapper;
 import de.featjar.formula.assignment.BooleanAssignmentGroups;
-import de.featjar.formula.assignment.BooleanAssignmentList;
-import de.featjar.formula.io.IBooleanAssignmentListFormat;
+import de.featjar.formula.io.IBooleanAssignmentGroupsFormat;
+import java.io.IOException;
 
 /**
  * Reads / Writes a list of assignments.
  *
  * @author Sebastian Krieter
  */
-public class BooleanAssignmentListDimacsFormat extends AAssignmentDimacsFormat<BooleanAssignmentList>
-        implements IBooleanAssignmentListFormat {
+public class BooleanAssignmentGroupsSimpleBinaryFormat extends ASimpleAssignmentBinaryFormat<BooleanAssignmentGroups>
+        implements IBooleanAssignmentGroupsFormat {
 
-    /**
-     * The identifier of this format.
-     */
-    public static final String ID = BooleanAssignmentListDimacsFormat.class.getCanonicalName();
+    public static final String ID = BooleanAssignmentGroupsSimpleBinaryFormat.class.getCanonicalName();
 
     @Override
     public String getIdentifier() {
@@ -45,17 +43,17 @@ public class BooleanAssignmentListDimacsFormat extends AAssignmentDimacsFormat<B
     }
 
     @Override
-    public BooleanAssignmentListDimacsFormat getInstance() {
+    public BooleanAssignmentGroupsSimpleBinaryFormat getInstance() {
         return this;
     }
 
     @Override
-    public Result<String> serialize(BooleanAssignmentList assignmentList) {
-        return serializeGroups(new BooleanAssignmentGroups(assignmentList));
+    public void write(BooleanAssignmentGroups assignmentGroups, AOutputMapper outputMapper) throws IOException {
+        writeList(assignmentGroups.getMergedGroups(), outputMapper);
     }
 
     @Override
-    public Result<BooleanAssignmentList> parse(AInputMapper inputMapper) {
-        return parseGroups(inputMapper).map(BooleanAssignmentGroups::getMergedGroups);
+    public Result<BooleanAssignmentGroups> parse(AInputMapper inputMapper) {
+        return parseList(inputMapper).map(BooleanAssignmentGroups::new);
     }
 }

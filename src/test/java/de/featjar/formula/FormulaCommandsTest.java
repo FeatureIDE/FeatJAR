@@ -30,14 +30,30 @@ import org.junit.jupiter.api.Test;
 public class FormulaCommandsTest {
 
     @Test
-    void testConvertFormatCommand() throws IOException {
+    void convertToDimcasCommandFails() throws IOException {
         Path tempFile = Files.createTempFile("featJarTest", ".txt");
         int exitCode = FeatJAR.runTest(
-                "convert-cnf-format",
+                "convert-formula",
                 "--input",
                 "src/testFixtures/resources/GPL/model.xml",
-                "--format",
-                "de.featjar.formula.io.dimacs.FormulaDimacsFormat",
+                "--output-format",
+                "DIMACS",
+                "--overwrite",
+                "--output",
+                tempFile.toString());
+        Assertions.assertEquals(1, exitCode);
+    }
+
+    @Test
+    void convertToCNFDimcasCommandSucceeds() throws IOException {
+        Path tempFile = Files.createTempFile("featJarTest", ".txt");
+        int exitCode = FeatJAR.runTest(
+                "convert-formula",
+                "--input",
+                "src/testFixtures/resources/GPL/model.xml",
+                "--output-format",
+                "CNF-DIMACS",
+                "--overwrite",
                 "--output",
                 tempFile.toString());
         Assertions.assertEquals(0, exitCode);
@@ -47,24 +63,7 @@ public class FormulaCommandsTest {
     }
 
     @Test
-    void testConvertCNFFormatCommand() throws IOException {
-        Path tempFile = Files.createTempFile("featJarTest", ".txt");
-        int exitCode = FeatJAR.runTest(
-                "convert-cnf-format",
-                "--input",
-                "src/testFixtures/resources/GPL/model.xml",
-                "--format",
-                "de.featjar.formula.io.dimacs.FormulaDimacsFormat",
-                "--output",
-                tempFile.toString());
-        Assertions.assertEquals(0, exitCode);
-        Assertions.assertEquals(
-                Files.readString(Path.of("./src/test/resources/testConvertFormatCommand.dimacs")),
-                Files.readString(tempFile));
-    }
-
-    @Test
-    void testPrintCommand() throws IOException {
+    void printFormulaWorksCorrectly() throws IOException {
         Path tempFile = Files.createTempFile("featJarTest", ".txt");
         int exitCode = FeatJAR.runTest(
                 "print",

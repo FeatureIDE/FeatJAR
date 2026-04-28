@@ -374,7 +374,7 @@ public class ExpressionSerializer implements IInOrderTreeVisitor<IExpression, St
         return enforceParentheses
                 || symbols.getPriority(node).orElse(-1)
                         <= ITreeVisitor.getParentNode(path)
-                                .flatMap(symbols::getPriority)
+                                .mapResult(symbols::getPriority)
                                 .orElse(-1);
     }
 

@@ -24,12 +24,10 @@ import de.featjar.Common;
 import de.featjar.FormatTest;
 import de.featjar.base.FeatJAR;
 import de.featjar.base.computation.Computations;
-import de.featjar.formula.assignment.BooleanAssignmentGroups;
-import de.featjar.formula.assignment.conversion.ComputeBooleanRepresentation;
 import de.featjar.formula.computation.ComputeCNFFormula;
 import de.featjar.formula.computation.ComputeNNFFormula;
-import de.featjar.formula.io.binary.BooleanAssignmentGroupsBinaryFormat;
-import de.featjar.formula.io.textual.ExpressionFormat;
+import de.featjar.formula.io.binary.FormulaBinaryFormat;
+import de.featjar.formula.structure.IFormula;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -53,7 +51,7 @@ public class BinaryFormatTest extends Common {
 
     @Test
     public void Formula_ABC_nAnBnC() {
-        test("ABC-nAnBnC");
+        test("123-n1n2n3");
     }
 
     @Test
@@ -67,13 +65,11 @@ public class BinaryFormatTest extends Common {
     }
 
     private static void test(String name) {
-        final BooleanAssignmentGroups assignmentSpace = Computations.of(getFormula(name))
+        final IFormula formula = Computations.of(getFormula(name))
                 .map(ComputeNNFFormula::new)
                 .map(ComputeCNFFormula::new)
-                .map(ComputeBooleanRepresentation::new)
                 .compute();
-
-        FormatTest.testParseAndSerialize("binary/" + name, new BooleanAssignmentGroupsBinaryFormat());
-        FormatTest.testSerializeAndParse(assignmentSpace, new BooleanAssignmentGroupsBinaryFormat());
+        FormatTest.testParseAndSerialize("binary/" + name, new FormulaBinaryFormat());
+        FormatTest.testSerializeAndParse(formula, new FormulaBinaryFormat());
     }
 }

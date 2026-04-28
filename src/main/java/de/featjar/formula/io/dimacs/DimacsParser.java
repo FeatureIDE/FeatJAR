@@ -20,6 +20,7 @@
  */
 package de.featjar.formula.io.dimacs;
 
+import de.featjar.base.FeatJAR;
 import de.featjar.base.data.Pair;
 import de.featjar.base.io.NonEmptyLineIterator;
 import de.featjar.base.io.input.AInputMapper;
@@ -27,7 +28,6 @@ import de.featjar.formula.VariableMap;
 import java.io.IOException;
 import java.text.ParseException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -41,6 +41,12 @@ import java.util.regex.Pattern;
 public class DimacsParser {
 
     private static final Pattern commentPattern = Pattern.compile("\\A" + DimacsSerializer.COMMENT + "\\s*(.*)\\Z");
+    private static final Pattern variablePattern =
+            Pattern.compile("\\A" + DimacsSerializer.COMMENT + "\\s+(\\d+)\\s+(\\S+)\\s*\\Z");
+    private static final Pattern groupPattern =
+            Pattern.compile("\\A" + DimacsSerializer.COMMENT + "\\s+" + DimacsSerializer.GROUP + "\\s+(\\d+)\\s*\\Z");
+    private static final Pattern clauseLinePattern =
+            Pattern.compile("\\A((-?\\d+\\s+)*)" + DimacsSerializer.CLAUSE_END + "\\s*\\Z");
     private static final Pattern problemPattern = Pattern.compile(
             "\\A\\s*" + DimacsSerializer.PROBLEM + "\\s+" + DimacsSerializer.TYPE + "\\s+(\\d+)\\s+(\\d+)");
 
@@ -85,9 +91,20 @@ public class DimacsParser {
      * @throws IOException    if the reader encounters a problem.
      * @throws ParseException if the input does not conform to the DIMACS CNF file format.
      */
-    public Pair<VariableMap, List<int[]>> parse(AInputMapper inputMapper) throws ParseException, IOException {
-        init(inputMapper);
-        List<int[]> clauses = readLines();
+    public Pair<VariableMap, List<List<int[]>>> parse(AInputMapper inputMapper) throws ParseException, IOException {
+        nonEmptyLineIterator = inputMapper.get().getNonEmptyLineIterator();
+        nonEmptyLineIterator.get();
+        indexVariables.clear();
+
+        readHeader();
+
+        final List<List<int[]>> clauses = readBody();
+
+        final int actualClauseCount = clauses.stream().mapToInt(List::size).sum();
+        if (clauseCount != actualClauseCount) {
+            throw new ParseException(
+                    String.format("Found %d instead of %d clauses", actualClauseCount, clauseCount), 1);
+        }
         return new Pair<>(indexVariables, clauses);
     }
 
@@ -97,10 +114,9 @@ public class DimacsParser {
         indexVariables.clear();
     }
 
-    protected List<int[]> readLines() throws ParseException {
+    private void readHeader() throws ParseException {
         readComments();
         readProblem();
-        final List<int[]> clauses = readClauses();
 
         if (readVariableDirectory) {
             for (int i = 1; i <= variableCount; i++) {
@@ -111,16 +127,10 @@ public class DimacsParser {
         }
 
         final int actualVariableCount = indexVariables.size();
-        final int actualClauseCount = clauses.size();
         if (variableCount != actualVariableCount) {
             throw new ParseException(
                     String.format("Found %d instead of %d variables", actualVariableCount, variableCount), 1);
         }
-        if (clauseCount != actualClauseCount) {
-            throw new ParseException(
-                    String.format("Found %d instead of %d clauses", actualClauseCount, clauseCount), 1);
-        }
-        return clauses;
     }
 
     private String getUniqueName(int i) {
@@ -136,12 +146,13 @@ public class DimacsParser {
 
     protected void readComments() {
         for (String line = nonEmptyLineIterator.currentLine(); line != null; line = nonEmptyLineIterator.get()) {
-            final Matcher matcher = commentPattern.matcher(line);
-            if (matcher.matches()) {
-                readComment(matcher.group(1)); // read comments ...
-            } else {
-                break; // ... until a non-comment token is found.
+            if (matchVariable(line)) {
+                continue;
             }
+            if (matchComment(line)) {
+                continue;
+            }
+            break;
         }
     }
 
@@ -193,62 +204,98 @@ public class DimacsParser {
      * @throws ParseException if the input does not conform to the DIMACS CNF file
      *                        format
      */
-    private List<int[]> readClauses() throws ParseException {
-        final LinkedList<String> literalQueue = new LinkedList<>();
-        final List<int[]> clauses = new ArrayList<>(clauseCount);
-        int readClausesCount = 0;
+    private List<List<int[]>> readBody() throws ParseException {
+        final LinkedList<List<int[]>> groups = new LinkedList<>();
+        groups.add(new ArrayList<>(clauseCount));
         for (String line = nonEmptyLineIterator.currentLine(); line != null; line = nonEmptyLineIterator.get()) {
-            final Matcher matcher = commentPattern.matcher(line);
-            if (matcher.matches()) {
-                readComment(matcher.group(1));
+            if (matchVariable(line)) {
                 continue;
             }
-            if (problemPattern.matcher(line).matches()) {
-                if (!literalQueue.isEmpty()) {
-                    clauses.add(parseClause(readClausesCount, literalQueue.size(), literalQueue));
-                    readClausesCount++;
-                }
-                return clauses;
+            if (matchGroup(line, groups)) {
+                continue;
             }
-            List<String> literalList = Arrays.asList(line.trim().split("\\s+"));
-            literalQueue.addAll(literalList);
-
-            do {
-                final int clauseEndIndex = literalList.indexOf("0");
-                if (clauseEndIndex < 0) {
-                    break;
-                }
-                final int clauseSize = literalQueue.size() - (literalList.size() - clauseEndIndex);
-                if (clauseSize < 0) {
-                    throw new ParseException("Invalid clause", nonEmptyLineIterator.getLineCount());
-                } else if (clauseSize == 0) {
-                    clauses.add(new int[0]);
-                } else {
-                    clauses.add(parseClause(readClausesCount, clauseSize, literalQueue));
-                }
-                readClausesCount++;
-
-                if (!DimacsSerializer.CLAUSE_END.equals(literalQueue.removeFirst())) {
-                    throw new ParseException("Illegal clause end", nonEmptyLineIterator.getLineCount());
-                }
-                literalList = literalQueue;
-            } while (!literalQueue.isEmpty());
+            if (matchComment(line)) {
+                continue;
+            }
+            if (matchClause(line, groups.getLast())) {
+                continue;
+            }
+            throw new ParseException(String.format("Invalid line %s", line), 1);
         }
-        if (!literalQueue.isEmpty()) {
-            clauses.add(parseClause(readClausesCount, literalQueue.size(), literalQueue));
-            readClausesCount++;
+        if (groups.size() > 1 && groups.get(0).isEmpty()) {
+            groups.removeFirst();
         }
-        return clauses;
+        return groups;
     }
 
-    private int[] parseClause(int readClausesCount, int clauseSize, LinkedList<String> literalQueue)
-            throws ParseException {
-        if (readClausesCount == clauseCount) {
-            throw new ParseException(String.format("Found more than %d clauses", clauseCount), 1);
+    private boolean matchGroup(String line, List<List<int[]>> groups) {
+        final Matcher matcher = groupPattern.matcher(line);
+        if (matcher.matches()) {
+            String group = matcher.group(1);
+            try {
+                groups.add(new ArrayList<>(Integer.parseInt(group)));
+            } catch (final NumberFormatException e) {
+                FeatJAR.log()
+                        .warning("Line " + nonEmptyLineIterator.getLineCount()
+                                + ": Unable to parse number in group comment: " + group);
+            }
+            return true;
+        } else {
+            return false;
         }
-        final int[] literals = new int[clauseSize];
-        for (int j = 0; j < literals.length; j++) {
-            final String token = literalQueue.removeFirst();
+    }
+
+    private boolean matchVariable(String line) {
+        final Matcher matcher = variablePattern.matcher(line);
+        if (matcher.matches()) {
+            String indexString = matcher.group(1);
+            try {
+                final int index = Integer.parseInt(indexString);
+                final String variable = matcher.group(2);
+                if (readVariableDirectory && !indexVariables.has(index)) {
+                    indexVariables.add(index, variable);
+                }
+            } catch (final NumberFormatException e) {
+                FeatJAR.log()
+                        .warning("Line " + nonEmptyLineIterator.getLineCount()
+                                + ": Unable to parse number in variable comment: " + indexString);
+            }
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    private boolean matchComment(String line) {
+        final Matcher matcher = commentPattern.matcher(line);
+        if (matcher.matches()) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    private boolean matchClause(String line, List<int[]> clauses) throws ParseException {
+        Matcher matcher = clauseLinePattern.matcher(line);
+        if (matcher.matches()) {
+            String[] literalStrings = matcher.group(1).trim().split("\\s+");
+            clauses.add(
+                    (literalStrings.length == 1 && literalStrings[0].isEmpty())
+                            ? new int[0]
+                            : parseClause(literalStrings));
+            if (clauses.size() > clauseCount) {
+                throw new ParseException(String.format("Found more than %d clauses", clauseCount), 1);
+            }
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    private int[] parseClause(String[] literalStrings) throws ParseException {
+        final int[] literals = new int[literalStrings.length];
+        for (int i = 0; i < literals.length; i++) {
+            final String token = literalStrings[i];
             final int index;
             try {
                 index = Integer.parseInt(token);
@@ -262,45 +309,8 @@ public class DimacsParser {
             if (!indexVariables.has(key)) {
                 indexVariables.add(key, getUniqueName(key));
             }
-            literals[j] = index;
+            literals[i] = index;
         }
         return literals;
-    }
-
-    /**
-     * Called when a comment is read.
-     *
-     * @param comment content of the comment; not null
-     * @return whether the comment was consumed logically
-     */
-    private boolean readComment(String comment) {
-        return readVariableDirectory && readVariableDirectoryEntry(comment);
-    }
-
-    /**
-     * Reads an entry of the variable directory.
-     *
-     * @param comment variable directory entry
-     * @return true if an entry was found
-     */
-    private boolean readVariableDirectoryEntry(String comment) {
-        final int firstSeparator = comment.indexOf(' ');
-        if (firstSeparator <= 0) {
-            return false;
-        }
-        final int index;
-        try {
-            index = Integer.parseInt(comment.substring(0, firstSeparator));
-        } catch (final NumberFormatException e) {
-            return false;
-        }
-        if (comment.length() < (firstSeparator + 2)) {
-            return false;
-        }
-        final String variable = comment.substring(firstSeparator + 1);
-        if (!indexVariables.has(index)) {
-            indexVariables.add(index, variable);
-        }
-        return true;
     }
 }

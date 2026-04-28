@@ -22,6 +22,8 @@ package de.featjar.formula.io;
 
 import de.featjar.Common;
 import de.featjar.FormatTest;
+import de.featjar.formula.io.kconfig.KConfigReaderFormat;
+
 import org.junit.jupiter.api.Test;
 
 /**

@@ -21,8 +21,9 @@
 package de.featjar.formula.io.textual;
 
 import de.featjar.base.data.Result;
-import de.featjar.base.io.format.IFormat;
+import de.featjar.base.io.text.ATextFormat;
 import de.featjar.base.tree.Trees;
+import de.featjar.formula.io.IExpressionFormat;
 import de.featjar.formula.io.textual.ExpressionSerializer.Notation;
 import de.featjar.formula.structure.IExpression;
 
@@ -32,7 +33,7 @@ import de.featjar.formula.structure.IExpression;
  * @author Sebastian Krieter
  */
 @Deprecated
-public class ExpressionFormat implements IFormat<IExpression> {
+public class ExpressionFormat extends ATextFormat<IExpression> implements IExpressionFormat {
     @Override
     public String getName() {
         return "Expression";

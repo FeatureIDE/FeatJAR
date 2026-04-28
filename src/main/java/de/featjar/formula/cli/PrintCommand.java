@@ -132,7 +132,7 @@ public class PrintCommand extends ACommand {
 
         Path outputPath = optionParser.getResult(OUTPUT_OPTION).orElse(null);
         Result<IFormula> formula =
-                optionParser.getResult(INPUT_OPTION).flatMap(p -> IO.load(p, FormulaFormats.getInstance()));
+                optionParser.getResult(INPUT_OPTION).mapResult(p -> IO.load(p, FormulaFormats.getInstance()));
 
         if (formula.isEmpty()) {
             FeatJAR.log().problems(formula);

@@ -21,6 +21,11 @@
 package de.featjar.formula.assignment;
 
 import de.featjar.formula.VariableMap;
+import de.featjar.formula.structure.IExpression;
+import de.featjar.formula.structure.IFormula;
+import de.featjar.formula.structure.connective.And;
+import de.featjar.formula.structure.connective.Or;
+import de.featjar.formula.structure.connective.Reference;
 import de.featjar.formula.structure.predicate.Literal;
 import de.featjar.formula.structure.term.value.Variable;
 import java.util.ArrayList;
@@ -47,7 +52,7 @@ public final class Assignments {
                 .collect(Collectors.toList());
     }
 
-    public static List<Literal> toLiterals(VariableMap variableMap, BooleanAssignment assignment) {
+    public static List<Literal> toFormulaLiterals(BooleanAssignment assignment, VariableMap variableMap) {
         List<Literal> list = new ArrayList<>(assignment.size());
         for (int literal : assignment.get()) {
             if (literal != 0) {
@@ -56,5 +61,51 @@ public final class Assignments {
             }
         }
         return list;
+    }
+
+    public static IFormula toCNFFormula(BooleanAssignmentList clauseList, VariableMap variableMap) {
+        List<IFormula> clauses = new ArrayList<>();
+        for (BooleanAssignment clause : clauseList) {
+            clauses.add(new Or(Assignments.toFormulaLiterals(clause, variableMap)));
+        }
+        return new Reference(new And(clauses), variablesFromMap(variableMap));
+    }
+
+    public static IFormula toCNFFormula(BooleanAssignmentList clauseList) {
+        return toCNFFormula(clauseList, clauseList.getVariableMap());
+    }
+
+    public static IFormula toDNFFormula(BooleanAssignmentList clauseList, VariableMap variableMap) {
+        List<IFormula> clauses = new ArrayList<>();
+        for (BooleanAssignment clause : clauseList) {
+            clauses.add(new And(Assignments.toFormulaLiterals(clause, variableMap)));
+        }
+        return new Reference(new Or(clauses), variablesFromMap(variableMap));
+    }
+
+    public static IFormula toDNFFormula(BooleanAssignmentList clauseList) {
+        return toDNFFormula(clauseList, clauseList.getVariableMap());
+    }
+
+    public static int[] toBooleanLiterals(IFormula clause, VariableMap variableMap) {
+        int[] literals = new int[clause.getChildrenCount()];
+        int i = 0;
+        for (final IExpression child : clause.getChildren()) {
+            final Literal l = (Literal) child;
+            final int index = variableMap.get(l.getExpression().getName()).orElseThrow();
+            literals[i++] = l.isPositive() ? index : -index;
+        }
+        return literals;
+    }
+
+    public static BooleanAssignmentList toBooleanAssignmentList(IFormula cnf, VariableMap variableMap) {
+        if (cnf instanceof Reference) {
+            cnf = ((Reference) cnf).getExpression();
+        }
+        return new BooleanAssignmentList(
+                variableMap,
+                cnf.getChildren().stream()
+                        .map(c -> new BooleanAssignment(toBooleanLiterals((IFormula) c, variableMap)))
+                        .collect(Collectors.toList()));
     }
 }
