@@ -22,15 +22,19 @@ package de.featjar.feature.model.io.uvl;
 
 import de.featjar.base.data.Problem;
 import de.featjar.base.data.Result;
-import de.featjar.base.io.format.IFormat;
 import de.featjar.base.io.input.AInputMapper;
 import de.featjar.base.tree.Trees;
-import de.featjar.feature.model.*;
+import de.featjar.feature.model.IConstraint;
+import de.featjar.feature.model.IFeature;
+import de.featjar.feature.model.IFeatureModel;
+import de.featjar.feature.model.IFeatureTree;
+import de.featjar.feature.model.io.IFeatureModelFormat;
 import de.featjar.feature.model.io.uvl.visitor.FeatureTreeToUVLFeatureModelVisitor;
 import de.featjar.feature.model.io.uvl.visitor.FormulaToUVLConstraintVisitor;
 import de.featjar.formula.structure.IFormula;
 import de.vill.main.UVLModelFactory;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Parses and writes feature models from and to UVL files.
@@ -38,7 +42,7 @@ import java.util.*;
  * @author Sebastian Krieter
  * @author Andreas Gerasimow
  */
-public class UVLFeatureModelFormat implements IFormat<IFeatureModel> {
+public class UVLFeatureModelFormat implements IFeatureModelFormat {
 
     @Override
     public Result<IFeatureModel> parse(AInputMapper inputMapper) {

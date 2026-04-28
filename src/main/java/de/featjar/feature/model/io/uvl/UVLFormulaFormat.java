@@ -22,13 +22,13 @@ package de.featjar.feature.model.io.uvl;
 
 import de.featjar.base.data.Problem;
 import de.featjar.base.data.Result;
-import de.featjar.base.io.format.IFormat;
 import de.featjar.base.io.input.AInputMapper;
 import de.featjar.base.tree.Trees;
 import de.featjar.feature.model.IFeatureModel;
 import de.featjar.feature.model.IFeatureTree;
 import de.featjar.feature.model.io.uvl.visitor.FeatureTreeToFormulaVisitor;
 import de.featjar.feature.model.io.uvl.visitor.FormulaToUVLConstraintVisitor;
+import de.featjar.formula.io.IFormulaFormat;
 import de.featjar.formula.structure.IFormula;
 import de.featjar.formula.structure.connective.And;
 import de.featjar.formula.structure.connective.Reference;
@@ -47,7 +47,7 @@ import java.util.List;
  * @author Sebastian Krieter
  * @author Andreas Gerasimow
  */
-public class UVLFormulaFormat implements IFormat<IFormula> {
+public class UVLFormulaFormat implements IFormulaFormat {
 
     /**
      * Name of the root element.
