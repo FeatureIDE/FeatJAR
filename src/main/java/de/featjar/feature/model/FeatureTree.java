@@ -188,7 +188,7 @@ public class FeatureTree extends ARootedTree<IFeatureTree> implements IMutableFe
 
     @Override
     public String toString() {
-        return Result.ofNullable(feature).flatMap(IFeature::getName).orElse("?");
+        return Result.ofNullable(feature).mapResult(IFeature::getName).orElse("?");
     }
 
     @Override

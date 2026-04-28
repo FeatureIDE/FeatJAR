@@ -23,12 +23,12 @@ package de.featjar.feature.model.io.dimacs;
 import de.featjar.base.computation.Computations;
 import de.featjar.base.data.Pair;
 import de.featjar.base.data.Result;
-import de.featjar.base.io.format.IFormat;
 import de.featjar.base.io.format.ParseProblem;
 import de.featjar.base.io.input.AInputMapper;
 import de.featjar.feature.model.FeatureModel;
 import de.featjar.feature.model.IFeatureModel;
 import de.featjar.feature.model.IFeatureTree;
+import de.featjar.feature.model.io.IFeatureModelFormat;
 import de.featjar.feature.model.transformer.ComputeFormula;
 import de.featjar.formula.VariableMap;
 import de.featjar.formula.computation.ComputeCNFFormula;
@@ -36,6 +36,7 @@ import de.featjar.formula.computation.ComputeNNFFormula;
 import de.featjar.formula.io.dimacs.DimacsParser;
 import de.featjar.formula.io.dimacs.DimacsSerializer;
 import de.featjar.formula.structure.IExpression;
+import de.featjar.formula.structure.IFormula;
 import de.featjar.formula.structure.connective.Or;
 import de.featjar.formula.structure.connective.Reference;
 import de.featjar.formula.structure.predicate.Literal;
@@ -48,11 +49,11 @@ import java.util.List;
  *
  * @author Sebastian Krieter
  */
-public class DimacsFeatureModelFormat implements IFormat<IFeatureModel> {
+public class DimacsFeatureModelFormat implements IFeatureModelFormat {
 
     @Override
     public Result<String> serialize(IFeatureModel featureModel) {
-        Reference formula = Computations.of(featureModel)
+        IFormula formula = Computations.of(featureModel)
                 .map(ComputeFormula::new)
                 .map(ComputeNNFFormula::new)
                 .map(ComputeCNFFormula::new)
@@ -60,7 +61,7 @@ public class DimacsFeatureModelFormat implements IFormat<IFeatureModel> {
                 .compute();
         VariableMap variableMap = new VariableMap(formula.getVariableMap().keySet());
         return Result.of(DimacsSerializer.serialize(
-                variableMap, formula.getExpression().getChildren(), c -> writeClause(c, variableMap)));
+                variableMap, ((Reference) formula).getExpression().getChildren(), c -> writeClause(c, variableMap)));
     }
 
     private static int[] writeClause(IExpression clause, VariableMap variableMap) {
@@ -79,7 +80,7 @@ public class DimacsFeatureModelFormat implements IFormat<IFeatureModel> {
         final DimacsParser parser = new DimacsParser();
         parser.setReadingVariableDirectory(true);
         try {
-            Pair<VariableMap, List<int[]>> parsingResult = parser.parse(inputMapper);
+            Pair<VariableMap, List<List<int[]>>> parsingResult = parser.parse(inputMapper);
             VariableMap variableMap = parsingResult.getKey();
 
             FeatureModel featureModel = new FeatureModel();
@@ -88,15 +89,17 @@ public class DimacsFeatureModelFormat implements IFormat<IFeatureModel> {
                 featureNode.mutate().makeOptional();
             }
 
-            for (int[] clauseLiterals : parsingResult.getValue()) {
-                List<Literal> literals = new ArrayList<>(clauseLiterals.length);
-                for (int l : clauseLiterals) {
-                    String variableName = variableMap
-                            .get(Math.abs(l))
-                            .orElseThrow(p -> new IllegalArgumentException("No mapping for literal " + l));
-                    literals.add(new Literal(l > 0, variableName));
+            for (List<int[]> clauseGroup : parsingResult.getValue()) {
+                for (int[] clauseLiterals : clauseGroup) {
+                    List<Literal> literals = new ArrayList<>(clauseLiterals.length);
+                    for (int l : clauseLiterals) {
+                        String variableName = variableMap
+                                .get(Math.abs(l))
+                                .orElseThrow(p -> new IllegalArgumentException("No mapping for literal " + l));
+                        literals.add(new Literal(l > 0, variableName));
+                    }
+                    featureModel.addConstraint(new Or(literals));
                 }
-                featureModel.addConstraint(new Or(literals));
             }
 
             return Result.of(featureModel);

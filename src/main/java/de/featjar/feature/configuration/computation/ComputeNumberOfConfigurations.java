@@ -18,38 +18,32 @@
  *
  * See <https://github.com/FeatureIDE/FeatJAR-feature-model> for further information.
  */
-package de.featjar.feature.model.io.tikz;
+package de.featjar.feature.configuration.computation;
 
+import de.featjar.base.computation.IComputation;
+import de.featjar.base.computation.Progress;
 import de.featjar.base.data.Result;
-import de.featjar.feature.model.IFeatureModel;
-import de.featjar.feature.model.io.IFeatureModelFormat;
+import de.featjar.base.tree.DataTree;
+import de.featjar.formula.assignment.BooleanAssignmentList;
+import java.util.List;
 
 /**
- * Format for serializing a feature model as Tikz picture.
+ * Compute how many assignments are in the assignmentList
  *
- * @author Felix Behme
- * @author Lara Merza
- * @author Jonas Hanke
+ * @author Mohammad Khair Almekkawi
+ * @author Florian Beese
+ * @author Sebastian Krieter
  */
-public class TikzFeatureModelFormat implements IFeatureModelFormat {
+public class ComputeNumberOfConfigurations extends ABooleanAssignmentListComputation<DataTree<Integer>> {
 
-    @Override
-    public Result<String> serialize(IFeatureModel featureModel) {
-        return Result.of(new TikzFeatureModelSerializer().serialize(featureModel));
+    public ComputeNumberOfConfigurations(IComputation<BooleanAssignmentList> booleanAssignmentList) {
+        super(booleanAssignmentList);
     }
 
     @Override
-    public boolean supportsWrite() {
-        return true;
-    }
-
-    @Override
-    public String getFileExtension() {
-        return ".tex";
-    }
-
-    @Override
-    public String getName() {
-        return "TikZ";
+    public Result<DataTree<Integer>> compute(List<Object> dependencyList, Progress progress) {
+        return Result.of(DataTree.ofValue(
+                "NumberOfConfigurations",
+                BOOLEAN_ASSIGNMENT_LIST.get(dependencyList).getAll().size()));
     }
 }

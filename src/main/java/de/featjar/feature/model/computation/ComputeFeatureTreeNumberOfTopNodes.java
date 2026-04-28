@@ -18,38 +18,33 @@
  *
  * See <https://github.com/FeatureIDE/FeatJAR-feature-model> for further information.
  */
-package de.featjar.feature.model.io.tikz;
+package de.featjar.feature.model.computation;
 
+import de.featjar.base.computation.IComputation;
+import de.featjar.base.computation.Progress;
 import de.featjar.base.data.Result;
+import de.featjar.base.tree.DataTree;
 import de.featjar.feature.model.IFeatureModel;
-import de.featjar.feature.model.io.IFeatureModelFormat;
+import java.util.List;
 
 /**
- * Format for serializing a feature model as Tikz picture.
+ * Computes number of nodes under a root feature in a feature tree.
  *
- * @author Felix Behme
- * @author Lara Merza
- * @author Jonas Hanke
+ * @author Benjamin von Holt
+ * @author Sebastian Krieter
  */
-public class TikzFeatureModelFormat implements IFeatureModelFormat {
+public class ComputeFeatureTreeNumberOfTopNodes extends AFeatureModelComputation<DataTree<Long>> {
 
-    @Override
-    public Result<String> serialize(IFeatureModel featureModel) {
-        return Result.of(new TikzFeatureModelSerializer().serialize(featureModel));
+    public ComputeFeatureTreeNumberOfTopNodes(IComputation<IFeatureModel> featureModel) {
+        super(featureModel);
     }
 
     @Override
-    public boolean supportsWrite() {
-        return true;
-    }
-
-    @Override
-    public String getFileExtension() {
-        return ".tex";
-    }
-
-    @Override
-    public String getName() {
-        return "TikZ";
+    public Result<DataTree<Long>> compute(List<Object> dependencyList, Progress progress) {
+        return Result.of(DataTree.ofValue(
+                "NumberOfTopNodes",
+                FEATURE_MODEL.get(dependencyList).getRoots().stream()
+                        .mapToLong(r -> r.getChildrenCount())
+                        .sum()));
     }
 }

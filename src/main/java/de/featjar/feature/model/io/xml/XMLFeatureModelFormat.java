@@ -21,10 +21,10 @@
 package de.featjar.feature.model.io.xml;
 
 import de.featjar.base.data.Result;
-import de.featjar.base.io.format.IFormat;
 import de.featjar.base.io.input.AInputMapper;
 import de.featjar.base.io.input.InputHeader;
 import de.featjar.feature.model.IFeatureModel;
+import de.featjar.feature.model.io.IFeatureModelFormat;
 import de.featjar.formula.io.xml.AXMLFeatureModelParser;
 
 /**
@@ -33,7 +33,7 @@ import de.featjar.formula.io.xml.AXMLFeatureModelParser;
  * @author Sebastian Krieter
  * @author Elias Kuiter
  */
-public class XMLFeatureModelFormat implements IFormat<IFeatureModel> {
+public class XMLFeatureModelFormat implements IFeatureModelFormat {
 
     @Override
     public String getName() {

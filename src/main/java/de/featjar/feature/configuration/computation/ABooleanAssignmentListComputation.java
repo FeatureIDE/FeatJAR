@@ -18,38 +18,25 @@
  *
  * See <https://github.com/FeatureIDE/FeatJAR-feature-model> for further information.
  */
-package de.featjar.feature.model.io.tikz;
+package de.featjar.feature.configuration.computation;
 
-import de.featjar.base.data.Result;
-import de.featjar.feature.model.IFeatureModel;
-import de.featjar.feature.model.io.IFeatureModelFormat;
+import de.featjar.base.computation.AComputation;
+import de.featjar.base.computation.Dependency;
+import de.featjar.base.computation.IComputation;
+import de.featjar.formula.assignment.BooleanAssignmentList;
 
 /**
- * Format for serializing a feature model as Tikz picture.
+ * Abstract class for computations on boolean assignment lists.
  *
- * @author Felix Behme
- * @author Lara Merza
- * @author Jonas Hanke
+ * @author Sebastian Krieter
  */
-public class TikzFeatureModelFormat implements IFeatureModelFormat {
+public abstract class ABooleanAssignmentListComputation<T> extends AComputation<T> {
 
-    @Override
-    public Result<String> serialize(IFeatureModel featureModel) {
-        return Result.of(new TikzFeatureModelSerializer().serialize(featureModel));
-    }
+    public static final Dependency<BooleanAssignmentList> BOOLEAN_ASSIGNMENT_LIST =
+            Dependency.newDependency(BooleanAssignmentList.class);
 
-    @Override
-    public boolean supportsWrite() {
-        return true;
-    }
-
-    @Override
-    public String getFileExtension() {
-        return ".tex";
-    }
-
-    @Override
-    public String getName() {
-        return "TikZ";
+    public ABooleanAssignmentListComputation(
+            IComputation<BooleanAssignmentList> booleanAssignmentList, IComputation<?>... dependencies) {
+        super(booleanAssignmentList, dependencies);
     }
 }

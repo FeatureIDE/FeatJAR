@@ -67,6 +67,7 @@ public class ConfigurationTest {
     private static FeatureModel featureModel;
     private static Configuration configuration;
 
+    @SuppressWarnings("unused")
     @BeforeAll
     public static void setupTestConfiguration() {
 
@@ -122,6 +123,7 @@ public class ConfigurationTest {
         }
     }
 
+    @SuppressWarnings("unused")
     @Test
     public void testConfigurationCloning() {
 

@@ -18,38 +18,35 @@
  *
  * See <https://github.com/FeatureIDE/FeatJAR-feature-model> for further information.
  */
-package de.featjar.feature.model.io.tikz;
+package de.featjar.feature.model.computation;
 
+import de.featjar.base.computation.IComputation;
+import de.featjar.base.computation.Progress;
 import de.featjar.base.data.Result;
+import de.featjar.base.tree.DataTree;
+import de.featjar.base.tree.Trees;
+import de.featjar.base.tree.visitor.TreeDepthCounter;
 import de.featjar.feature.model.IFeatureModel;
-import de.featjar.feature.model.io.IFeatureModelFormat;
+import java.util.List;
 
 /**
- * Format for serializing a feature model as Tikz picture.
+ * Computes max depth of a feature tree.
  *
- * @author Felix Behme
- * @author Lara Merza
- * @author Jonas Hanke
+ * @author Benjamin von Holt
+ * @author Sebastian Krieter
  */
-public class TikzFeatureModelFormat implements IFeatureModelFormat {
+public class ComputeFeatureTreeMaxDepth extends AFeatureModelComputation<DataTree<Integer>> {
 
-    @Override
-    public Result<String> serialize(IFeatureModel featureModel) {
-        return Result.of(new TikzFeatureModelSerializer().serialize(featureModel));
+    public ComputeFeatureTreeMaxDepth(IComputation<IFeatureModel> featureModel) {
+        super(featureModel);
     }
 
     @Override
-    public boolean supportsWrite() {
-        return true;
-    }
-
-    @Override
-    public String getFileExtension() {
-        return ".tex";
-    }
-
-    @Override
-    public String getName() {
-        return "TikZ";
+    public Result<DataTree<Integer>> compute(List<Object> dependencyList, Progress progress) {
+        return Result.of(DataTree.ofValue(
+                "MaxDepth",
+                (Trees.traverse(FEATURE_MODEL.get(dependencyList).getPseudoRoot(), new TreeDepthCounter())
+                                .orElse(1)
+                        - 1)));
     }
 }

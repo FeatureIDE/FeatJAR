@@ -37,6 +37,7 @@ import org.junit.jupiter.api.Test;
 public class FeatureTest {
     private static FeatureModel featureModel;
 
+    @SuppressWarnings("unused")
     @BeforeAll
     public static void setup() {
         FeatureModel featureModel = new FeatureModel(Identifiers.newCounterIdentifier());

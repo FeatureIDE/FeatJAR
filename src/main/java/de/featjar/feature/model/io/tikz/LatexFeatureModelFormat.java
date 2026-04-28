@@ -22,8 +22,8 @@ package de.featjar.feature.model.io.tikz;
 
 import de.featjar.base.data.Result;
 import de.featjar.base.io.IO;
-import de.featjar.base.io.format.IFormat;
 import de.featjar.feature.model.IFeatureModel;
+import de.featjar.feature.model.io.IFeatureModelFormat;
 import java.io.IOException;
 
 /**
@@ -33,7 +33,7 @@ import java.io.IOException;
  * @author Lara Merza
  * @author Jonas Hanke
  */
-public class LatexFeatureModelFormat implements IFormat<IFeatureModel> {
+public class LatexFeatureModelFormat implements IFeatureModelFormat {
 
     @Override
     public Result<String> serialize(IFeatureModel featureModel) {

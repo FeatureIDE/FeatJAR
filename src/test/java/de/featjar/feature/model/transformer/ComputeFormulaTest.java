@@ -116,6 +116,7 @@ class ComputeFormulaTest {
         return new Or(formulas);
     }
 
+    @SuppressWarnings("unused")
     @Test
     void optionalRootIsCorrectlyTranslated() {
         IMutableFeatureModel model = new FeatureModel(Identifiers.newCounterIdentifier()).mutate();
@@ -133,6 +134,7 @@ class ComputeFormulaTest {
         translateAndCompareFeatureModel(model, expected);
     }
 
+    @SuppressWarnings("unused")
     @Test
     void crossTreeConstraintsIsCorrectlyTranslated() {
         IMutableFeatureModel model = new FeatureModel(Identifiers.newCounterIdentifier()).mutate();
@@ -215,6 +217,7 @@ class ComputeFormulaTest {
         translateAndCompareFeatureModel(model, expected);
     }
 
+    @SuppressWarnings("unused")
     @Test
     void featureCardinalityIsCorrectlyTranslated() {
         IMutableFeatureModel model = new FeatureModel(Identifiers.newCounterIdentifier()).mutate();
@@ -241,6 +244,7 @@ class ComputeFormulaTest {
         translateAndCompareFeatureModel(model, expected);
     }
 
+    @SuppressWarnings("unused")
     @Test
     void nestedFeatureCardinalityIsCorrectlyTranslated() {
         IMutableFeatureModel model = new FeatureModel(Identifiers.newCounterIdentifier()).mutate();

@@ -21,9 +21,9 @@
 package de.featjar.feature.model.io.xml;
 
 import de.featjar.base.data.Result;
-import de.featjar.base.io.format.IFormat;
 import de.featjar.feature.model.IFeatureModel;
 import de.featjar.feature.model.IFeatureTree;
+import de.featjar.feature.model.io.IFeatureModelFormat;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -33,7 +33,7 @@ import java.util.stream.Collectors;
  *
  * @author Elias Kuiter
  */
-public class GraphVizFeatureModelFormat implements IFormat<IFeatureModel> {
+public class GraphVizFeatureModelFormat implements IFeatureModelFormat {
     @Override
     public String getFileExtension() {
         return "dot";

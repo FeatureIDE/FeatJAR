@@ -18,38 +18,14 @@
  *
  * See <https://github.com/FeatureIDE/FeatJAR-feature-model> for further information.
  */
-package de.featjar.feature.model.io.tikz;
+package de.featjar.feature.model.io;
 
-import de.featjar.base.data.Result;
+import de.featjar.base.io.format.IFormat;
 import de.featjar.feature.model.IFeatureModel;
-import de.featjar.feature.model.io.IFeatureModelFormat;
 
 /**
- * Format for serializing a feature model as Tikz picture.
+ * Interface for format handling {@link IFeatureModel feature models}.
  *
- * @author Felix Behme
- * @author Lara Merza
- * @author Jonas Hanke
+ * @author Sebastian Krieter
  */
-public class TikzFeatureModelFormat implements IFeatureModelFormat {
-
-    @Override
-    public Result<String> serialize(IFeatureModel featureModel) {
-        return Result.of(new TikzFeatureModelSerializer().serialize(featureModel));
-    }
-
-    @Override
-    public boolean supportsWrite() {
-        return true;
-    }
-
-    @Override
-    public String getFileExtension() {
-        return ".tex";
-    }
-
-    @Override
-    public String getName() {
-        return "TikZ";
-    }
-}
+public interface IFeatureModelFormat extends IFormat<IFeatureModel> {}

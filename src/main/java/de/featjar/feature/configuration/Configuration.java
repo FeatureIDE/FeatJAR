@@ -398,7 +398,7 @@ public class Configuration implements Cloneable {
     }
 
     public Result<Selection<?>> getSelection(String name) {
-        return Result.ofNullable(name).flatMap(variableMap::get).map(selections::get);
+        return Result.ofNullable(name).mapResult(variableMap::get).map(selections::get);
     }
 
     public Selection<?> get(String name) {
@@ -407,8 +407,8 @@ public class Configuration implements Cloneable {
 
     public Result<Selection<?>> getSelection(IFeature feature) {
         return Result.ofNullable(feature)
-                .flatMap(IFeature::getName)
-                .flatMap(variableMap::get)
+                .mapResult(IFeature::getName)
+                .mapResult(variableMap::get)
                 .map(selections::get);
     }
 

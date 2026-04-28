@@ -106,7 +106,7 @@ public class AttributeIO {
     }
 
     public static Result<Object> parseAttributeValue(String typeString, String valueString) {
-        return getType(typeString).flatMap(type -> parseAttributeValue(type, valueString));
+        return getType(typeString).mapResult(type -> parseAttributeValue(type, valueString));
     }
 
     @SuppressWarnings("unchecked")
