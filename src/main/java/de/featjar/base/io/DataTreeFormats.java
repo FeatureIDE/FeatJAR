@@ -18,26 +18,26 @@
  *
  * See <https://github.com/FeatureIDE/FeatJAR-base> for further information.
  */
-package de.featjar.base.io.text;
+package de.featjar.base.io;
 
-import de.featjar.base.data.Result;
+import de.featjar.base.FeatJAR;
+import de.featjar.base.io.format.AFormats;
+import de.featjar.base.tree.DataTree;
 
 /**
- * Serializes an arbitrary object as text, as it is returned by {@link Object#toString()}.
- *
- * @param <T> the type of the read/written object
+ * Extension point for {@link AFormats formats} for {@link BooleanAssignmentGroups}.
  *
  * @author Sebastian Krieter
  */
-public class GenericTextFormat<T> extends ATextFormat<T> {
+@SuppressWarnings("rawtypes")
+public class DataTreeFormats extends AFormats<DataTree> {
 
-    @Override
-    public boolean supportsWrite() {
-        return true;
+    public static DataTreeFormats getInstance() {
+        return FeatJAR.extensionPoint(DataTreeFormats.class);
     }
 
     @Override
-    public Result<String> serialize(T object) {
-        return Result.of(String.valueOf(object));
+    public Class<DataTree> getType() {
+        return DataTree.class;
     }
 }

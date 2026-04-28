@@ -26,6 +26,7 @@ import de.featjar.base.data.Result;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -198,6 +199,18 @@ public class Option<T> {
      * @return the newly created string enum option
      */
     public static StringEnumOption newStringEnumOption(String name, String... possibleValues) {
+        return newStringEnumOption(name, Arrays.asList(possibleValues));
+    }
+
+    /**
+     * Registers a new {@link StringEnumOption} for the calling class.
+     *
+     * @param name the name of the option
+     * @param possibleValues the possible values for this option
+     *
+     * @return the newly created string enum option
+     */
+    public static StringEnumOption newStringEnumOption(String name, List<String> possibleValues) {
         StringEnumOption option = new StringEnumOption(name, possibleValues);
         list.add(new Pair<>(getCallingClass(), option));
         return option;

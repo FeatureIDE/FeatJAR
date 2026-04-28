@@ -139,7 +139,7 @@ public abstract class AComputation<T> extends ATree<IComputation<?>> implements 
         progress.setName(toString());
         checkCancel();
         try {
-            Result<T> result = mergeResults(results).flatMap(r -> {
+            Result<T> result = mergeResults(results).mapResult(r -> {
                 try (progress) {
                     FeatJAR.progress().track(progress);
                     return compute(r, progress);

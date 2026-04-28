@@ -28,7 +28,7 @@ package de.featjar.base.data.type;
  * @author Sebastian Krieter
  * @author Elias Kuiter
  */
-public interface Type<T> {
+public interface Type<T> extends Comparable<Type<?>> {
 
     Class<T> getClassType();
 
@@ -41,4 +41,8 @@ public interface Type<T> {
     }
 
     T parse(String text);
+
+    default int compareTo(Type<?> o) {
+        return getClassType().getName().compareTo(o.getClassType().getName());
+    }
 }

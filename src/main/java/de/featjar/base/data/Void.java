@@ -33,5 +33,5 @@ public class Void {
     /**
      * Singleton instance of Void.
      */
-    protected static final de.featjar.base.data.Void VOID = new de.featjar.base.data.Void();
+    public static final de.featjar.base.data.Void VOID = new de.featjar.base.data.Void();
 }

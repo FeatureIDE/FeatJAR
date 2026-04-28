@@ -20,4 +20,8 @@
     <point id="de.featjar.base.shell.VariableTypes">
 		<extension id="de.featjar.base.shell.type.PathType" />
     </point>
+    <point id="de.featjar.base.io.DataTreeFormats" priority="10">
+		<extension id="de.featjar.base.io.csv.DataTreeCSVFormat" />
+		<extension id="de.featjar.base.io.text.DataTreeTextFormat" />
+    </point>
 </extensions>

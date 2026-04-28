@@ -73,7 +73,7 @@ public interface IIOObject extends AutoCloseable {
      * @param path the path
      */
     static Result<String> getFileExtension(Path path) {
-        return Result.ofNullable(path).flatMap(_path -> getFileExtension(getFileName(_path)));
+        return Result.ofNullable(path).mapResult(_path -> getFileExtension(getFileName(_path)));
     }
 
     /**

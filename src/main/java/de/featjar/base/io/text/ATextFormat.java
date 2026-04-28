@@ -20,24 +20,24 @@
  */
 package de.featjar.base.io.text;
 
-import de.featjar.base.data.Result;
+import de.featjar.base.io.format.IFormat;
 
 /**
- * Serializes an arbitrary object as text, as it is returned by {@link Object#toString()}.
+ * Abstract format for text.
  *
  * @param <T> the type of the read/written object
  *
  * @author Sebastian Krieter
  */
-public class GenericTextFormat<T> extends ATextFormat<T> {
+public class ATextFormat<T> implements IFormat<T> {
 
     @Override
-    public boolean supportsWrite() {
-        return true;
+    public String getName() {
+        return "Text";
     }
 
     @Override
-    public Result<String> serialize(T object) {
-        return Result.of(String.valueOf(object));
+    public String getFileExtension() {
+        return "txt";
     }
 }

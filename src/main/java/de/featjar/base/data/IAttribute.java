@@ -32,7 +32,7 @@ import java.util.function.Function;
  *
  * @author Elias Kuiter
  */
-public interface IAttribute<T> extends Function<IAttributable, Result<T>> {
+public interface IAttribute<T> extends Function<IAttributable, Result<T>>, Comparable<IAttribute<?>> {
     String getNamespace();
 
     String getSimpleName();

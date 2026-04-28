@@ -173,13 +173,13 @@ public class Attribute<T> implements IAttribute<T> {
     @Override
     public Result<T> copyValue(IAttributable attributable) {
         return getCopyValueFunction()
-                .flatMap(f -> attributable.getAttributeValue(this).map(o -> f.apply((T) o)));
+                .mapResult(f -> attributable.getAttributeValue(this).map(o -> f.apply((T) o)));
     }
 
     @Override
     public Result<String> serializeValue(IAttributable attributable) {
         return getSerializeValueFunction()
-                .flatMap(f -> attributable.getAttributeValue(this).map(o -> f.apply((T) o)));
+                .mapResult(f -> attributable.getAttributeValue(this).map(o -> f.apply((T) o)));
     }
 
     /**
@@ -217,5 +217,15 @@ public class Attribute<T> implements IAttribute<T> {
     @Override
     public int hashCode() {
         return Objects.hash(name);
+    }
+
+    @Override
+    public int compareTo(IAttribute<?> o) {
+        int nameCompare = name.compareTo(o.getName());
+        if (nameCompare != 0) {
+            return nameCompare;
+        } else {
+            return type.compareTo(o.getType());
+        }
     }
 }

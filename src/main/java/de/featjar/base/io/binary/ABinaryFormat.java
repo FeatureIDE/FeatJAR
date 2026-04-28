@@ -34,6 +34,16 @@ import java.io.IOException;
 public abstract class ABinaryFormat<T> implements IFormat<T> {
 
     @Override
+    public String getName() {
+        return "Binary";
+    }
+
+    @Override
+    public String getFileExtension() {
+        return "bin";
+    }
+
+    @Override
     public boolean isTextual() {
         return false;
     }

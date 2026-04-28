@@ -21,15 +21,21 @@
 package de.featjar.base.io.text;
 
 import de.featjar.base.data.Result;
+import de.featjar.base.io.IDataTreeFormat;
+import de.featjar.base.tree.DataTree;
+import de.featjar.base.tree.Trees;
+import de.featjar.base.tree.structure.ITree;
+import de.featjar.base.tree.visitor.TreePrinter;
 
 /**
- * Serializes an arbitrary object as text, as it is returned by {@link Object#toString()}.
+ * An IFormat class that take an AnalysisTree as input and can serialize it into CSV String.
+ * With the CSV having only four columns (AnalysisType, Name, Value, Class)
  *
- * @param <T> the type of the read/written object
- *
+ * @author Mohammad Khair Almekkawi
+ * @author Florian Beese
  * @author Sebastian Krieter
  */
-public class GenericTextFormat<T> extends ATextFormat<T> {
+public class DataTreeTextFormat extends ATextFormat<DataTree<?>> implements IDataTreeFormat {
 
     @Override
     public boolean supportsWrite() {
@@ -37,7 +43,14 @@ public class GenericTextFormat<T> extends ATextFormat<T> {
     }
 
     @Override
-    public Result<String> serialize(T object) {
-        return Result.of(String.valueOf(object));
+    public Result<String> serialize(DataTree<?> dataTree) {
+        return Trees.traverse(
+                dataTree, new TreePrinter().setIndentation("| ").setToStringFunction(this::treeNodeToString));
+    }
+
+    private String treeNodeToString(ITree<?> node) {
+        DataTree<?> dataNode = ((DataTree<?>) node);
+        Object value = dataNode.getValue().orElse(null);
+        return dataNode.getAttribute().getSimpleName() + (value == null ? "" : ": " + String.valueOf(value));
     }
 }

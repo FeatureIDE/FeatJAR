@@ -394,10 +394,46 @@ public class Result<T> implements Supplier<T> {
      * @param <R>    the type of the mapped object
      * @return A new result with the mapped object or an empty result, if any
      * exceptions occur during the mapping or if this result was empty before.
+     *
+     * @deprecated Renamed. Use {@link #mapResult(Function)} instead
      */
+    @Deprecated
     public <R> Result<R> flatMap(Function<T, Result<R>> mapper) {
         try {
             return object != null ? mergeProblems(mapper.apply(object)) : Result.empty(problems);
+        } catch (final Exception e) {
+            return mergeProblems(Result.empty(e));
+        }
+    }
+
+    /**
+     * Maps the object in this result to another object using a mapper function that also returns a {@link Result}.
+     * Merges the two problems lists.
+     *
+     * @param mapper the mapper function
+     * @param <R>    the type of the mapped object
+     * @return A new result with the mapped object or an empty result, if any
+     * exceptions occur during the mapping or if this result was empty before.
+     */
+    public <R> Result<R> mapResult(Function<T, Result<R>> mapper) {
+        try {
+            return object != null ? mergeProblems(mapper.apply(object)) : Result.empty(problems);
+        } catch (final Exception e) {
+            return mergeProblems(Result.empty(e));
+        }
+    }
+
+    /**
+     * Maps the object in this result to another object using a mapper function that returns a {@link Optional}.
+     *
+     * @param mapper the mapper function
+     * @param <R>    the type of the mapped object
+     * @return A new result with the mapped object or an empty result, if any
+     * exceptions occur during the mapping or if this result was empty before.
+     */
+    public <R> Result<R> mapOptional(Function<T, Optional<R>> mapper) {
+        try {
+            return object != null ? Result.ofOptional(mapper.apply(object)) : Result.empty(problems);
         } catch (final Exception e) {
             return mergeProblems(Result.empty(e));
         }

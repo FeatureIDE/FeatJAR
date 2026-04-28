@@ -21,7 +21,6 @@
 package de.featjar.base.io.text;
 
 import de.featjar.base.data.Result;
-import de.featjar.base.io.format.IFormat;
 import de.featjar.base.io.input.AInputMapper;
 
 /**
@@ -29,17 +28,7 @@ import de.featjar.base.io.input.AInputMapper;
  *
  * @author Sebastian Krieter
  */
-public class StringTextFormat implements IFormat<String> {
-
-    @Override
-    public String getName() {
-        return "String";
-    }
-
-    @Override
-    public String getFileExtension() {
-        return "txt";
-    }
+public class StringTextFormat extends ATextFormat<String> {
 
     @Override
     public boolean supportsParse() {

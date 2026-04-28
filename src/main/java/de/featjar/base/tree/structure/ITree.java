@@ -507,7 +507,7 @@ public interface ITree<T extends ITree<T>> extends IBrowsable<GraphVizTreeFormat
 
     @Override
     default Result<URI> getBrowseURI(GraphVizTreeFormat<T> argument) {
-        return argument.serialize((T) this).flatMap(ITree::buildURI);
+        return argument.serialize((T) this).mapResult(ITree::buildURI);
     }
 
     private static Result<URI> buildURI(String dot) {

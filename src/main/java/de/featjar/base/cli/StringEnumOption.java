@@ -22,6 +22,7 @@ package de.featjar.base.cli;
 
 import java.util.Arrays;
 import java.util.LinkedHashSet;
+import java.util.List;
 
 /**
  * An option that takes one value from a predefined list of values given by a list of strings.
@@ -39,8 +40,18 @@ public class StringEnumOption extends Option<String> {
      * @param possibleValues the possible values this option can take
      */
     protected StringEnumOption(String name, String... possibleValues) {
+        this(name, Arrays.asList(possibleValues));
+    }
+
+    /**
+     * Creates an enum option.
+     *
+     * @param name the name of the flag option
+     * @param possibleValues the possible values this option can take
+     */
+    protected StringEnumOption(String name, List<String> possibleValues) {
         super(name, StringParser);
-        this.possibleValues = new LinkedHashSet<>(Arrays.asList(possibleValues));
+        this.possibleValues = new LinkedHashSet<>(possibleValues);
         validator = s -> this.possibleValues.contains(s);
     }
 

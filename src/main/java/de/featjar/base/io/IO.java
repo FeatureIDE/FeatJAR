@@ -575,8 +575,8 @@ public class IO {
         return inputMapper
                 .get()
                 .getInputHeader()
-                .flatMap(formatSupplier::getFormat)
-                .flatMap(format -> parse(inputMapper, format, factory));
+                .mapResult(formatSupplier::getFormat)
+                .mapResult(format -> parse(inputMapper, format, factory));
     }
 
     /**
@@ -591,8 +591,8 @@ public class IO {
         return inputMapper
                 .get()
                 .getInputHeader()
-                .flatMap(formatSupplier::getFormat)
-                .flatMap(format -> parse(inputMapper, format));
+                .mapResult(formatSupplier::getFormat)
+                .mapResult(format -> parse(inputMapper, format));
     }
 
     /**
@@ -613,10 +613,10 @@ public class IO {
         return inputMapper
                 .get()
                 .getInputHeader()
-                .flatMap(formatSupplier::getFormat)
-                .flatMap(format -> factorySupplier
+                .mapResult(formatSupplier::getFormat)
+                .mapResult(format -> factorySupplier
                         .getFactory(path, format)
-                        .flatMap(factory -> parse(inputMapper, format, factory)));
+                        .mapResult(factory -> parse(inputMapper, format, factory)));
     }
 
     /**

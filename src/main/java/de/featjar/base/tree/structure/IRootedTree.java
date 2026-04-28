@@ -94,6 +94,6 @@ public interface IRootedTree<T extends IRootedTree<T>> extends ITree<T> {
      */
     @SuppressWarnings("unchecked")
     default Result<Integer> getIndex() {
-        return getParent().flatMap(parent -> parent.getChildIndex((T) this));
+        return getParent().mapResult(parent -> parent.getChildIndex((T) this));
     }
 }
