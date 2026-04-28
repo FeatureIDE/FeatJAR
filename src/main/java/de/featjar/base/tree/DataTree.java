@@ -214,6 +214,11 @@ public class DataTree<T> extends ATree<DataTree<?>> {
 
     @Override
     public String toString() {
-        return "Attribute: " + attribute + " - Value: " + ValueUtils.toStringValue(value);
+        return String.format(
+                "%s.%s = %s (%s)",
+                attribute.getNamespace(),
+                attribute.getSimpleName(),
+                ValueUtils.toStringValue(value),
+                attribute.getClassType());
     }
 }
