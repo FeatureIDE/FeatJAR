@@ -36,7 +36,7 @@ import de.featjar.formula.assignment.BooleanAssignmentGroups;
 import de.featjar.formula.assignment.BooleanAssignmentList;
 import de.featjar.formula.assignment.conversion.ComputeBooleanClauseList;
 import de.featjar.formula.io.FormulaFormats;
-import de.featjar.formula.io.csv.BooleanAssignmentGroupsCSVFormat;
+import de.featjar.formula.io.csv.BooleanAssignmentGroupsGroupedCSVFormat;
 import de.featjar.formula.structure.IFormula;
 import java.io.IOException;
 import java.nio.file.Path;
@@ -85,11 +85,11 @@ public class ProjectionCommand extends ACommand {
         Set<String> sliceLiterals = new LinkedHashSet<>(
                 optionParser.getResult(LITERALS_SLICE_OPTION).orElse(List.of()));
         Duration timeout = optionParser.getResult(TIMEOUT_OPTION).get();
-        BooleanAssignmentGroupsCSVFormat format = new BooleanAssignmentGroupsCSVFormat();
+        BooleanAssignmentGroupsGroupedCSVFormat format = new BooleanAssignmentGroupsGroupedCSVFormat();
 
         IFormula inputFormula = optionParser
                 .getResult(INPUT_OPTION)
-                .flatMap(p -> IO.load(p, FormulaFormats.getInstance()))
+                .mapResult(p -> IO.load(p, FormulaFormats.getInstance()))
                 .orElseThrow();
 
         BooleanAssignmentList cnf =

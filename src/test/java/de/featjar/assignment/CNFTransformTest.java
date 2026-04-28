@@ -30,7 +30,7 @@ import de.featjar.formula.assignment.BooleanAssignmentList;
 import de.featjar.formula.assignment.conversion.ComputeBooleanClauseList;
 import de.featjar.formula.computation.ComputeCNFFormula;
 import de.featjar.formula.computation.ComputeNNFFormula;
-import de.featjar.formula.io.KConfigReaderFormat;
+import de.featjar.formula.io.kconfig.KConfigReaderFormat;
 import de.featjar.formula.structure.IFormula;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;

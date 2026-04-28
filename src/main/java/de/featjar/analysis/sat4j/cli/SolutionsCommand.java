@@ -29,7 +29,7 @@ import de.featjar.base.io.format.IFormat;
 import de.featjar.formula.assignment.BooleanAssignmentGroups;
 import de.featjar.formula.assignment.BooleanAssignmentList;
 import de.featjar.formula.io.BooleanAssignmentGroupsFormats;
-import de.featjar.formula.io.csv.BooleanAssignmentGroupsUngroupedCSVFormat;
+import de.featjar.formula.io.csv.BooleanAssignmentGroupsCSVFormat;
 import java.util.Optional;
 
 /**
@@ -63,7 +63,7 @@ public class SolutionsCommand extends ASAT4JAnalysisCommand<BooleanAssignmentGro
 
     public static final Option<String> FORMAT = Option.newStringEnumOption(
                     "format", BooleanAssignmentGroupsFormats.getInstance().getNames())
-            .setDefaultValue(new BooleanAssignmentGroupsUngroupedCSVFormat().getName())
+            .setDefaultValue(new BooleanAssignmentGroupsCSVFormat().getName())
             .setDescription("Format of the output");
 
     @Override
@@ -97,7 +97,7 @@ public class SolutionsCommand extends ASAT4JAnalysisCommand<BooleanAssignmentGro
     protected IFormat<BooleanAssignmentGroups> getOuputFormat(OptionList optionParser) {
         return BooleanAssignmentGroupsFormats.getInstance()
                 .getFormatByName(optionParser.get(FORMAT))
-                .orElse(new BooleanAssignmentGroupsUngroupedCSVFormat());
+                .orElse(new BooleanAssignmentGroupsCSVFormat());
     }
 
     @Override
