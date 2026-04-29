@@ -20,10 +20,15 @@
  */
 package de.featjar.feature.model;
 
+import java.util.Collection;
 import java.util.function.Predicate;
 
 public interface IFeatureModelElementFilter extends Predicate<IFeatureModelElement> {
 
     public static final IFeatureModelElementFilter ALL = e -> true;
     public static final IFeatureModelElementFilter NONE = e -> false;
+
+    public static FeatureNameListFilter featuresByName(Collection<String> featureNames) {
+        return new FeatureNameListFilter(featureNames);
+    }
 }
