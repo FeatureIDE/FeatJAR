@@ -117,6 +117,20 @@ public class Configuration implements Cloneable {
         }
 
         /**
+         * {@return the whether manual is defined but automatic is not}
+         */
+        public boolean isManual() {
+            return automatic == null && manual != null;
+        }
+
+        /**
+         * {@return the whether automatic is defined}
+         */
+        public boolean isAutomatic() {
+            return automatic != null;
+        }
+
+        /**
          * Sets the manual value.
          * @param selection the value
          *
@@ -264,6 +278,85 @@ public class Configuration implements Cloneable {
     }
 
     /**
+     * {@return a list of all features that have a manual and no automatic value}
+     */
+    public List<String> getManual() {
+        return variableMap.stream()
+                .filter(e -> selection(e.getFirst()).isManual())
+                .map(e -> e.getSecond())
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * {@return a list of all features that have a automatic value}
+     */
+    public List<String> getAutomatic() {
+        return variableMap.stream()
+                .filter(e -> selection(e.getFirst()).isAutomatic())
+                .map(e -> e.getSecond())
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * {@return a list of all selected features}
+     *
+     * That is the name of all features of type {@code Boolean} with the value {@code true}
+     */
+    public List<String> getSelected() {
+        return variableMap.stream()
+                .filter(e -> selection(e.getFirst()).getSelection() == Boolean.TRUE)
+                .map(e -> e.getSecond())
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * {@return a list of all deselected features}
+     *
+     * That is the name of all features of type {@code Boolean} with the value {@code false}
+     */
+    public List<String> getDeselected() {
+        return variableMap.stream()
+                .filter(e -> selection(e.getFirst()).getSelection() == Boolean.TRUE)
+                .map(e -> e.getSecond())
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * {@return a list of all undefined features}
+     *
+     * That is the name of all features of any type that have no value.
+     */
+    public List<String> getUndefined() {
+        return variableMap.stream()
+                .filter(e -> selection(e.getFirst()).getSelection() == null)
+                .map(e -> e.getSecond())
+                .collect(Collectors.toList());
+    }
+
+    private Selection<?> selection(int index) {
+        return selections.get(index);
+    }
+
+    private Stream<Selection<?>> getSelectionStream() {
+        return selections.stream().filter(Objects::nonNull);
+    }
+
+    public Result<Selection<?>> getSelection(String name) {
+        return Result.ofNullable(name).mapResult(variableMap::get).map(selections::get);
+    }
+
+    public Selection<?> get(String name) {
+        return getSelection(name).orElseThrow();
+    }
+
+    public Result<Selection<?>> getSelection(IFeature feature) {
+        return Result.ofNullable(feature)
+                .mapResult(IFeature::getName)
+                .mapResult(variableMap::get)
+                .map(selections::get);
+    }
+
+    /**
      * Adopts the values from this assignment.
      *
      * @param assignment the assignment to adopt
@@ -378,41 +471,6 @@ public class Configuration implements Cloneable {
     }
 
     /**
-     * {@return a list of all features that have a manual and no automatic value}
-     */
-    public List<Selection<?>> getManualFeatures() {
-        return getSelectionStream()
-                .filter(f -> f.getAutomatic() == null && f.getManual() != null)
-                .collect(Collectors.toList());
-    }
-
-    /**
-     * {@return a list of all features that have a automatic value}
-     */
-    public List<Selection<?>> getAutomaticFeatures() {
-        return getSelectionStream().filter(f -> f.getAutomatic() != null).collect(Collectors.toList());
-    }
-
-    private Stream<Selection<?>> getSelectionStream() {
-        return selections.stream().filter(Objects::nonNull);
-    }
-
-    public Result<Selection<?>> getSelection(String name) {
-        return Result.ofNullable(name).mapResult(variableMap::get).map(selections::get);
-    }
-
-    public Selection<?> get(String name) {
-        return getSelection(name).orElseThrow();
-    }
-
-    public Result<Selection<?>> getSelection(IFeature feature) {
-        return Result.ofNullable(feature)
-                .mapResult(IFeature::getName)
-                .mapResult(variableMap::get)
-                .map(selections::get);
-    }
-
-    /**
      * Turns all automatic into manual values.
      */
     public void makeManual() {
@@ -458,6 +516,14 @@ public class Configuration implements Cloneable {
             }
         }
         return new Configuration(this);
+    }
+
+    public BooleanAssignment toBooleanAssignment() {
+        return new BooleanAssignment(getVariableMap().stream()
+                .filter(e -> selection(e.getFirst()).getType() == Boolean.class)
+                .filter(e -> selection(e.getFirst()).getSelection() != null)
+                .mapToInt(e -> selection(e.getFirst()).getSelection() == Boolean.TRUE ? e.getFirst() : -e.getFirst())
+                .toArray());
     }
 
     @Override

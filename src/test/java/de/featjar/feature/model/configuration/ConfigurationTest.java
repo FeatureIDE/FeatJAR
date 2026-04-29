@@ -337,8 +337,8 @@ public class ConfigurationTest {
         testConfiguration.reset();
 
         // selected, unselected and automatic features should be empty after resetValues()
-        assertTrue(testConfiguration.getManualFeatures().isEmpty());
-        assertTrue(testConfiguration.getAutomaticFeatures().isEmpty());
+        assertTrue(testConfiguration.getManual().isEmpty());
+        assertTrue(testConfiguration.getAutomatic().isEmpty());
 
         assertEquals(null, testConfiguration.get("root").getSelection());
         assertEquals(null, testConfiguration.get("Test1").getSelection());
@@ -363,7 +363,7 @@ public class ConfigurationTest {
         testConfiguration.resetAutomatic();
 
         // there should be no automatic features anymore
-        assertTrue(testConfiguration.getAutomaticFeatures().isEmpty());
+        assertTrue(testConfiguration.getAutomatic().isEmpty());
 
         assertTrue(testConfiguration.get("Test1").getAutomatic() == null);
         assertTrue(testConfiguration.get("Test2").getAutomatic() == null);
