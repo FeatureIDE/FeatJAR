@@ -71,7 +71,7 @@ public class ComputeCompleteSample extends AComputation<BooleanAssignmentList> {
                 Computations.of(new BooleanAssignmentList(null, 0)),
                 Computations.of(Duration.ZERO),
                 Computations.of(ISelectionStrategy.NonParameterStrategy.FAST_RANDOM),
-                Computations.of(1));
+                Computations.of(1L));
     }
 
     protected Random random;
@@ -121,7 +121,10 @@ public class ComputeCompleteSample extends AComputation<BooleanAssignmentList> {
             SAT4JAssignment assignment = solver.getAssignment();
             final int orgAssignmentSize = assignment.size();
             for (int i = 0; i < literals.length; i++) {
-                assignment.add(literals[i]);
+                int l = literals[i];
+                if (l != 0) {
+                    assignment.add(l);
+                }
             }
             try {
                 Result<BooleanSolution> hasSolution = solver.findSolution();
@@ -134,7 +137,7 @@ public class ComputeCompleteSample extends AComputation<BooleanAssignmentList> {
                     return Result.empty(new RuntimeTimeoutException());
                 }
             } finally {
-                solver.getAssignment().clear(orgAssignmentSize);
+                assignment.clear(orgAssignmentSize);
             }
             progress.incrementCurrentStep();
         }
