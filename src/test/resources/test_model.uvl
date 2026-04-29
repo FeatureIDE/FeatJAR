@@ -1,0 +1,25 @@
+features
+        root
+                optional
+                        alternative
+                                alternative
+                                        altA
+                                        altB
+                                        altC
+                        and
+                                mandatory
+                                        andMandatoryA
+                                                optional
+                                                        andMandatoryAOptionalA
+                                optional
+                                        andOptionalB
+                        or
+                                or
+                                        orA
+                                        orB
+                                        orC
+
+constraints
+        !(altC) & !(andMandatoryAOptionalA)
+        orB => orC
+
