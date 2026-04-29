@@ -20,18 +20,20 @@
  */
 package de.featjar.feature.model;
 
+import de.featjar.base.data.Attribute;
 import de.featjar.base.data.IAttribute;
 import de.featjar.base.data.Range;
 import de.featjar.base.tree.structure.ARootedTree;
 import de.featjar.base.tree.structure.ITree;
 import de.featjar.feature.model.FeatureTree.Group;
+import de.featjar.feature.model.IFeatureTree.IMutableFeatureTree;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-public class PseudoFeatureTreeRoot extends ARootedTree<IFeatureTree> implements IFeatureTree {
+public class PseudoFeatureTreeRoot extends ARootedTree<IFeatureTree> implements IMutableFeatureTree {
 
     private final PseudoRootFeature feature;
 
@@ -125,4 +127,35 @@ public class PseudoFeatureTreeRoot extends ARootedTree<IFeatureTree> implements 
         clearChildren();
         return children;
     }
+
+    @Override
+    public <S> void setAttributeValue(Attribute<S> attribute, S value) {}
+
+    @Override
+    public <S> S removeAttributeValue(Attribute<S> attribute) {
+        return null;
+    }
+
+    @Override
+    public void setParentGroupID(int groupID) {}
+
+    @Override
+    public void setFeatureCardinality(Range featureRange) {}
+
+    @Override
+    public void makeMandatory() {}
+
+    @Override
+    public void makeOptional() {}
+
+    @Override
+    public int addCardinalityGroup(int lowerBound, int upperBound) {
+        return 0;
+    }
+
+    @Override
+    public void removeCardinalityGroup(int groupID, int substituteGroupID) {}
+
+    @Override
+    public void toCardinalityGroup(int groupID, int lowerBound, int upperBound) {}
 }

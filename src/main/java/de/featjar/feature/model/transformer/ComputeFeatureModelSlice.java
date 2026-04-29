@@ -108,11 +108,10 @@ public class ComputeFeatureModelSlice extends AComputation<IFeatureModel> {
         for (IFeatureTree rootFeature : slicedModel.getRoots()) {
             PseudoFeatureTreeRoot pseudoRoot = new PseudoFeatureTreeRoot(slicedModel);
             pseudoRoot.addChild(rootFeature);
-            pseudoRoot.postOrderStream().forEach(node -> {
-                if (!featureFilter.test(node.getFeature())) {
-                    node.mutate().removeFromTree();
-                }
-            });
+            rootFeature
+                    .postOrderStream()
+                    .filter(node -> !featureFilter.test(node.getFeature()))
+                    .forEach(node -> node.mutate().removeFromTree());
             newRoots.addAll(pseudoRoot.detach());
         }
 
