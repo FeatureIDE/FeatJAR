@@ -230,8 +230,8 @@ public class Configuration implements Cloneable {
      * Creates an empty configuration.
      */
     public Configuration() {
-        variableMap = new VariableMap();
-        selections = new ArrayList<>();
+        this.variableMap = new VariableMap();
+        this.selections = new ArrayList<>();
     }
 
     /**
@@ -240,8 +240,8 @@ public class Configuration implements Cloneable {
      * @param featureModel the underlying feature model.
      */
     public Configuration(IFeatureModel featureModel) {
-        variableMap = new VariableMap();
-        selections = new ArrayList<>(featureModel.getNumberOfFeatures());
+        this.variableMap = new VariableMap();
+        this.selections = new ArrayList<>(featureModel.getNumberOfFeatures());
         for (final IFeature child : featureModel.getFeatures()) {
             String featureName = child.getName().get();
             int index = variableMap.add(featureName);
@@ -258,7 +258,7 @@ public class Configuration implements Cloneable {
      * @param configuration The configuration to clone
      */
     protected Configuration(Configuration configuration) {
-        variableMap = configuration.variableMap.clone();
+        this.variableMap = configuration.variableMap.clone();
         selections = new ArrayList<>(configuration.selections.size());
         for (Selection<?> selection : configuration.selections) {
             selections.add(selection != null ? selection.clone() : null);
@@ -272,8 +272,12 @@ public class Configuration implements Cloneable {
      * @param variableMap mapping of variable names to indices. Is used to link a literal index in a {@link BooleanAssignment}.
      */
     public Configuration(BooleanAssignment booleanAssignment, VariableMap variableMap) {
-        variableMap = variableMap.clone();
-        selections = new ArrayList<>(variableMap.maxIndex());
+        this.variableMap = variableMap.clone();
+        int maxIndex = variableMap.maxIndex();
+        selections = new ArrayList<>(maxIndex);
+        for (int i = 0; i <= maxIndex; i++) {
+            selections.add(null);
+        }
         adopt(booleanAssignment, variableMap);
     }
 
@@ -282,6 +286,7 @@ public class Configuration implements Cloneable {
      */
     public List<String> getManual() {
         return variableMap.stream()
+                .filter(e -> selection(e.getFirst()) != null)
                 .filter(e -> selection(e.getFirst()).isManual())
                 .map(e -> e.getSecond())
                 .collect(Collectors.toList());
@@ -292,6 +297,7 @@ public class Configuration implements Cloneable {
      */
     public List<String> getAutomatic() {
         return variableMap.stream()
+                .filter(e -> selection(e.getFirst()) != null)
                 .filter(e -> selection(e.getFirst()).isAutomatic())
                 .map(e -> e.getSecond())
                 .collect(Collectors.toList());
@@ -304,6 +310,7 @@ public class Configuration implements Cloneable {
      */
     public List<String> getSelected() {
         return variableMap.stream()
+                .filter(e -> selection(e.getFirst()) != null)
                 .filter(e -> selection(e.getFirst()).getSelection() == Boolean.TRUE)
                 .map(e -> e.getSecond())
                 .collect(Collectors.toList());
@@ -316,7 +323,8 @@ public class Configuration implements Cloneable {
      */
     public List<String> getDeselected() {
         return variableMap.stream()
-                .filter(e -> selection(e.getFirst()).getSelection() == Boolean.TRUE)
+                .filter(e -> selection(e.getFirst()) != null)
+                .filter(e -> selection(e.getFirst()).getSelection() == Boolean.FALSE)
                 .map(e -> e.getSecond())
                 .collect(Collectors.toList());
     }
@@ -328,6 +336,7 @@ public class Configuration implements Cloneable {
      */
     public List<String> getUndefined() {
         return variableMap.stream()
+                .filter(e -> selection(e.getFirst()) != null)
                 .filter(e -> selection(e.getFirst()).getSelection() == null)
                 .map(e -> e.getSecond())
                 .collect(Collectors.toList());
@@ -374,7 +383,7 @@ public class Configuration implements Cloneable {
                     Selection<?> selection = selections.get(index);
                     if (selection == null) {
                         selection = new Selection<>(Boolean.class);
-                        selections.add(index, selection);
+                        selections.set(index, selection);
                     }
                     selection.setManual(adapedLiteral > 0);
                 }
@@ -398,7 +407,7 @@ public class Configuration implements Cloneable {
                 Selection<?> selection = selections.get(index);
                 if (selection == null) {
                     selection = new Selection<>(Boolean.class);
-                    selections.add(index, selection);
+                    selections.set(index, selection);
                 }
                 selection.setManual(literal > 0);
             }
@@ -424,7 +433,7 @@ public class Configuration implements Cloneable {
                     Selection<?> selection = selections.get(adapedIndex);
                     if (selection == null) {
                         selection = otherSelection.clone();
-                        selections.add(adapedIndex, selection);
+                        selections.set(adapedIndex, selection);
                     } else {
                         selection.adopt(otherSelection);
                     }
@@ -456,7 +465,7 @@ public class Configuration implements Cloneable {
                     for (int i = selections.size(); i <= adapedIndex; i++) {
                         newSelections.add(null);
                     }
-                    newSelections.add(adapedIndex, otherSelection.clone());
+                    newSelections.set(adapedIndex, otherSelection.clone());
                 }
             }
         }
