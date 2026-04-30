@@ -4,9 +4,9 @@ plugins {
 
 dependencies {
     api 'de.featjar:formula'
-    api 'org.sosy-lab:java-smt:3.12.0'
+    implementation 'org.sosy-lab:java-smt:3.12.0'
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    api testFixtures('de.featjar:formula')
+    testImplementation testFixtures('de.featjar:formula')
 }
 
 license {
