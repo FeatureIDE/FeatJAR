@@ -30,22 +30,23 @@ import de.featjar.base.computation.Computations;
 import de.featjar.base.computation.IComputation;
 import de.featjar.base.data.Result;
 import de.featjar.base.io.IO;
+import de.featjar.base.io.format.IFormat;
 import de.featjar.formula.VariableMap;
 import de.featjar.formula.assignment.BooleanAssignment;
-import de.featjar.formula.assignment.BooleanAssignmentGroups;
 import de.featjar.formula.assignment.BooleanAssignmentList;
 import de.featjar.formula.assignment.conversion.ComputeBooleanClauseList;
+import de.featjar.formula.io.BooleanAssignmentListFormats;
 import de.featjar.formula.io.FormulaFormats;
-import de.featjar.formula.io.csv.BooleanAssignmentGroupsGroupedCSVFormat;
+import de.featjar.formula.io.csv.BooleanAssignmentListGroupedCSVFormat;
 import de.featjar.formula.structure.IFormula;
 import java.io.IOException;
-import java.nio.file.Path;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Removes literals of a given formula using SAT4J.
@@ -77,15 +78,22 @@ public class ProjectionCommand extends ACommand {
             .setValidator(timeout -> !timeout.isNegative())
             .setDefaultValue(Duration.ZERO);
 
+    public static final Option<String> OUTPUT_FORMAT = Option.newStringEnumOption(
+                    "output-format",
+                    BooleanAssignmentListFormats.getInstance().getExtensions().stream()
+                            .filter(IFormat::supportsWrite)
+                            .map(IFormat::getName)
+                            .collect(Collectors.toList()))
+            .setDefaultValue(new BooleanAssignmentListGroupedCSVFormat().getName())
+            .setDescription("Format of the output");
+
     @Override
     public int run(OptionList optionParser) {
-        Path outputPath = optionParser.getResult(OUTPUT_OPTION).orElse(null);
         List<String> projectLiterals =
                 optionParser.getResult(LITERALS_PROJECT_OPTION).orElse(List.of());
         Set<String> sliceLiterals = new LinkedHashSet<>(
                 optionParser.getResult(LITERALS_SLICE_OPTION).orElse(List.of()));
         Duration timeout = optionParser.getResult(TIMEOUT_OPTION).get();
-        BooleanAssignmentGroupsGroupedCSVFormat format = new BooleanAssignmentGroupsGroupedCSVFormat();
 
         IFormula inputFormula = optionParser
                 .getResult(INPUT_OPTION)
@@ -140,13 +148,12 @@ public class ProjectionCommand extends ACommand {
         if (result.isPresent()) {
             BooleanAssignmentList clauseList = result.get().remap(slicedVariableMap);
             try {
-                if (outputPath == null || outputPath.toString().equals("results")) {
-                    String string = format.serialize(new BooleanAssignmentGroups(slicedVariableMap, clauseList))
-                            .orElseThrow();
-                    FeatJAR.log().message(string);
-                } else {
-                    IO.save(new BooleanAssignmentGroups(slicedVariableMap, clauseList), outputPath, format);
-                }
+                writeToOutput(
+                        clauseList,
+                        BooleanAssignmentListFormats.getInstance()
+                                .getFormatByName(optionParser.get(OUTPUT_FORMAT))
+                                .orElseThrow(),
+                        optionParser);
             } catch (IOException | RuntimeException e) {
                 FeatJAR.log().error(e);
                 return FeatJAR.ERROR_WRITING_RESULT;
