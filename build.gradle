@@ -3,7 +3,7 @@ plugins {
 }
 
 dependencies {
-    api 'net.tascalate:net.tascalate.concurrent:0.9.6'
+    implementation 'net.tascalate:net.tascalate.concurrent:0.9.6'
 }
 
 license {
