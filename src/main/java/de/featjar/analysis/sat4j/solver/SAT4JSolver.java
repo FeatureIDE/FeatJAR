@@ -150,14 +150,20 @@ public abstract class SAT4JSolver implements de.featjar.analysis.ISolver {
     }
 
     public Result<Boolean> hasSolution(int... integers) {
-        return hasSolution(new VecInt(integers));
-    }
-
-    protected Result<Boolean> hasSolution(VecInt integers) {
         if (trivialContradictionFound) {
             return Result.of(Boolean.FALSE);
         }
+        return callSat4J(new VecInt(integers));
+    }
 
+    public Result<Boolean> hasSolution() {
+        if (trivialContradictionFound) {
+            return Result.of(Boolean.FALSE);
+        }
+        return callSat4J(assignment.getIntegers());
+    }
+
+    private Result<Boolean> callSat4J(VecInt integers) {
         try {
             FeatJAR.log().debug("calling SAT4J");
             if (internalSolver.isSatisfiable(integers, globalTimeout)) {
@@ -174,16 +180,12 @@ public abstract class SAT4JSolver implements de.featjar.analysis.ISolver {
         }
     }
 
-    public Result<Boolean> hasSolution() {
-        return hasSolution(assignment.getIntegers());
-    }
-
     /**
      * Does only consider the given {@code assignment} and <b>not</b> the global
      * assignment variable of the solver.
      */
     public Result<Boolean> hasSolution(BooleanAssignment assignment) {
-        return hasSolution(new VecInt(assignment.get()));
+        return hasSolution(assignment.get());
     }
 
     public BooleanSolution getSolution() {
