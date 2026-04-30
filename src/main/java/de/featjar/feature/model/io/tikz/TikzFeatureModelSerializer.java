@@ -204,8 +204,8 @@ public class TikzFeatureModelSerializer {
 
     /**
      * Set the list of attributes that are shown in the Tikz output.
-     * If no inclusion list is provided, all attributes will be shown that are not explicitly {@link #setAttributeExclusionList(List) excluded}.
-     * @param attributeNames the list of attribute names
+     * If no inclusion list is provided, all attributes will be shown that are not explicitly {@link #setAttributeExclusionList(Predicate) excluded}.
+     * @param include a filter on attributes to include
      */
     public void setAttributeInclusion(Predicate<Attribute<?>> include) {
         this.include = Objects.requireNonNull(include);
@@ -213,7 +213,7 @@ public class TikzFeatureModelSerializer {
 
     /**
      * Set the list of attributes that are **not** shown in the Tikz output.
-     * @param attributeNames the list of attribute names
+     * @param exclude a filter on attributes to exclude
      */
     public void setAttributeExclusionList(Predicate<Attribute<?>> exclude) {
         this.exclude = Objects.requireNonNull(exclude);
