@@ -492,6 +492,9 @@ public class RangeMap<T> implements Cloneable {
                     normalizedIndex++;
                 }
             }
+            if (indexToObject.size() > normalizedIndex) {
+                indexToObject.subList(normalizedIndex, indexToObject.size()).clear();
+            }
             updateObjectToIndex();
         }
     }
