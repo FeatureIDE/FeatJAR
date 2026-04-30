@@ -30,8 +30,6 @@ import de.featjar.base.computation.Computations;
 import de.featjar.base.data.Result;
 import de.featjar.formula.structure.Expressions;
 import de.featjar.formula.structure.IFormula;
-import de.featjar.formula.structure.connective.And;
-import de.featjar.formula.structure.connective.BiImplies;
 import de.featjar.formula.structure.connective.Implies;
 import de.featjar.formula.structure.connective.Or;
 import de.featjar.formula.structure.predicate.Literal;
@@ -53,18 +51,15 @@ public class SharpSATSolverTest extends Common {
     }
 
     @Test
-    public void formulaHas3Solutions() {
+    public void formulaHas7Solutions() {
         final Literal a = Expressions.literal("a");
         final Literal b = Expressions.literal("b");
         final Literal c = Expressions.literal("c");
 
         final Implies implies1 = new Implies(a, b);
-        final Or or = new Or(implies1, c);
-        final BiImplies equals = new BiImplies(a, b);
-        final And and = new And(equals, c);
-        final Implies formula = new Implies(or, and);
+        final Or formula = new Or(implies1, c);
 
-        checkCount(formula, 3);
+        checkCount(formula, 7);
     }
 
     @Test
