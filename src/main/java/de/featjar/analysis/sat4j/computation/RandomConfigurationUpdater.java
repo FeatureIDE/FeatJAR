@@ -52,7 +52,7 @@ public class RandomConfigurationUpdater implements IConfigurationUpdater {
                 .map(ComputeCoreSAT4J::new)
                 .set(ComputeCoreSAT4J.ASSUMED_ASSIGNMENT, partialSolution)
                 .computeResult()
-                .map(a -> a.getFirst().toSolution(model.getVariableMap().size()));
+                .map(a -> a.getFirst().toSolution(model.getVariableMap().maxIndex()));
     }
 
     @Override
