@@ -1,5 +1,5 @@
 // pass common tasks through to included builds
-['assemble', 'test', 'build', 'clean', 'licenseFormatMain', 'licenseFormatTest', 'spotlessApply', 'publishToMavenLocal', 'release'].each { registerTaskForRepo it }
+['assemble', 'test', 'build', 'clean', 'javadoc', 'licenseFormatMain', 'licenseFormatTest', 'spotlessApply', 'publishToMavenLocal', 'release'].each { registerTaskForRepo it }
 
 def registerTaskForRepo(taskName) {
     tasks.register(taskName) {

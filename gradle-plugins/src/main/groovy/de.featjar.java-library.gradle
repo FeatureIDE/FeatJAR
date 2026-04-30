@@ -1,7 +1,6 @@
 /**
  * Contains conventions specific to Java libraries.
  */
-
 plugins {
     id 'de.featjar.java'
     id 'java-library'

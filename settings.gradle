@@ -4,7 +4,12 @@ pluginManagement {
 
 // add all buildable subdirectories as included builds
 rootDir.eachDir { dir ->
-    if (dir.toPath().resolve('build.gradle').toFile().exists()) {
-        includeBuild dir.name
-    }
+    if (dir.name.equals('all')
+     || dir.name.equals('feature-model-extra')) {
+		return
+	}
+	var buildFile = dir.toPath().resolve('build.gradle').toFile()
+	if (buildFile.exists() && buildFile.text.contains('id \'de.featjar.')) {
+		includeBuild dir.name
+	}
 }

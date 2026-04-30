@@ -26,6 +26,10 @@ tasks.named('shadowJar', com.github.jengelman.gradle.plugins.shadow.tasks.Shadow
   }
 }
 
+shadow {
+  addShadowVariantIntoJavaComponent = false
+}
+
 project.tasks.register('allSources', Zip) {
     group = 'Build'
     archiveBaseName = project.name

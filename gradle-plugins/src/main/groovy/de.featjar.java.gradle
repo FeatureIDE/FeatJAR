@@ -10,10 +10,6 @@ plugins {
     id 'pl.allegro.tech.build.axion-release'
 }
 
-repositories {
-    mavenCentral()
-}
-
 scmVersion {
     repository {
 		directory.set(project.rootProject.file('../').absolutePath)
@@ -23,16 +19,22 @@ scmVersion {
 group = 'de.featjar'
 version = scmVersion.version
 
+repositories {
+    mavenCentral()
+    mavenLocal()
+}
+
 dependencies {
-    testImplementation 'org.junit.jupiter:junit-jupiter:5.9.2'
-    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-    testImplementation 'org.mockito:mockito-inline:4.7.0'
+	testImplementation 'org.junit.jupiter:junit-jupiter:6.0.3'
+	testImplementation 'org.mockito:mockito-core:5.23.0'
+	testRuntimeOnly 'org.junit.platform:junit-platform-launcher:6.0.3'
 }
 
 java {
-    sourceCompatibility = 1.11
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
     withSourcesJar()
-    //withJavadocJar()
+    withJavadocJar()
 }
 
 javadoc {
@@ -45,25 +47,18 @@ test {
     ignoreFailures = true
 }
 
-task copyBinaries (type: Copy) {
-    from 'src/main/resources/bin/.'
-    into System.getProperty('user.home') + '/.featjar-bin'
-    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-    filePermissions {
-     user {
-         write = true
-         read = true
-         execute = true
-     }
-     other.execute = false
- }
-}
-tasks.matching { it != copyBinaries }.all { it.dependsOn copyBinaries }
-
 publishing {
     publications {
         maven(MavenPublication) {
-            from(components.java)
+            from components.java
+            versionMapping {
+                usage('java-api') {
+                    fromResolutionOf('runtimeClasspath')
+                }
+                usage('java-runtime') {
+                    fromResolutionResult()
+                }
+            }
         }
     }
 }
@@ -84,13 +79,28 @@ license {
     }
 }
 
+task copyBinaries (type: Copy) {
+    from 'src/main/resources/bin/.'
+    into System.getProperty('user.home') + '/.featjar-bin'
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    filePermissions {
+     user {
+         write = true
+         read = true
+         execute = true
+     }
+     other.execute = false
+ }
+}
+tasks.matching { it != copyBinaries }.all { it.dependsOn copyBinaries }
+
 spotless {
     enforceCheck = false // TODO: discuss whether to enable always
     lineEndings = 'GIT_ATTRIBUTES_FAST_ALLSAME'
     java {
         importOrder()
         removeUnusedImports()
-        palantirJavaFormat() // TODO: discuss format
+    	palantirJavaFormat() // TODO: discuss format
     }
 }
 
