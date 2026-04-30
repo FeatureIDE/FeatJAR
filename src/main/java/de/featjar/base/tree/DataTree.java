@@ -186,7 +186,7 @@ public class DataTree<T> extends ATree<DataTree<?>> {
     /**
      * {@return the child of this node with the specified attribute name, if any}
      *
-     * @param idx the index
+     * @param name the simple name of the attribute
      */
     public Result<DataTree<?>> getChild(String name) {
         for (DataTree<?> child : getChildren()) {

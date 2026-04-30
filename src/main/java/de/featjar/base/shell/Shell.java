@@ -307,9 +307,8 @@ public class Shell {
      * Handles special keys. ESC cancels every command. Ensures that arrow keys work as in a normal shell (including a terminal history).
      * Page keys are ignored. Interrupts do not need special treatment and, therefore, work as usual.
      *
-     * @param prompt the message that is shown in the terminal
      * @return all normal keys combined into a string
-     * @throws AbortException
+     * @throws AbortException if the user aborts the input
      */
     public static Optional<String> readCommand() throws AbortException {
         FeatJAR.log().noLineBreakMessage(START_OF_TERMINAL_LINE);
@@ -322,9 +321,8 @@ public class Shell {
      * Handles special keys. ESC cancels every command. Ensures that arrow keys work as in a normal shell (including a terminal history).
      * Page keys are ignored. Interrupts do not need special treatment and, therefore, work as usual.
      *
-     * @param prompt the message that is shown in the terminal
      * @return all normal keys combined into a string
-     * @throws AbortException
+     * @throws AbortException if the user aborts the input
      */
     public static Optional<String> readText() throws AbortException {
         return Shell.getInstance().readShellCommand("");

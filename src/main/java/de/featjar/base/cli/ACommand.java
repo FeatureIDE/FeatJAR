@@ -101,10 +101,8 @@ public abstract class ACommand implements ICommand {
     /**
      * Write result to output path or console.
      * @param <T> type of the result
-     * @param outputResult the result of the command execution
      * @param ouputFormat format to store the result in
      * @param optionParser the option list
-     * @return an exit code
      */
     protected final <T> void writeToOutput(T output, IFormat<T> ouputFormat, OptionList optionParser)
             throws IOException {

@@ -88,7 +88,7 @@ public class ExtensionList<T extends IExtension> implements Iterable<T> {
 
     /**
      * {@return all extensions installed at this extension point}
-     * The list is in the same order as the extensions were installed with {@link #installExtension(IExtension)}.
+     * The list is in the same order as the extensions were installed with {@link #addExtension(IExtension)}.
      */
     public List<T> getExtensions() {
         return extensions;

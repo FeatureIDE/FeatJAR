@@ -25,7 +25,7 @@ import de.featjar.base.io.format.AFormats;
 import de.featjar.base.tree.DataTree;
 
 /**
- * Extension point for {@link AFormats formats} for {@link BooleanAssignmentGroups}.
+ * Extension point for {@link AFormats formats} for {@link DataTree}.
  *
  * @author Sebastian Krieter
  */

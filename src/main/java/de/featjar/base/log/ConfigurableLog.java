@@ -75,8 +75,8 @@ public class ConfigurableLog implements Log, IInitializer {
      * Configures a log.
      * <ul>
      * <li>Allows to map {@link Log.Verbosity verbosities} to streams and log files with
-     * {@link Configuration#logToStream(PrintStream, Verbosity...) logToStream} and
-     * {@link Configuration#logToFile(Path, Verbosity...) logToFile}. Unmapped verbosities are not logged.</li>
+     * {@link Configuration#logToStream(PrintStream, String, Log.Verbosity...) logToStream} and
+     * {@link Configuration#logToFile(Path, Log.Verbosity...) logToFile}. Unmapped verbosities are not logged.</li>
      * <li>Allows to set {@link IFormatter formatters} with {@link Configuration#addFormatter(IFormatter) addFormatter}.</li>
      * <li>Allows to enable the stack trace for error logging with {@link Configuration#setPrintStacktrace(boolean) setPrintStacktrace}.</li>
      * </ul>
