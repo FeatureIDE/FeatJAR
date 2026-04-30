@@ -5,7 +5,7 @@ plugins {
 
 dependencies {
     api 'de.featjar:formula'
-    api testFixtures('de.featjar:formula')
+    testImplementation testFixtures('de.featjar:formula')
 }
 
 license {
