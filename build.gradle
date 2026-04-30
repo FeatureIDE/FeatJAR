@@ -3,20 +3,12 @@ plugins {
     id 'de.featjar.java-application'
 }
 
-repositories {
-    mavenCentral()
-    mavenLocal()
-}
-
 dependencies {
     api 'de.featjar:feature-model'
     api 'de.featjar:formula-analysis-sat4j'
     api 'de.featjar:formula-analysis-sharpsat'
-    api 'de.featjar:uvl'
-}
-
-java {
-    sourceCompatibility = 1.21
+    testImplementation 'de.featjar:uvl'
+    testImplementation testFixtures('de.featjar:formula')
 }
 
 license {
