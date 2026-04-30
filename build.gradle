@@ -6,8 +6,7 @@ plugins {
 dependencies {
     api 'de.featjar:formula'
     api 'de.featjar:formula-analysis-sat4j'
-    api testFixtures('de.featjar:formula')
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.10.0'
+    testImplementation testFixtures('de.featjar:formula')
 }
 
 license {
