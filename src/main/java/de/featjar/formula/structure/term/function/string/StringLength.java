@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 FeatJAR-Development-Team
+ * Copyright (C) 2026 FeatJAR-Development-Team
  *
  * This file is part of FeatJAR-formula.
  *
@@ -18,21 +18,18 @@
  *
  * See <https://github.com/FeatureIDE/FeatJAR-formula> for further information.
  */
-
 package de.featjar.formula.structure.term.function.string;
 
-import java.util.List;
-import java.util.Optional;
-
 import de.featjar.formula.structure.ANonTerminalExpression;
-import de.featjar.formula.structure.IExpression;
 import de.featjar.formula.structure.IUnaryExpression;
 import de.featjar.formula.structure.term.ITerm;
 import de.featjar.formula.structure.term.function.IFunction;
+import java.util.List;
+import java.util.Optional;
 
 public class StringLength extends ANonTerminalExpression implements IFunction, IUnaryExpression {
-	
-	protected StringLength() {}
+
+    protected StringLength() {}
 
     public StringLength(ITerm variable) {
         super(variable);
@@ -42,7 +39,7 @@ public class StringLength extends ANonTerminalExpression implements IFunction, I
     public String getName() {
         return "len";
     }
-    
+
     @Override
     public Class<Long> getType() {
         return Long.class;
@@ -55,9 +52,7 @@ public class StringLength extends ANonTerminalExpression implements IFunction, I
 
     @Override
     public Optional<Integer> evaluate(List<?> values) {
-    	IExpression variable = this.getChildren().get(0);
-    	Optional<String> value = (Optional<String>) variable.evaluate(values);
-        return Optional.ofNullable(value.orElseThrow().length());
+        return getChildren().get(0).evaluate(values).map(v -> ((String) v).length());
     }
 
     @Override
@@ -65,4 +60,3 @@ public class StringLength extends ANonTerminalExpression implements IFunction, I
         return new StringLength();
     }
 }
-
