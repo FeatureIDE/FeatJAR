@@ -63,6 +63,12 @@ public class SharpSATSolverTest extends Common {
     }
 
     @Test
+    public void carHas7Solutions() {
+        IFormula formula = loadFormula("testFeatureModels/car.xml");
+        checkCount(formula, 7);
+    }
+
+    @Test
     public void gplHas960Solutions() {
         IFormula formula = loadFormula("testFeatureModels/gpl_medium_model.xml");
         checkCount(formula, 960);
