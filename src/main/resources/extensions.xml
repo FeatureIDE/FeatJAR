@@ -11,6 +11,10 @@
 	<point id="de.featjar.formula.io.ExpressionFormats" priority="10">
 	    <extension id="de.featjar.formula.io.kconfig.KConfigReaderFormat" />
 		<extension id="de.featjar.formula.io.textual.ExpressionFormat" />
+		<extension id="de.featjar.formula.io.textual.ExpressionStringFormat" />
+	</point>
+	<point id="de.featjar.formula.io.ExpressionListFormats" priority="10">
+		<extension id="de.featjar.formula.io.textual.ExpressionListStringFormat" />
 	</point>
 	<point id="de.featjar.formula.io.BooleanAssignmentGroupsFormats" priority="10">
 		<extension id="de.featjar.formula.io.binary.BooleanAssignmentGroupsGroupedBinaryFormat" />
