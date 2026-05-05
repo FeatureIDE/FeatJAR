@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<extensions>
+	<point id="de.featjar.base.cli.Commands">
+		<extension id="de.featjar.analysis.ddnnife.cli.CoreCommand" />
+		<extension id="de.featjar.analysis.ddnnife.cli.CountCommand" />
+		<extension id="de.featjar.analysis.ddnnife.cli.RandomSolutionsCommand" />
+		<extension id="de.featjar.analysis.ddnnife.cli.SolutionCommand" />
+		<extension id="de.featjar.analysis.ddnnife.cli.SolutionsCommand" />
+		<extension id="de.featjar.analysis.ddnnife.cli.TWiseCommand" />
+	</point>
+	<point id="de.featjar.base.env.Binaries">
+		<extension id="de.featjar.analysis.ddnnife.bin.DdnnifeBinary" />
+		<extension id="de.featjar.analysis.ddnnife.bin.D4Binary" />
+	</point>
+</extensions>
