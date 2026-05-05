@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<extensions>
+	<point id="de.featjar.base.cli.Commands">
+		<extension id="de.featjar.analysis.sharpsat.cli.CountCommand" />
+	</point>
+	<point id="de.featjar.base.env.Binaries">
+		<extension id="de.featjar.analysis.sharpsat.bin.SharpSATBinary" />
+	</point>
+</extensions>
