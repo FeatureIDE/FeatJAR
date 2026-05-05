@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<extensions>
+	<point id="de.featjar.base.cli.Commands">
+		<extension id="de.featjar.analysis.kissat.cli.SolutionCommand" />
+	</point>
+	<point id="de.featjar.base.env.Binaries">
+		<extension id="de.featjar.analysis.kissat.bin.KissatBinary" />
+	</point>
+</extensions>
