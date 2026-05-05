@@ -374,7 +374,7 @@ public class Configuration implements Cloneable {
     public void adopt(BooleanAssignment assignment, VariableMap variableMap) {
         for (int literal : assignment.get()) {
             if (literal != 0) {
-                int adapedLiteral = variableMap.adapt(literal, this.variableMap, true);
+                int adapedLiteral = variableMap.remap(literal, this.variableMap, true);
                 if (adapedLiteral != 0) {
                     int index = Math.abs(adapedLiteral);
                     for (int i = selections.size(); i <= index; i++) {
@@ -425,7 +425,7 @@ public class Configuration implements Cloneable {
         while (it.hasNext()) {
             Selection<?> otherSelection = it.next();
             if (otherSelection != null) {
-                int adapedIndex = configuration.variableMap.adapt(it.previousIndex(), variableMap, true);
+                int adapedIndex = configuration.variableMap.remap(it.previousIndex(), variableMap, true);
                 if (adapedIndex != 0) {
                     for (int i = selections.size(); i <= adapedIndex; i++) {
                         selections.add(null);
@@ -460,7 +460,7 @@ public class Configuration implements Cloneable {
         while (it.hasNext()) {
             Selection<?> otherSelection = it.next();
             if (otherSelection != null) {
-                int adapedIndex = variableMap.adapt(it.previousIndex(), newVariableMap, true);
+                int adapedIndex = variableMap.remap(it.previousIndex(), newVariableMap, true);
                 if (adapedIndex != 0) {
                     for (int i = selections.size(); i <= adapedIndex; i++) {
                         newSelections.add(null);
