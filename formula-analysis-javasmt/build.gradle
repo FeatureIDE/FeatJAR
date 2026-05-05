@@ -1,0 +1,16 @@
+plugins {
+    id 'de.featjar.java-library'
+}
+
+dependencies {
+    api 'de.featjar:formula'
+    implementation 'org.sosy-lab:java-smt:3.12.0'
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    testImplementation testFixtures('de.featjar:formula')
+}
+
+license {
+    ext {
+        licence_url = 'https://github.com/FeatureIDE/FeatJAR-formula-analysis-javasmt'
+    }
+}

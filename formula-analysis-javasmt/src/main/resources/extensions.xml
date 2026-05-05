@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<extensions>
+	<point id="de.featjar.base.cli.Commands">
+		<extension id="de.featjar.analysis.javasmt.cli.CountCommand" />
+		<extension id="de.featjar.analysis.javasmt.cli.SolutionCommand" />
+	</point>
+	<point id="de.featjar.base.env.Binaries">
+		<extension id="de.featjar.analysis.javasmt.bin.JavaSMTBinary" />
+	</point>
+</extensions>
