@@ -1,0 +1,16 @@
+plugins {
+    id 'de.featjar.java-library'
+    id 'de.featjar.java-application'
+}
+
+dependencies {
+    api 'de.featjar:formula'
+    implementation 'org.ow2.sat4j:org.ow2.sat4j.core:2.3.6'
+    testImplementation testFixtures('de.featjar:formula')
+}
+
+license {
+    ext {
+        licence_url = 'https://github.com/FeatureIDE/FeatJAR-formula-analysis-sat4j'
+    }
+}
