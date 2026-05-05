@@ -1,0 +1,13 @@
+plugins {
+    id 'de.featjar.java-library'
+}
+
+dependencies {
+    api 'de.featjar:base'
+}
+
+license {
+    ext {
+        licence_url = 'https://github.com/FeatureIDE/FeatJAR-evaluation'
+    }
+}

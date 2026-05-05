@@ -1,0 +1,5 @@
+<extensions>
+	<point id="de.featjar.base.cli.Commands">
+		<extension id="de.featjar.evaluation.OutputCleaner" />
+	</point>
+</extensions>
