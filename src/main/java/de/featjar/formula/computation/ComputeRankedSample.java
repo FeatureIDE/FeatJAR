@@ -28,7 +28,6 @@ import de.featjar.base.computation.IComputation;
 import de.featjar.base.computation.Progress;
 import de.featjar.base.data.Result;
 import de.featjar.formula.assignment.BooleanAssignmentList;
-import de.featjar.formula.assignment.BooleanAssignmentValueMap;
 import de.featjar.formula.assignment.ValuedBooleanAssignment;
 import de.featjar.formula.assignment.ValuedBooleanAssignmentList;
 import de.featjar.formula.index.SampleBitIndex;
@@ -51,7 +50,7 @@ public class ComputeRankedSample extends AComputation<BooleanAssignmentList> {
     public static final Dependency<Boolean> OPTIMIZE = Dependency.newDependency(Boolean.class);
 
     public ComputeRankedSample(IComputation<BooleanAssignmentList> sample) {
-        super(sample, sample.map(BooleanAssignmentValueMap.EmptyComputation::new), Computations.of(Boolean.FALSE));
+        super(sample, Computations.of(new ValuedBooleanAssignmentList()), Computations.of(Boolean.FALSE));
     }
 
     @Override

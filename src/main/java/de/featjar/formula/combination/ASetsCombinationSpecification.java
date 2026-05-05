@@ -95,9 +95,12 @@ public abstract class ASetsCombinationSpecification implements ICombinationSpeci
     }
 
     public void remap(VariableMap newVariableMap) {
+        if (variableMap == newVariableMap) {
+            return;
+        }
         Objects.requireNonNull(newVariableMap);
         for (int[] elements : elementSets) {
-            variableMap.adapt(elements, elements, newVariableMap, false);
+            variableMap.remap(elements, elements, newVariableMap, false);
         }
         variableMap = newVariableMap;
     }

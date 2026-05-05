@@ -292,10 +292,10 @@ public class SampleBitIndex implements ISampleIndex {
         int newNumberOfVariables = variableMap.size();
         BitSet[] newBitSetReference = new BitSet[2 * newNumberOfVariables + 1];
 
-        for (int i = 1; i <= numberOfVariables; i++) {
-            int adapt = variableMap.adapt(i, newVariableMap, true);
-            newBitSetReference[newNumberOfVariables + adapt] = bitSetReference[numberOfVariables + i];
-            newBitSetReference[newNumberOfVariables - adapt] = bitSetReference[numberOfVariables - i];
+        for (int index = 1; index <= numberOfVariables; index++) {
+            int remapedIndex = variableMap.remap(index, newVariableMap, true);
+            newBitSetReference[newNumberOfVariables + remapedIndex] = bitSetReference[numberOfVariables + index];
+            newBitSetReference[newNumberOfVariables - remapedIndex] = bitSetReference[numberOfVariables - index];
         }
         numberOfVariables = newNumberOfVariables;
         bitSetReference = newBitSetReference;

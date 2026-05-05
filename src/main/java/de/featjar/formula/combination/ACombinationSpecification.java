@@ -100,11 +100,14 @@ public abstract class ACombinationSpecification implements ICombinationSpecifica
 
     @Override
     public void remap(VariableMap newVariableMap) {
+        if (variableMap == newVariableMap) {
+            return;
+        }
         Objects.requireNonNull(newVariableMap);
         if (elements == null) {
             setElements(newVariableMap.getVariables().get(), newVariableMap);
         } else {
-            variableMap.adapt(elements, elements, newVariableMap, false);
+            variableMap.remap(elements, elements, newVariableMap, false);
             variableMap = newVariableMap;
         }
     }

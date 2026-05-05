@@ -23,14 +23,21 @@ package de.featjar.formula.assignment;
 public class ValuedBooleanAssignment extends BooleanAssignment {
     private static final long serialVersionUID = -6484298506539342496L;
 
-    private long value = 0;
+    private long value;
 
     public ValuedBooleanAssignment(BooleanAssignment booleanAssignment) {
         super(booleanAssignment);
+        this.value = 0;
+    }
+
+    public ValuedBooleanAssignment(BooleanAssignment booleanAssignment, long value) {
+        super(booleanAssignment);
+        this.value = value;
     }
 
     public ValuedBooleanAssignment(int... elements) {
         super(elements);
+        this.value = 0;
     }
 
     public void setValue(long value) {

@@ -207,7 +207,7 @@ public class BooleanSolution extends BooleanAssignment implements ISolution<Inte
         }
         int[] newElements = new int[newVariableMap.size()];
         for (int i = 0; i < elements.length; i++) {
-            int newLiteral = oldVariableMap.adapt(i + 1, newVariableMap, false);
+            int newLiteral = oldVariableMap.remap(i + 1, newVariableMap, false);
             int oldLiteral = elements[i];
             newElements[newLiteral - 1] = oldLiteral == 0 ? 0 : oldLiteral > 0 ? newLiteral : -newLiteral;
         }

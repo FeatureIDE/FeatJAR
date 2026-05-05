@@ -100,9 +100,11 @@ public class MultiCombinationSpecification implements ICombinationSpecification 
 
     @Override
     public VariableMap variableMap() {
-        return new VariableMap(combinationSets.stream()
+        VariableMap mergedVariableMap = new VariableMap(combinationSets.stream()
                 .map(ICombinationSpecification::variableMap)
                 .collect(Collectors.toList()));
+        remap(mergedVariableMap);
+        return mergedVariableMap;
     }
 
     @Override

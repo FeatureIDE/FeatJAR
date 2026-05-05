@@ -162,7 +162,7 @@ public class BooleanClause extends BooleanAssignment implements IClause<Integer,
     @Override
     public BooleanClause remap(VariableMap oldVariableMap, VariableMap newVariableMap, boolean integrateOldVariables) {
         final int[] newElements = new int[elements.length];
-        oldVariableMap.adapt(elements, newElements, newVariableMap, integrateOldVariables);
+        oldVariableMap.remap(elements, newElements, newVariableMap, integrateOldVariables);
         return new BooleanClause(newElements);
     }
 

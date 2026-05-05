@@ -21,13 +21,13 @@
 package de.featjar.formula.computation;
 
 import de.featjar.base.computation.AComputation;
+import de.featjar.base.computation.Computations;
 import de.featjar.base.computation.Dependency;
 import de.featjar.base.computation.IComputation;
 import de.featjar.base.computation.Progress;
 import de.featjar.base.data.Result;
 import de.featjar.formula.assignment.BooleanAssignment;
 import de.featjar.formula.assignment.BooleanAssignmentList;
-import de.featjar.formula.assignment.BooleanAssignmentValueMap;
 import de.featjar.formula.assignment.ValuedBooleanAssignment;
 import de.featjar.formula.assignment.ValuedBooleanAssignmentList;
 import de.featjar.formula.index.SampleBitIndex;
@@ -64,7 +64,7 @@ public class ComputeSortedSample extends AComputation<BooleanAssignmentList> {
             Dependency.newDependency(ValuedBooleanAssignmentList.class);
 
     public ComputeSortedSample(IComputation<BooleanAssignmentList> sample) {
-        super(sample, sample.map(BooleanAssignmentValueMap.EmptyComputation::new));
+        super(sample, Computations.of(new ValuedBooleanAssignmentList()));
     }
 
     @Override
