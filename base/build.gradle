@@ -1,0 +1,13 @@
+plugins {
+    id 'de.featjar.java-library'
+}
+
+dependencies {
+    implementation 'net.tascalate:net.tascalate.concurrent:0.9.6'
+}
+
+license {
+    ext {
+        licence_url = 'https://github.com/FeatureIDE/FeatJAR-base'
+    }
+}

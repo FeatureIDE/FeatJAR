@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema targetNamespace="https://featureide.github.io/featjar"
+    elementFormDefault="qualified"
+    xmlns="https://featureide.github.io/featjar extensions.xsd"
+    xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+<xs:element name="extensions">
+	<xs:complexType>
+		<xs:sequence>
+			<xs:element name="point" maxOccurs="unbounded">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="extension" minOccurs="0" maxOccurs="unbounded">
+							<xs:complexType>
+								<xs:attribute name="id" type="xs:string" use="required" />
+							</xs:complexType>
+						</xs:element>
+					</xs:sequence>
+					<xs:attribute name="id" type="xs:string" use="required" />
+					<xs:attribute name="priority" type="xs:int" use="optional" />
+				</xs:complexType>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+</xs:element>
+
+</xs:schema>

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<extensions>
+    <point id="de.featjar.base.extension.Initializers" priority="100">
+        <extension id="de.featjar.base.log.ConfigurableLog" />
+        <extension id="de.featjar.base.computation.Cache" />
+    </point>
+    <point id="de.featjar.base.cli.Commands" />
+    <point id="de.featjar.base.shell.ShellCommands">
+		<extension id="de.featjar.base.shell.command.ClearShellCommand" />
+		<extension id="de.featjar.base.shell.command.DeleteShellCommand" />
+    	<extension id="de.featjar.base.shell.command.ExitShellCommand" />
+    	<extension id="de.featjar.base.shell.command.HelpShellCommand" />
+    	<extension id="de.featjar.base.shell.command.ListVariablesShellCommand" />
+    	<extension id="de.featjar.base.shell.command.LoadShellCommand" />
+		<extension id="de.featjar.base.shell.command.PrintShellCommand" />
+		<extension id="de.featjar.base.shell.command.RunShellCommand" />
+		<extension id="de.featjar.base.shell.command.RunDirectlyShellCommand" />
+		<extension id="de.featjar.base.shell.command.StoreShellCommand" />
+    </point>
+    <point id="de.featjar.base.shell.VariableTypes">
+		<extension id="de.featjar.base.shell.type.PathType" />
+    </point>
+    <point id="de.featjar.base.io.DataTreeFormats" priority="10">
+		<extension id="de.featjar.base.io.csv.DataTreeCSVFormat" />
+		<extension id="de.featjar.base.io.text.DataTreeTextFormat" />
+    </point>
+</extensions>
