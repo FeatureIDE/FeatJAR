@@ -1,0 +1,172 @@
+\documentclass[border=5pt]{standalone}
+
+%---required packages & variable definitions------------------------------------
+\usepackage{forest}
+\usepackage{amsmath}
+\usepackage{xcolor}
+\usetikzlibrary{angles}
+\usetikzlibrary{positioning}
+\definecolor{drawColor}{RGB}{128 128 128}
+\newcommand{\circleSize}{0.25em}
+%-------------------------------------------------------------------------------
+%---Define the style of the tree------------------------------------------------
+\forestset{
+    /tikz/mandatory/.style={
+        circle,fill=drawColor,
+        draw=drawColor,
+        inner sep=\circleSize
+    },
+    /tikz/optional/.style={
+        circle,
+        fill=white,
+        draw=drawColor,
+        inner sep=\circleSize
+    },
+    featureDiagram/.style={
+        for tree={
+            draw = drawColor,
+            edge = {draw=drawColor},
+            anchor=north,
+            parent anchor = south,
+            child anchor = north,
+            l sep = 2em,
+            s sep = 1em,
+        }
+    },
+    /tikz/abstract/.style={
+        fill = blue!85!cyan!5,
+        draw = drawColor
+    },
+    /tikz/concrete/.style={
+        fill = blue!85!cyan!20,
+        draw = drawColor
+    },
+    mandatory/.style={
+        edge label+={
+            node [mandatory] {}
+        }
+    },
+    optional/.style={
+        edge label+={
+            node [optional] {}
+        }
+    },
+    featurecardinality/.style n args={2}{
+        edge label+={
+            node[midway,fill=white,font=\scriptsize]{#1,#2}
+        }
+    },
+    or/.style n args={3}{
+        tikz+={
+            \path
+            (!{current, n=#1}.parent) coordinate (A) -- (!c.children) coordinate (B) -- (!{current, n=#2}.parent) coordinate (C) -- (!{current, n=#3}.parent) coordinate (D)
+            let \p1 = (A), \p2 = (B), \p3 = (C), \p4 = (D), \n1 = {veclen(\x2 - \x1, \y2 - \y1)}, \n2 = {veclen(\x2 - \x3, \y2 - \y3)}, \n3 = {veclen(\x2 - \x4, \y2 - \y4)}
+            in pic[
+            fill=drawColor,
+            angle radius={min(\n1/2,\n2/2,\n3/2)}
+            ]{angle};
+        }
+    },
+    alternative/.style n args={3}{
+        tikz+={
+            \path
+            (!{current, n=#1}.parent) coordinate (A) -- (!c.children) coordinate (B) -- (!{current, n=#2}.parent) coordinate (C) -- (!{current, n=#3}.parent) coordinate (D)
+            let \p1 = (A), \p2 = (B), \p3 = (C), \p4 = (D), \n1 = {veclen(\x2 - \x1, \y2 - \y1)}, \n2 = {veclen(\x2 - \x3, \y2 - \y3)}, \n3 = {veclen(\x2 - \x4, \y2 - \y4)}
+            in pic[
+            draw=drawColor,
+            angle radius={min(\n1/2,\n2/2,\n3/2)}
+            ]{angle};
+        }
+    },
+    groupcardinality/.style n args={5}{
+        tikz+={
+            \path (!{current, n=#1}.parent) coordinate (A) -- (!c.children) coordinate (B) -- (!{current, n=#2}.parent) coordinate (C) -- (!{current, n=#3}.parent) coordinate (D)
+            let \p1 = (A), \p2 = (B), \p3 = (C), \p4 = (D), \n1 = {veclen(\x2 - \x1, \y2 - \y1)}, \n2 = {veclen(\x2 - \x3, \y2 - \y3)}, \n3 = {veclen(\x2 - \x4, \y2 - \y4)}
+            in pic[
+            draw=drawColor,
+            angle radius={min(\n1/2,\n2/2,\n3/2)},
+            pic text={#4,#5},
+            pic text options={
+                scale=0.6,
+                fill=white,
+                inner sep=0.3pt
+            }
+            ]{angle};
+        }
+    },
+    /tikz/placeholder/.style={
+    },
+    collapsed/.style={
+        rounded corners,
+        no edge,
+        for tree={
+            fill opacity=0,
+            draw opacity=0,
+            l = 0em,
+        }
+    },
+    /tikz/hiddenNodes/.style={
+        midway,
+        rounded corners,
+        draw=drawColor,
+        fill=white,
+        minimum size = 1.2em,
+        minimum width = 0.8em,
+        scale=0.9
+    }
+}
+%-------------------------------------------------------------------------------
+
+\begin{document}
+
+\begin{forest}
+	featureDiagram
+	[Hello,abstract,mandatory
+		[Feature,abstract,optional,alternative={1}{2}{1},or={3}{4}{3},groupcardinality={5}{6}{5}{7}{8}
+			[\multicolumn{2}{c}{Wonderful1} \\\hline
+				\small\texttt{when (String)} &\small\texttt{= now} \\
+				\small\texttt{who (String)} &\small\texttt{= you} \\
+				,align=ll,concrete]
+			[Beautiful1,concrete]
+			[Wonderful2,concrete]
+			[Beautiful2,concrete,groupcardinality={1}{3}{2}{0}{2}
+				[Meaningful1,concrete]
+				[Meaningful2,concrete]
+				[Meaningful3,concrete]]
+			[\multicolumn{2}{c}{Wonderful3} \\\hline
+				\small\texttt{who (String)} &\small\texttt{= you} \\
+				,align=ll,concrete]
+			[Beautiful3,concrete]]
+		[\multicolumn{2}{c}{World1} \\\hline
+			\small\texttt{population (Integer)} &\small\texttt{= 1} \\
+			\small\texttt{size (Double)} &\small\texttt{= 6000.0} \\
+			,align=ll,concrete,optional]
+		[World2,concrete,mandatory]]
+%
+	\matrix [below=1mm of current bounding box] {
+		\node {\(\text{World1} \land{} \text{Wonderful1}\)}; \\
+		\node {\(\text{World2} \Rightarrow{} (\text{Beautiful2} \Leftrightarrow{} \text{Beautiful3})\)}; \\
+	};
+%
+	\matrix [anchor=north west] at (current bounding box.north east) {
+		\node [placeholder] {}; \\
+	};
+	\matrix [draw=drawColor,anchor=north west] at (current bounding box.north east) {
+		\node [label=center:\underline{Legend:}] {}; \\
+		\node [abstract,label=right:Abstract Feature] {}; \\
+		\node [concrete,label=right:Concrete Feature] {}; \\
+		\node [mandatory,label=right:Mandatory] {}; \\
+		\node [optional,label=right:Optional] {}; \\
+			\filldraw[drawColor] (0.1,0) - +(-0,-0.2) - +(0.2,-0.2)- +(0.1,0);
+			\draw[drawColor] (0.1,0) -- +(-0.2, -0.4);
+			\draw[drawColor] (0.1,0) -- +(0.2,-0.4);
+			\fill[drawColor] (0,-0.2) arc (240:300:0.2);
+		\node [label=right:Or Group] {}; \\
+			\draw[drawColor] (0.1,0) -- +(-0.2, -0.4);
+			\draw[drawColor] (0.1,0) -- +(0.2,-0.4);
+			\draw[drawColor] (0,-0.2) arc (240:300:0.2);
+		\node [label=right:Alternative Group] {}; \\
+	};
+\end{forest}
+
+\end{document}

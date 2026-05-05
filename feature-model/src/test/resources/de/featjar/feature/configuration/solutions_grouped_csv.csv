@@ -1,0 +1,11 @@
+ID;Group;GPL;MainGpl;HiddenGtp;DirectedWithEdges;DirectedWithNeighbors;DirectedOnlyVertices;UndirectedWithEdges;UndirectedWithNeighbors;UndirectedOnlyVertices;TestProg;Alg;Number;Connected;StrongC;StronglyConnected;Transpose;Cycle;MSTPrim;MSTKruskal;Src;BFS;DFS;HiddenWgt;WeightOptions;WeightedWithEdges;WeightedWithNeighbors;WeightedOnlyVertices;Wgt;Weighted;Unweighted;Gtp;Directed;Undirected;Implementation;OnlyVertices;WithNeighbors;WithEdges;Base
+0;0;+;+;+;+;-;-;-;-;-;+;+;-;-;-;-;-;+;-;-;+;-;+;+;+;+;-;-;+;+;-;+;+;-;+;-;-;+;+
+1;0;+;+;+;-;-;-;-;-;+;+;+;-;-;-;-;-;+;+;-;+;-;+;+;+;-;-;+;+;+;-;+;-;+;+;+;-;-;+
+2;0;+;+;+;-;-;-;-;+;-;+;+;+;-;-;-;-;-;+;-;+;+;-;+;+;-;+;-;+;+;-;+;-;+;+;-;+;-;+
+3;0;+;+;+;+;-;-;-;-;-;+;+;+;-;+;+;+;-;-;-;+;-;+;+;+;-;-;-;+;-;+;+;+;-;+;-;-;+;+
+4;0;+;+;+;+;-;-;-;-;-;+;+;+;-;+;+;+;-;-;-;+;-;+;+;+;+;-;-;+;+;-;+;+;-;+;-;-;+;+
+5;0;+;+;+;-;-;+;-;-;-;+;+;+;-;+;+;+;-;-;-;+;-;+;+;+;-;-;-;+;-;+;+;+;-;+;+;-;-;+
+6;0;+;+;+;-;-;+;-;-;-;+;+;+;-;-;-;-;+;-;-;+;-;+;+;+;-;-;+;+;+;-;+;+;-;+;+;-;-;+
+7;0;+;+;+;+;-;-;-;-;-;+;+;-;-;+;+;+;+;-;-;+;-;+;+;+;+;-;-;+;+;-;+;+;-;+;-;-;+;+
+8;0;+;+;+;-;+;-;-;-;-;+;+;-;-;+;+;+;-;-;-;+;-;+;+;+;-;+;-;+;+;-;+;+;-;+;-;+;-;+
+9;0;+;+;+;-;-;-;+;-;-;+;+;+;-;-;-;-;+;-;-;+;-;+;+;+;-;-;-;+;-;+;+;-;+;+;-;-;+;+

@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<extensions>
+    <point id="de.featjar.feature.model.io.FeatureModelFormats" priority="10" >
+        <extension id="de.featjar.feature.model.io.xml.GraphVizFeatureModelFormat" />
+        <extension id="de.featjar.feature.model.io.xml.XMLFeatureModelFormat" />
+        <extension id="de.featjar.feature.model.io.dimacs.DimacsFeatureModelFormat" />
+        <extension id="de.featjar.feature.model.io.tikz.LatexFeatureModelFormat" />
+        <extension id="de.featjar.feature.model.io.tikz.TikzFeatureModelFormat" />
+    </point>
+    <point id="de.featjar.base.shell.VariableTypes">
+    	<extension id="de.featjar.shell.type.ConfigType" />
+    	<extension id="de.featjar.shell.type.FeatureModelType" />
+    	<extension id="de.featjar.shell.type.FormulaType" />
+    	<extension id="de.featjar.shell.type.SampleType" />
+    	<extension id="de.featjar.shell.type.SampleGroupType" />
+    </point>
+    <point id="de.featjar.base.cli.Commands">
+		<extension id="de.featjar.feature.model.cli.PrintModelStatistics" />
+		<extension id="de.featjar.feature.model.cli.PrintConfigurationStatistics" />
+		<extension id="de.featjar.feature.model.cli.ConvertModelFormatCommand" />
+	</point>
+</extensions>
