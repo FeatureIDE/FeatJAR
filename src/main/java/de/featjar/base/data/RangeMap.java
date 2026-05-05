@@ -544,9 +544,9 @@ public class RangeMap<T> implements Cloneable {
      * @param newMap the range map to adapt to
      * @param integrateOldObjects if {@code true} objects that do not occur in {@code newMap} are added to it, otherwise an exception is thrown in this case.
      */
-    public void adapt(int[] oldIndices, int[] newIndices, RangeMap<T> newMap, boolean integrateOldObjects) {
+    public void remap(int[] oldIndices, int[] newIndices, RangeMap<T> newMap, boolean integrateOldObjects) {
         for (int i = 0; i < oldIndices.length; i++) {
-            newIndices[i] = adapt(oldIndices[i], newMap, integrateOldObjects);
+            newIndices[i] = remap(oldIndices[i], newMap, integrateOldObjects);
         }
     }
 
@@ -559,7 +559,7 @@ public class RangeMap<T> implements Cloneable {
      * @param integrateOldObject if {@code true} an object that does not occur in {@code newMap} is added to it, otherwise an exception is thrown in this case.
      * @return the adapted index
      */
-    public int adapt(int oldIndex, RangeMap<T> newMap, boolean integrateOldObject) {
+    public int remap(int oldIndex, RangeMap<T> newMap, boolean integrateOldObject) {
         if (oldIndex == 0) {
             return 0;
         } else {
