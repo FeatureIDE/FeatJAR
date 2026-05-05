@@ -1,0 +1,6 @@
+[submodule "cadical"]
+	path = cadical
+	url = https://github.com/arminbiere/cadical
+[submodule "cadiback"]
+	path = cadiback
+	url = git@github.com:skrieter/cadiback.git

@@ -1,0 +1,15 @@
+plugins {
+    id 'java-library'
+    id 'de.featjar.java-application'
+}
+
+dependencies {
+    api 'de.featjar:formula'
+    testImplementation testFixtures('de.featjar:formula')
+}
+
+license {
+    ext {
+        licence_url = 'https://github.com/FeatureIDE/FeatJAR-formula-analysis-cadical'
+    }
+}

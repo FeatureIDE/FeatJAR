@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<extensions>
+	<point id="de.featjar.base.cli.Commands">
+		<extension id="de.featjar.analysis.cadical.cli.CoreCommand" />
+		<extension id="de.featjar.analysis.cadical.cli.SolutionCommand" />
+		<extension id="de.featjar.analysis.cadical.cli.AtomicSetsCommand" />
+	</point>
+	<point id="de.featjar.base.env.Binaries">
+		<extension id="de.featjar.analysis.cadical.bin.CadiCalBinary" />
+		<extension id="de.featjar.analysis.cadical.bin.CadiBackBinary" />
+	</point>
+</extensions>
