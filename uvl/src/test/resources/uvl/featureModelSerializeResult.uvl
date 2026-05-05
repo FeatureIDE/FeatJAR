@@ -1,0 +1,16 @@
+features
+        Boolean root {name 'root', abstract false}
+                mandatory
+                        Boolean Test7 {name 'Test7', abstract false}
+                optional
+                        Boolean Test1 {name 'Test1', abstract false}
+                                alternative
+                                        Boolean Test3 {name 'Test3', abstract false}
+                                        Boolean Test4 {name 'Test4', abstract false}
+                        Boolean Test2 {name 'Test2', abstract false}
+                                or
+                                        Boolean Test5 {name 'Test5', abstract false}
+                                        Boolean Test6 {name 'Test6', abstract false}
+
+constraints
+        (Test1 & Test2) | (Test3 <=> Test4) | (Test5 => Test6) | !Test7

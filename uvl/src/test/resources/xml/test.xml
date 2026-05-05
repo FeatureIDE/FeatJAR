@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<featureModel>
+    <properties>
+        <graphics key="autolayoutconstraints" value="false"/>
+        <graphics key="legendposition" value="733,27"/>
+        <graphics key="legendautolayout" value="false"/>
+        <graphics key="showconstraints" value="true"/>
+        <graphics key="showshortnames" value="false"/>
+        <graphics key="layout" value="horizontal"/>
+        <graphics key="showcollapsedconstraints" value="true"/>
+        <graphics key="legendhidden" value="false"/>
+        <graphics key="layoutalgorithm" value="1"/>
+    </properties>
+    <struct>
+        <and abstract="true" mandatory="true" name="test">
+            <or mandatory="true" name="Test1">
+                <feature name="Test3"/>
+                <feature name="Test4"/>
+                <feature name="Test5"/>
+            </or>
+            <alt name="Test2">
+                <feature name="Test6"/>
+                <feature name="Test7"/>
+            </alt>
+        </and>
+    </struct>
+    <constraints>
+        <rule>
+            <disj>
+                <conj>
+                    <var>Test3</var>
+                    <var>Test4</var>
+                </conj>
+                <var>Test5</var>
+            </disj>
+        </rule>
+    </constraints>
+</featureModel>
