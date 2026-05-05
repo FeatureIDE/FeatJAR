@@ -1,0 +1,2 @@
+(def(A)|(def(B)&def(C)))
+((def(D)&def(E))|(def(F)&def(G)&def(H))|(def(I)&def(J))|def(K))

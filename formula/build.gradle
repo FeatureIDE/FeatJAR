@@ -1,0 +1,16 @@
+plugins {
+    id 'de.featjar.java-library'
+    id 'de.featjar.java-application'
+    id 'java-test-fixtures'
+}
+
+dependencies {
+    api 'de.featjar:base'
+    testFixturesImplementation 'org.junit.jupiter:junit-jupiter-api:6.0.3'
+}
+
+license {
+    ext {
+        licence_url = 'https://github.com/FeatureIDE/FeatJAR-formula'
+    }
+}

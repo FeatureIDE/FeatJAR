@@ -1,0 +1,7 @@
+features
+        Boolean Root {name 'Root', abstract true}
+                optional
+                        Boolean A {name 'A', abstract false}
+
+constraints
+        !A

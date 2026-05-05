@@ -1,0 +1,4 @@
+def(A)|def(B)|def(C)
+#def(A)
+#comment
+!def(A)|(!def(B)|!def(C))

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<featureModel>
+	<struct>
+		<feature abstract="true" mandatory="true" name="A"/>
+		<feature abstract="true" mandatory="true" name="B"/>
+	</struct>
+</featureModel>

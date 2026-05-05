@@ -1,0 +1,2 @@
+(!def(C)|def(D))
+(def(A)|(def(C)&(def(A)|def(B))))

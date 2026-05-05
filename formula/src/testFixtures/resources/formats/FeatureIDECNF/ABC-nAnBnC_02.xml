@@ -1,0 +1,24 @@
+<featureModel>
+	<struct>
+		<or abstract="true" mandatory="true" name="Root">
+			<feature name="A" />
+			<feature name="B" />
+			<feature name="C" />
+		</or>
+	</struct>
+	<constraints>
+		<rule>
+			<disj>
+				<not>
+					<var>A</var>
+				</not>
+				<not>
+					<var>B</var>
+				</not>
+				<not>
+					<var>C</var>
+				</not>
+			</disj>
+		</rule>
+	</constraints>
+</featureModel>

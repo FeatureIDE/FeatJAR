@@ -1,0 +1,9 @@
+features
+        Boolean Root {name 'Root', abstract true}
+                or
+                        Boolean A {name 'A', abstract false}
+                        Boolean B {name 'B', abstract false}
+                        Boolean C {name 'C', abstract false}
+
+constraints
+        !A | (!B | !C)

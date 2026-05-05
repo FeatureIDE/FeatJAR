@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<featureModel>
+	<properties />
+	<struct>
+		<or abstract="true" mandatory="true" name="Root">
+			<feature name="A" />
+			<feature name="B" />
+			<feature name="C" />
+		</or>
+	</struct>
+	<constraints>
+		<rule>
+			<disj>
+				<not>
+					<var>A</var>
+				</not>
+				<not>
+					<var>B</var>
+				</not>
+				<not>
+					<var>C</var>
+				</not>
+			</disj>
+		</rule>
+	</constraints>
+	<calculations Auto="true" Constraints="true" Features="true" Redundant="true" Tautology="true" />
+	<comments />
+	<featureOrder userDefined="false" />
+</featureModel>

@@ -1,0 +1,10 @@
+c This is a comment
+c 1 A
+c This is another comment
+c 2 B
+c Third comment
+p cnf 2 1
+c Fourth
+c Fifth
+-1 2 0
+c Final one
