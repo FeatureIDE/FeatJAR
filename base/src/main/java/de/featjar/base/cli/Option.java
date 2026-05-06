@@ -199,7 +199,9 @@ public class Option<T> {
      * @return the newly created string enum option
      */
     public static StringEnumOption newStringEnumOption(String name, String... possibleValues) {
-        return newStringEnumOption(name, Arrays.asList(possibleValues));
+        StringEnumOption option = new StringEnumOption(name, Arrays.asList(possibleValues));
+        list.add(new Pair<>(getCallingClass(), option));
+        return option;
     }
 
     /**
