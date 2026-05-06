@@ -1,12 +1,13 @@
 # FeatJAR
 
 This is the root project for **FeatJAR**, a collection of Java libraries for feature-oriented software development, planned to replace the [FeatureIDE library](https://featureide.github.io/#download), starting with FeatureIDE 4.0.0.
-Please report feedback to sebastian.krieter@uni-ulm.de or kuiter@ovgu.de.
+Please report feedback to sebastian.krieter@tu-braunschweig.de or kuiter@ovgu.de.
+
+**Important Note**: This repository now contains all core FeatJAR projects (e.g., base, formula, ...). There is no need to clone them separately anymore.
 
 ## How to build
 
 For developers who intend to push changes, we recommend to run `git config --global url.ssh://git@github.com/.insteadOf https://github.com/` (do not forget the trailing slash) beforehand to push/pull repositories over SSH instead of HTTPS.
-
 
 FeatJAR is still in active development. Thus, there can be test fails in some projects. Run `gradle assemble` instead of `gradle build` to skip tests.
 
@@ -16,8 +17,7 @@ Run the following in a shell:
 
     sudo apt update
     sudo apt install git openjdk-11-jdk
-    git clone https://github.com/FeatureIDE/FeatJAR.git && cd FeatJAR
-    scripts/clone.bat
+    git clone https://github.com/FeatureIDE/FeatJAR.git && cd FeatJAR/all
     ./gradlew build
 
 Installation on other Linux distributions may differ slightly, depending on the package manager.
@@ -27,8 +27,7 @@ Installation on other Linux distributions may differ slightly, depending on the 
 Assuming [Chocolatey](https://chocolatey.org/install) is installed, run the following in `cmd.exe`: 
 
     choco install git openjdk11
-    git clone https://github.com/FeatureIDE/FeatJAR.git && cd FeatJAR
-    scripts\clone.bat
+    git clone https://github.com/FeatureIDE/FeatJAR.git && cd FeatJAR\all
     gradlew build
 
 Alternatively, follow the steps for Ubuntu in a [WSL](https://docs.microsoft.com/en-us/windows/wsl/install) shell.
@@ -39,16 +38,14 @@ Assuming [Homebrew](https://brew.sh/) is installed, run the following in a shell
 
     brew update
     brew install git openjdk@11
-    git clone https://github.com/FeatureIDE/FeatJAR.git && cd FeatJAR
-    scripts/clone.bat
+    git clone https://github.com/FeatureIDE/FeatJAR.git && cd FeatJAR/all
     ./gradlew build
 
 ### Using Docker
 
 Assuming [Git](https://git-scm.com/) and [Docker](https://docs.docker.com/get-docker/) are installed, run the following in a shell (or, on Windows, in WSL):
 
-    git clone https://github.com/FeatureIDE/FeatJAR.git && cd FeatJAR
-    scripts/clone.bat
+    git clone https://github.com/FeatureIDE/FeatJAR.git && cd FeatJAR/all
     docker run -v "$(pwd)":/home/gradle gradle:8.0.2-jdk11 gradle build
 
 ### More about Gradle
@@ -140,7 +137,6 @@ For example, when using the `--help` flag on the *formula-analysis-sat4j* packag
                     (Classpath: de.featjar.analysis.sat4j.cli.SolutionsCommand)
             t-wise-sat4j: Computes solutions for a given formula using SAT4J
                     (Classpath: de.featjar.analysis.sat4j.cli.TWiseCommand)
-
 
 
 If you want more details of one specific command, you can again use the `--help` flag.
