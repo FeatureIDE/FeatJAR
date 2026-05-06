@@ -23,8 +23,8 @@ package de.featjar.formula.io.textual;
 import de.featjar.base.data.Result;
 import de.featjar.base.io.text.ATextFormat;
 import de.featjar.base.tree.structure.ITree;
-import de.featjar.formula.io.IFormulaFormat;
-import de.featjar.formula.structure.IFormula;
+import de.featjar.formula.io.IExpressionFormat;
+import de.featjar.formula.structure.IExpression;
 
 /**
  * Writes an expression to a string representation using {@link ITree#print()}.
@@ -33,7 +33,7 @@ import de.featjar.formula.structure.IFormula;
  * @author Klara Surmeier
  * @author Sebastian Krieter
  */
-public class ExpressionStringFormat extends ATextFormat<IFormula> implements IFormulaFormat {
+public class ExpressionStringFormat extends ATextFormat<IExpression> implements IExpressionFormat {
 
     @Override
     public ExpressionStringFormat getInstance() {
@@ -46,7 +46,7 @@ public class ExpressionStringFormat extends ATextFormat<IFormula> implements IFo
     }
 
     @Override
-    public Result<String> serialize(IFormula formula) {
-        return Result.of(formula.print());
+    public Result<String> serialize(IExpression expression) {
+        return Result.of(expression.print());
     }
 }
