@@ -1,7 +1,16 @@
 # FeatJAR
 
+**Important Note**:
+This repository now includes all FeatJAR core projects (e.g., base, formula, ...).
+For compatibility reasons the branch `main` stays as it was previously.
+The branch `develop` is the new default branch and contains all projects.
+* If you newly clone this repository, just make sure that you have checked out the default branch `develop`.
+* If you have already cloned the repository prior to commit 85e2a7962df4bafc429933e8c42c812e499c881b:
+  * Either delete you local copy and clone it again
+  * Or delete the repositories of the single projects (e.g., base, formula, ...) and checkout the branch `develop`
+
 This is the root project for **FeatJAR**, a collection of Java libraries for feature-oriented software development, planned to replace the [FeatureIDE library](https://featureide.github.io/#download), starting with FeatureIDE 4.0.0.
-Please report feedback to sebastian.krieter@uni-ulm.de or kuiter@ovgu.de.
+Please report feedback to sebastian.krieter@tu-braunschweig.de or kuiter@ovgu.de.
 
 ## How to build
 
