@@ -40,6 +40,7 @@ import org.junit.jupiter.api.Test;
 
 public class FeatJARWrapperTest {
 
+    @SuppressWarnings("unused")
     @Test
     public void featjarWrapperWorksCorrectly() {
         FeatJARWrapper featJARWrapper = new FeatJARWrapper();
