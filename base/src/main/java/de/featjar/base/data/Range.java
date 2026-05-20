@@ -33,7 +33,6 @@ import java.util.stream.IntStream;
 public class Range implements Function<Integer, Boolean>, Cloneable {
     public static final int OPEN = -1;
 
-    // TODO store as one int
     protected int lowerBound;
     protected int upperBound;
 
@@ -44,9 +43,13 @@ public class Range implements Function<Integer, Boolean>, Cloneable {
     }
 
     protected static void checkBounds(int lowerBound, int upperBound) {
-        if ((lowerBound < OPEN) || (upperBound < OPEN)) {
+        if (lowerBound < 0) {
             throw new IllegalArgumentException(
-                    String.format("invalid bounds %d, %d, negative values are not allowed", lowerBound, upperBound));
+                    String.format("invalid lower bound %d, negative values are not allowed", lowerBound));
+        }
+        if (upperBound < OPEN) {
+            throw new IllegalArgumentException(
+                    String.format("invalid upper bounds %d, negative values are not allowed", upperBound));
         }
         if (upperBound != OPEN && lowerBound > upperBound) {
             throw new IllegalArgumentException(
@@ -63,7 +66,7 @@ public class Range implements Function<Integer, Boolean>, Cloneable {
     }
 
     public static Range open() {
-        return new Range(OPEN, OPEN);
+        return new Range(0, OPEN);
     }
 
     public static Range atLeast(int minimum) {
@@ -71,7 +74,7 @@ public class Range implements Function<Integer, Boolean>, Cloneable {
     }
 
     public static Range atMost(int maximum) {
-        return new Range(OPEN, maximum);
+        return new Range(0, maximum);
     }
 
     public static Range exactly(int bound) {
@@ -82,11 +85,7 @@ public class Range implements Function<Integer, Boolean>, Cloneable {
         return lowerBound;
     }
 
-    public boolean isLowerBoundOpen() {
-        return lowerBound == OPEN;
-    }
-
-    public void setLowerBound(Integer lowerBound) {
+    public void setLowerBound(int lowerBound) {
         checkBounds(lowerBound, upperBound);
         this.lowerBound = lowerBound;
     }
@@ -110,10 +109,6 @@ public class Range implements Function<Integer, Boolean>, Cloneable {
 
     public boolean is(Range range) {
         return this.lowerBound == range.lowerBound && this.upperBound == range.upperBound;
-    }
-
-    public boolean isOpen() {
-        return isLowerBoundOpen() || isUpperBoundOpen();
     }
 
     public void setBounds(int lowerBound, int upperBound) {
