@@ -31,8 +31,15 @@ import de.featjar.base.io.format.IFormatSupplier;
 import de.featjar.formula.io.FormulaFormats;
 import de.featjar.formula.structure.IFormula;
 import java.net.URL;
+import java.util.function.Function;
+import org.junit.jupiter.api.Assertions;
 
 public class Common {
+
+    public static <T> void compare(T expected, T actual, Function<T, String> toString) {
+        Assertions.assertEquals(
+                expected, actual, () -> toString.apply(expected) + "\n==========\n" + toString.apply(actual));
+    }
 
     public static <T> T load(String modelPath, IFormatSupplier<T> formatSupplier) {
         URL systemResource = ClassLoader.getSystemResource(modelPath);
