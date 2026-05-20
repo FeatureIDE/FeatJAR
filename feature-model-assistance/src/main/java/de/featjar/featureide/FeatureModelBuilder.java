@@ -33,8 +33,8 @@ import de.featjar.formula.structure.connective.And;
 import de.featjar.formula.structure.connective.Implies;
 import de.featjar.formula.structure.connective.Not;
 import de.featjar.formula.structure.connective.Or;
+import de.featjar.formula.structure.predicate.DefLiteral;
 import de.featjar.formula.structure.predicate.Literal;
-import de.featjar.formula.structure.predicate.NonBooleanLiteral;
 import de.featjar.formula.structure.term.value.Variable;
 import java.util.Objects;
 import java.util.Set;
@@ -166,7 +166,7 @@ public class FeatureModelBuilder {
         if (type == Boolean.class) {
             return new Literal(variable);
         } else {
-            return new NonBooleanLiteral(variable);
+            return new DefLiteral(variable);
         }
     }
 

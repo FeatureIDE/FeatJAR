@@ -22,9 +22,9 @@ package de.featjar.feature.model.transformer;
 
 import de.featjar.feature.model.IFeature;
 import de.featjar.formula.structure.IFormula;
+import de.featjar.formula.structure.predicate.DefLiteral;
 import de.featjar.formula.structure.predicate.ILiteral;
 import de.featjar.formula.structure.predicate.Literal;
-import de.featjar.formula.structure.predicate.NonBooleanLiteral;
 import de.featjar.formula.structure.predicate.NotEquals;
 import de.featjar.formula.structure.term.value.Variable;
 import java.util.Collection;
@@ -88,10 +88,10 @@ public class FeatureToFormula {
         Variable variable = new Variable(featureName, type);
         variables.add(variable);
 
-        if (type.equals(Boolean.class)) {
+        if (type == Boolean.class) {
             return new Literal(variable);
         } else {
-            return new NonBooleanLiteral(variable);
+            return new DefLiteral(variable);
         }
     }
 

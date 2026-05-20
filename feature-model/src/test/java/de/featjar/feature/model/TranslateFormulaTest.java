@@ -28,8 +28,8 @@ import de.featjar.formula.structure.Expressions;
 import de.featjar.formula.structure.IFormula;
 import de.featjar.formula.structure.connective.And;
 import de.featjar.formula.structure.connective.Reference;
+import de.featjar.formula.structure.predicate.DefLiteral;
 import de.featjar.formula.structure.predicate.Literal;
-import de.featjar.formula.structure.predicate.NonBooleanLiteral;
 import de.featjar.formula.structure.term.value.Variable;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
@@ -99,11 +99,11 @@ public class TranslateFormulaTest {
 
     private IFormula buildFormula(Class<?> type) {
         return new Reference(new And(
-                Expressions.implies(new NonBooleanLiteral(new Variable("feature0", type)), new Literal("root")),
-                Expressions.implies(new NonBooleanLiteral(new Variable("feature1", type)), new Literal("root")),
-                Expressions.implies(new NonBooleanLiteral(new Variable("feature2", type)), new Literal("root")),
-                Expressions.implies(new NonBooleanLiteral(new Variable("feature3", type)), new Literal("root")),
-                Expressions.implies(new NonBooleanLiteral(new Variable("feature4", type)), new Literal("root"))));
+                Expressions.implies(new DefLiteral(new Variable("feature0", type)), new Literal("root")),
+                Expressions.implies(new DefLiteral(new Variable("feature1", type)), new Literal("root")),
+                Expressions.implies(new DefLiteral(new Variable("feature2", type)), new Literal("root")),
+                Expressions.implies(new DefLiteral(new Variable("feature3", type)), new Literal("root")),
+                Expressions.implies(new DefLiteral(new Variable("feature4", type)), new Literal("root"))));
     }
 
     private IFormula buildBooleanForumla() {
