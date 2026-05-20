@@ -20,8 +20,17 @@
  */
 package de.featjar.base.io.format;
 
+import de.featjar.base.data.Problem;
 import de.featjar.base.data.Result;
+import de.featjar.base.io.IIOObject;
 import de.featjar.base.io.input.InputHeader;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * Decides on a format for a given file content and file path.
@@ -30,17 +39,69 @@ import de.featjar.base.io.input.InputHeader;
  *
  * @author Sebastian Krieter
  */
-@FunctionalInterface
 public interface IFormatSupplier<T> {
 
     /**
-     * {@return a constant format}
+     * {@return a constant format supplier}
      *
      * @param format the format
      * @param <T> the type of object parsed by the format
      */
     static <T> IFormatSupplier<T> of(IFormat<T> format) {
-        return inputHeader -> Result.of(format);
+        return new FormatList<T>(Arrays.asList(format));
+    }
+
+    /**
+     * {@return a constant format supplier}
+     *
+     * @param format the format
+     * @param <T> the type of object parsed by the format
+     */
+    static <T> IFormatSupplier<T> of(List<IFormat<T>> formats) {
+        return new FormatList<T>(new ArrayList<>(formats));
+    }
+
+    /**
+     * {@return all formats of this supplier}
+     */
+    List<IFormat<T>> getFormatList();
+
+    /**
+     * {@return all formats that support a given file extension}
+     *
+     * @param fileExtension the file extension
+     */
+    default List<IFormat<T>> getFormatList(final String fileExtension) {
+        return getFormatList().stream()
+                .filter(IFormat::supportsParse)
+                .filter(format -> Objects.equals(fileExtension, format.getFileExtension()))
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * {@return all formats that support a given file path}
+     *
+     * @param path the path
+     */
+    default List<IFormat<T>> getFormatList(Path path) {
+        return getFormatList(IIOObject.getFileExtension(path).orElse(null));
+    }
+
+    /**
+     * {@return an array of the names of all installed formats for BooleanAssignmentGroup}.
+     */
+    default String[] getNames() {
+        return getFormatList().stream().map(IFormat::getName).toArray(String[]::new);
+    }
+
+    /**
+     * {@return the format that matches the given name}.
+     * @param name the name to match
+     */
+    default Optional<IFormat<T>> getFormatByName(String name) {
+        return getFormatList().stream()
+                .filter(f -> Objects.equals(name, f.getName()))
+                .findFirst();
     }
 
     /**
@@ -48,5 +109,15 @@ public interface IFormatSupplier<T> {
      *
      * @param inputHeader the input header
      */
-    Result<IFormat<T>> getFormat(InputHeader inputHeader);
+    default Result<IFormat<T>> getFormat(InputHeader inputHeader) {
+        return getFormatList().stream()
+                .filter(format ->
+                        Objects.equals(inputHeader.getFileExtension().orElse(null), format.getFileExtension()))
+                .filter(format -> format.supportsContent(inputHeader))
+                .findFirst()
+                .map(Result::of)
+                .orElseGet(() -> Result.empty(new Problem(
+                        String.format("No suitable format found. Possible formats: %s", Arrays.toString(getNames())),
+                        Problem.Severity.ERROR)));
+    }
 }

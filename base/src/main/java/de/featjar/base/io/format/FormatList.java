@@ -20,26 +20,26 @@
  */
 package de.featjar.base.io.format;
 
-import de.featjar.base.extension.AExtensionPoint;
+import java.util.Collections;
 import java.util.List;
 
 /**
- * Manages formats.
- * Should be extended to manage formats for a specific kind of object.
+ * Manages a list of formats for the same object type.
  *
  * @param <T> the type of the read/written object
+ *
  * @author Sebastian Krieter
- * @author Elias Kuiter
  */
-public abstract class AFormats<T> extends AExtensionPoint<IFormat<T>> implements IFormatSupplier<T> {
+public class FormatList<T> implements IFormatSupplier<T> {
+
+    private final List<IFormat<T>> formatList;
+
+    public FormatList(List<IFormat<T>> formatList) {
+        this.formatList = formatList;
+    }
 
     @Override
     public List<IFormat<T>> getFormatList() {
-        return getExtensions();
+        return Collections.unmodifiableList(formatList);
     }
-
-    /**
-     * {@return the type of the object handled by the formats}
-     */
-    public abstract Class<T> getType();
 }
