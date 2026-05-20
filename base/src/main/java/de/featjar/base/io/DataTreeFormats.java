@@ -29,15 +29,15 @@ import de.featjar.base.tree.DataTree;
  *
  * @author Sebastian Krieter
  */
-@SuppressWarnings("rawtypes")
-public class DataTreeFormats extends AFormats<DataTree> {
+public class DataTreeFormats extends AFormats<DataTree<?>> {
 
     public static DataTreeFormats getInstance() {
         return FeatJAR.extensionPoint(DataTreeFormats.class);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
-    public Class<DataTree> getType() {
-        return DataTree.class;
+    public Class<DataTree<?>> getType() {
+        return (Class<DataTree<?>>) (Class<?>) DataTree.class;
     }
 }
