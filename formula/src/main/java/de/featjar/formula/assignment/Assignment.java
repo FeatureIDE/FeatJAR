@@ -24,6 +24,7 @@ import de.featjar.base.data.Maps;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -68,7 +69,15 @@ public class Assignment implements IClause<String, Object>, ISolution<String, Ob
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Assignment that = (Assignment) o;
-        return Objects.equals(variableValuePairs, that.variableValuePairs);
+        if (variableValuePairs.size() != that.variableValuePairs.size()) {
+            return false;
+        }
+        for (Entry<String, Object> entry : variableValuePairs.entrySet()) {
+            if (!Objects.equals(that.variableValuePairs.get(entry.getKey()), entry.getValue())) {
+                return false;
+            }
+        }
+        return true;
     }
 
     @Override

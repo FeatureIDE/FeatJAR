@@ -45,8 +45,9 @@ public abstract class AJavasmtAnalysisCommand<T> extends AAnalysisCommand<T> {
     protected IComputation<T> newComputation(OptionList optionParser) {
         inputFormula = readFromInput(optionParser, FormulaFormats.getInstance()).orElseThrow();
         return newAnalysis(
+                optionParser,
                 Computations.of(inputFormula).map(ComputeNNFFormula::new).map(ComputeCNFFormula::new));
     }
 
-    protected abstract IComputation<T> newAnalysis(IComputation<? extends IFormula> formula);
+    protected abstract IComputation<T> newAnalysis(OptionList optionParser, IComputation<? extends IFormula> formula);
 }

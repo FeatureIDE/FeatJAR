@@ -94,6 +94,15 @@ public class Literal extends ANonTerminalExpression implements IUnaryExpression,
     }
 
     @Override
+    public Variable getExpression() {
+        return getVariable();
+    }
+
+    public Variable getVariable() {
+        return (Variable) getChildren().get(0);
+    }
+
+    @Override
     public Optional<Boolean> evaluate(List<?> values) {
         final Boolean b = (Boolean) values.get(0);
         return b != null ? Optional.of(isPositive == b) : Optional.empty();

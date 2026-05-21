@@ -27,25 +27,22 @@ import de.featjar.base.computation.Progress;
 import de.featjar.base.data.Result;
 import java.util.List;
 import org.sosy_lab.java_smt.SolverContextFactory.Solvers;
+import org.sosy_lab.java_smt.api.BooleanFormula;
 
 /**
- * Counts the number of valid solutions to a formula.
+ * Enumerates valid solutions to a formula.
  *
  * @author Sebastian Krieter
+ * @author Klara Surmeier
  */
-public class ComputeSatisfiability extends AJavaSMTAnalysis<Boolean> {
+public class ComputeSolutionEnumeration extends AJavaSMTAnalysis<List<List<BooleanFormula>>> {
 
-    public ComputeSatisfiability(IComputation<? extends JavaSMTFormula> formula) {
+    public ComputeSolutionEnumeration(IComputation<? extends JavaSMTFormula> formula) {
         super(formula);
     }
 
-    protected ComputeSatisfiability(ComputeSatisfiability other) {
-        super(other);
-    }
-
     @Override
-    public Result<Boolean> compute(List<Object> dependencyList, Progress progress) {
-        return getCompatibleSolver(dependencyList, Solvers.Z3, Solvers.SMTINTERPOL, Solvers.PRINCESS, Solvers.MATHSAT5)
-                .mapResult(JavaSMTSolver::hasSolution);
+    public Result<List<List<BooleanFormula>>> compute(List<Object> dependencyList, Progress progress) {
+        return getCompatibleSolver(dependencyList, Solvers.Z3).mapResult(JavaSMTSolver::enumerateSolutions);
     }
 }

@@ -75,6 +75,10 @@ public class DefLiteral extends ANonTerminalExpression implements ILiteral {
         return Boolean.class;
     }
 
+    public Variable getVariable() {
+        return (Variable) getChildren().get(0);
+    }
+
     @Override
     public Optional<?> evaluate(List<?> values) {
         return Optional.of(isPositive == (values.get(0) != null));

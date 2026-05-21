@@ -20,10 +20,13 @@
  */
 package de.featjar.analysis.javasmt.solver;
 
+import de.featjar.formula.VariableMap;
 import de.featjar.formula.structure.IExpression;
 import java.util.List;
 import java.util.stream.Collectors;
+import org.sosy_lab.java_smt.SolverContextFactory.Solvers;
 import org.sosy_lab.java_smt.api.BooleanFormula;
+import org.sosy_lab.java_smt.api.NumeralFormula;
 import org.sosy_lab.java_smt.api.SolverContext;
 
 /**
@@ -31,28 +34,57 @@ import org.sosy_lab.java_smt.api.SolverContext;
  *
  * @author Sebastian Krieter
  */
+// TODO rename
 public class JavaSMTFormula {
 
-    private final BooleanFormula formula;
+    private final IExpression originalFormula;
     private final FormulaToJavaSMT translator;
+    private final VariableMap variableMap;
+    private final SolverContext solverContext;
+    private final Solvers solverName;
 
-    public JavaSMTFormula(SolverContext solverContext, IExpression expression) {
-        translator = new FormulaToJavaSMT(solverContext);
-        formula = translator.nodeToFormula(expression);
+    // maybe split JavaSMTFormula in two dependencies?
+    // one for SolverContext, one for Expression
+    public JavaSMTFormula(
+            SolverContext solverContext, IExpression expression, VariableMap variableMap, Solvers solverName) {
+        this.solverContext = solverContext;
+        this.variableMap = variableMap;
+        this.translator = new FormulaToJavaSMT(solverContext);
+        this.originalFormula = expression;
+        this.solverName = solverName;
     }
 
     public FormulaToJavaSMT getTranslator() {
         return translator;
     }
 
-    public BooleanFormula getFormula() {
-        return formula;
+    public IExpression getOriginalFormula() {
+        return originalFormula;
+    }
+
+    public VariableMap getVariableMap() {
+        return variableMap;
+    }
+
+    public SolverContext getContext() {
+        return solverContext;
+    }
+
+    public Solvers getSolverName() {
+        return solverName;
     }
 
     public List<BooleanFormula> getBooleanVariables() {
         return translator.getVariableFormulas().stream()
                 .filter(f -> f instanceof BooleanFormula)
                 .map(f -> (BooleanFormula) f)
+                .collect(Collectors.toList());
+    }
+
+    public List<NumeralFormula> getNumeralVariables() {
+        return translator.getVariableFormulas().stream()
+                .filter(f -> f instanceof NumeralFormula)
+                .map(f -> (NumeralFormula) f)
                 .collect(Collectors.toList());
     }
 }
