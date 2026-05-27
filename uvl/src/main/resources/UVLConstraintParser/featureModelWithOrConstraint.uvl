@@ -1,0 +1,18 @@
+features
+    Sandwich
+        mandatory
+            Bread {Calories 100, Sugar 20}
+        optional
+            Sauce
+                or
+                    Ketchup {Calories 100, Sugar 20}
+                    Mustard 
+            Integer Cheese
+                or
+                    Cheddar 
+                    Gouda
+                    Goat 
+            Pickle 
+            
+constraints
+    Bread | Ketchup | Mustard | Gouda | Goat | Cheddar

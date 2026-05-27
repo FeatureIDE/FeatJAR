@@ -1,0 +1,18 @@
+features
+    Sandwich
+        mandatory
+            String Bread {Sorte 100}
+        optional
+            Sauce
+                or
+                    Ketchup {Calories 100, Sugar 20}
+                    Mustard 
+            Integer Cheese
+                or
+                    Cheddar 
+                    Gouda
+                    Goat 
+            Pickle 
+            
+constraints
+    len(Bread.Geschmack) > 5

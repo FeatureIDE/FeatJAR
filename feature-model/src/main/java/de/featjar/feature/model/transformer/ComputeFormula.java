@@ -96,7 +96,14 @@ public class ComputeFormula extends AComputation<IFormula> {
         createTreeConstraints();
         createCrossTreeConstraints();
 
-        return Result.of(new Reference(new And(constraints), featureToFormula.getVariables()));
+        IFormula formula =
+                switch (constraints.size()) {
+                    case 0 -> True.INSTANCE;
+                    case 1 -> constraints.getFirst();
+                    default -> new And(constraints);
+                };
+
+        return Result.of(new Reference(formula, featureToFormula.getVariables()));
     }
 
     private void createTreeConstraints() {

@@ -27,6 +27,7 @@ import de.featjar.base.computation.Computations;
 import de.featjar.formula.computation.ComputeCNFFormula;
 import de.featjar.formula.computation.ComputeNNFFormula;
 import de.featjar.formula.io.binary.FormulaBinaryFormat;
+import de.featjar.formula.structure.Expressions;
 import de.featjar.formula.structure.IFormula;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -70,6 +71,6 @@ public class BinaryFormatTest extends Common {
                 .map(ComputeCNFFormula::new)
                 .compute();
         FormatTest.testParseAndSerialize("binary/" + name, new FormulaBinaryFormat());
-        FormatTest.testSerializeAndParse(formula, new FormulaBinaryFormat());
+        FormatTest.testSerializeAndParse(formula, new FormulaBinaryFormat(), Expressions::print);
     }
 }

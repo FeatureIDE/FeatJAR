@@ -27,6 +27,7 @@ import static de.vill.model.FeatureType.STRING;
 
 import de.featjar.base.data.Name;
 import de.featjar.base.data.Problem;
+import de.featjar.base.data.Range;
 import de.featjar.base.data.Result;
 import de.featjar.base.io.format.ParseException;
 import de.featjar.base.tree.visitor.ITreeVisitor;
@@ -35,6 +36,8 @@ import de.featjar.feature.model.FeatureTree;
 import de.featjar.feature.model.IFeature;
 import de.featjar.feature.model.IFeatureTree;
 import de.vill.model.Attribute;
+import de.vill.model.Cardinality;
+import de.vill.model.Feature;
 import de.vill.model.FeatureModel;
 import de.vill.model.FeatureType;
 import de.vill.model.Group;
@@ -49,6 +52,26 @@ import java.util.stream.Collectors;
  * @author Andreas Gerasimow
  */
 public class FeatureTreeToUVLFeatureModelVisitor implements ITreeVisitor<IFeatureTree, de.vill.model.FeatureModel> {
+
+    public static Feature newFeature(de.vill.model.FeatureModel uvlModel, String variableName) {
+        Feature uvlFeature = new Feature(variableName);
+        uvlModel.getFeatureMap().put(variableName, uvlFeature);
+        return uvlFeature;
+    }
+
+    public static Attribute<?> setAttribute(Feature uvlFeature, Name name, Object value) {
+        return setAttribute(uvlFeature, name.getNamespace(), name.getName(), value);
+    }
+
+    public static Attribute<?> setAttribute(Feature uvlFeature, String nameSpace, String name, Object value) {
+        if (name.indexOf('.') >= 0) {
+            throw new IllegalArgumentException("Invalid character '.' in attribute name");
+        }
+        String combinedName = nameSpace != null
+                ? nameSpace.replaceAll("_+", "_$0").replace(".", "_") + "_" + name.replaceAll("_+", "_$0")
+                : name;
+        return uvlFeature.getAttributes().put(combinedName, new Attribute<>(combinedName, value, uvlFeature));
+    }
 
     private de.vill.model.FeatureModel uvlModel;
     private List<Problem> problemList;
@@ -77,9 +100,9 @@ public class FeatureTreeToUVLFeatureModelVisitor implements ITreeVisitor<IFeatur
 
         try {
             String[] namespaceAndName = getUVLNamespaceAndName(node.getFeature());
-            String name;
-            String namespace = "";
+            String namespace, name;
             if (namespaceAndName.length == 1) {
+                namespace = null;
                 name = namespaceAndName[0];
             } else if (namespaceAndName.length == 2) {
                 namespace = namespaceAndName[0];
@@ -90,9 +113,14 @@ public class FeatureTreeToUVLFeatureModelVisitor implements ITreeVisitor<IFeatur
                 return TraversalAction.FAIL;
             }
 
-            de.vill.model.Feature uvlFeature = new de.vill.model.Feature(name);
+            Feature uvlFeature = newFeature(uvlModel, name);
+            if (namespace != null) {
+                uvlFeature.setNameSpace(namespace);
+            }
+            if (path.size() == 1) {
+                uvlModel.setRootFeature(uvlFeature);
+            }
 
-            uvlFeature.setNameSpace(namespace);
             try {
                 FeatureType uvlFeatureType = getUVLFeatureType(node.getFeature());
                 if (uvlFeatureType != BOOL) {
@@ -107,22 +135,16 @@ public class FeatureTreeToUVLFeatureModelVisitor implements ITreeVisitor<IFeatur
             node.getFeature().getAttributes().orElseThrow().entrySet().stream()
                     .filter((entry) -> !entry.getKey().equals(FeatureModelAttributes.NAME))
                     .forEach(entry -> {
-                        Name attributeName = entry.getKey().getName();
                         if (entry.getKey().equals(FeatureModelAttributes.ABSTRACT)) {
                             if (entry.getValue() == Boolean.TRUE) {
-                                uvlFeature.getAttributes().put("abstract", new Attribute<>("abstract", Boolean.TRUE));
+                                setAttribute(uvlFeature, null, "abstract", Boolean.TRUE);
                             }
                         } else if (entry.getKey().equals(FeatureModelAttributes.HIDDEN)) {
                             if (entry.getValue() == Boolean.TRUE) {
-                                uvlFeature.getAttributes().put("hidden", new Attribute<>("hidden", Boolean.TRUE));
+                                setAttribute(uvlFeature, null, "hidden", Boolean.TRUE);
                             }
                         } else {
-                            String uvlAttributeName = escapeSeparator(attributeName.getNamespace())
-                                    + ":"
-                                    + escapeSeparator(attributeName.getName());
-                            uvlFeature
-                                    .getAttributes()
-                                    .put(uvlAttributeName, new Attribute<>(uvlAttributeName, entry.getValue()));
+                            setAttribute(uvlFeature, entry.getKey().getName(), entry.getValue());
                         }
                     });
 
@@ -135,43 +157,38 @@ public class FeatureTreeToUVLFeatureModelVisitor implements ITreeVisitor<IFeatur
                 }
 
                 FeatureTree.Group group = groups.get(i);
-                Group.GroupType groupType = getUVLGroupType(group);
-
+                GroupType groupType = getUVLGroupType(group);
                 if (groupType == null) {
                     List<IFeatureTree> mandatoryChildren =
                             children.stream().filter(IFeatureTree::isMandatory).collect(Collectors.toList());
                     List<IFeatureTree> optionalChildren =
                             children.stream().filter(IFeatureTree::isOptional).collect(Collectors.toList());
                     if (!mandatoryChildren.isEmpty()) {
-                        de.vill.model.Group mandatoryGroup = new de.vill.model.Group(Group.GroupType.MANDATORY);
+                        Group mandatoryGroup = new Group(GroupType.MANDATORY);
                         mandatoryGroup.setParentFeature(uvlFeature);
                         mandatoryGroup.getFeatures().addAll(getUVLChildrenFeatures(mandatoryChildren));
                         uvlFeature.addChildren(mandatoryGroup);
                     }
                     if (!optionalChildren.isEmpty()) {
-                        de.vill.model.Group optionalGroup = new de.vill.model.Group(Group.GroupType.OPTIONAL);
+                        Group optionalGroup = new Group(GroupType.OPTIONAL);
                         optionalGroup.setParentFeature(uvlFeature);
                         optionalGroup.getFeatures().addAll(getUVLChildrenFeatures(optionalChildren));
                         uvlFeature.addChildren(optionalGroup);
                     }
                 } else if (groupType == GroupType.GROUP_CARDINALITY) {
-                    de.vill.model.Group uvlGroup = new de.vill.model.Group(groupType);
+                    Group uvlGroup = new Group(groupType);
                     uvlGroup.setParentFeature(uvlFeature);
-                    uvlGroup.setLowerBound(String.valueOf(group.getLowerBound()));
-                    uvlGroup.setUpperBound(String.valueOf(group.getUpperBound()));
+                    uvlGroup.setCardinality(new Cardinality(
+                            group.getLowerBound(),
+                            group.getUpperBound() == Range.OPEN ? Integer.MAX_VALUE : group.getUpperBound()));
                     uvlGroup.getFeatures().addAll(getUVLChildrenFeatures(children));
                     uvlFeature.addChildren(uvlGroup);
                 } else {
-                    de.vill.model.Group uvlGroup = new de.vill.model.Group(groupType);
+                    Group uvlGroup = new Group(groupType);
                     uvlGroup.setParentFeature(uvlFeature);
                     uvlGroup.getFeatures().addAll(getUVLChildrenFeatures(children));
                     uvlFeature.addChildren(uvlGroup);
                 }
-            }
-
-            uvlModel.getFeatureMap().put(name, uvlFeature);
-            if (path.size() == 1) {
-                uvlModel.setRootFeature(uvlFeature);
             }
         } catch (Exception e) {
             problemList.add(new Problem(e.getMessage()));
@@ -181,15 +198,11 @@ public class FeatureTreeToUVLFeatureModelVisitor implements ITreeVisitor<IFeatur
         return TraversalAction.CONTINUE;
     }
 
-    private String escapeSeparator(String name) {
-        return name.replace(":", "::");
-    }
-
-    private List<de.vill.model.Feature> getUVLChildrenFeatures(List<? extends IFeatureTree> features) throws Exception {
-        List<de.vill.model.Feature> children = new ArrayList<>();
+    private List<Feature> getUVLChildrenFeatures(List<? extends IFeatureTree> features) throws Exception {
+        List<Feature> children = new ArrayList<>();
         for (IFeatureTree feature : features) {
             if (feature.getFeature().getName().isEmpty()) throw new Exception("Feature has no name.");
-            de.vill.model.Feature uvlFeature =
+            Feature uvlFeature =
                     uvlModel.getFeatureMap().get(feature.getFeature().getName().get());
             children.add(uvlFeature);
         }
@@ -201,24 +214,24 @@ public class FeatureTreeToUVLFeatureModelVisitor implements ITreeVisitor<IFeatur
         return feature.getName().get().split("::");
     }
 
-    private Group.GroupType getUVLGroupType(FeatureTree.Group group) {
+    private static GroupType getUVLGroupType(FeatureTree.Group group) {
         if (group.isOr()) {
-            return Group.GroupType.OR;
+            return GroupType.OR;
         }
         if (group.isAnd()) {
             return null;
         }
         if (group.isAlternative()) {
-            return Group.GroupType.ALTERNATIVE;
+            return GroupType.ALTERNATIVE;
         }
         if (group.isCardinalityGroup()) {
-            return Group.GroupType.GROUP_CARDINALITY;
+            return GroupType.GROUP_CARDINALITY;
         }
 
-        return Group.GroupType.OPTIONAL;
+        return GroupType.OPTIONAL;
     }
 
-    private de.vill.model.FeatureType getUVLFeatureType(IFeature feature) throws ParseException {
+    private static de.vill.model.FeatureType getUVLFeatureType(IFeature feature) throws ParseException {
         Class<?> featureType = feature.getType();
         if (featureType == null) return BOOL;
         else if (featureType == Boolean.class) return BOOL;

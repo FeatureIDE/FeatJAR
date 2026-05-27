@@ -31,6 +31,7 @@ import de.featjar.FormatTest;
 import de.featjar.base.FeatJAR;
 import de.featjar.base.io.IO;
 import de.featjar.formula.io.dimacs.FormulaDimacsFormat;
+import de.featjar.formula.structure.Expressions;
 import java.io.IOException;
 import java.io.OutputStream;
 import org.junit.jupiter.api.AfterAll;
@@ -119,7 +120,7 @@ public class DIMACSFormatTest extends Common {
     }
 
     private static void test(String name) {
-        FormatTest.testSerializeAndParse(getFormula(name), new FormulaDimacsFormat());
+        FormatTest.testSerializeAndParse(getFormula(name), new FormulaDimacsFormat(), Expressions::print);
     }
 
     private void testException(final String name) {

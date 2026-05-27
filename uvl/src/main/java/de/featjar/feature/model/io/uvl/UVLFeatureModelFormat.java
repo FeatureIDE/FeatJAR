@@ -31,8 +31,8 @@ import de.featjar.feature.model.IFeatureTree;
 import de.featjar.feature.model.io.IFeatureModelFormat;
 import de.featjar.feature.model.io.uvl.visitor.FeatureTreeToUVLFeatureModelVisitor;
 import de.featjar.feature.model.io.uvl.visitor.FormulaToUVLConstraintVisitor;
-import de.featjar.formula.structure.IFormula;
 import de.vill.model.FeatureModel;
+import de.vill.model.constraint.Constraint;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -68,14 +68,8 @@ public class UVLFeatureModelFormat extends AUVLFormat<IFeatureModel> implements 
 
     @Override
     public Result<IFeatureModel> parse(AInputMapper inputMapper) {
-        FeatureModel uvlModel = parseUVLModel(inputMapper);
         try {
-            IFeatureModel featureModel = UVLFeatureModelToFeatureTree.createFeatureModel(uvlModel);
-
-            List<IFormula> formulas = UVLFeatureModelToFeatureTree.uvlConstraintToFormula(uvlModel.getConstraints());
-            formulas.forEach((formula) -> featureModel.mutate().addConstraint(formula));
-
-            return Result.of(featureModel);
+            return UVLFeatureModelToFeatureTree.toFeatureModel(parseUVLModel(inputMapper));
         } catch (Exception e) {
             return Result.empty(e);
         }
@@ -112,7 +106,7 @@ public class UVLFeatureModelFormat extends AUVLFormat<IFeatureModel> implements 
             FeatureModel model = uvlModel.get();
 
             for (IConstraint constraint : fm.getConstraints()) {
-                Result<de.vill.model.constraint.Constraint> uvlConstraint =
+                Result<Constraint> uvlConstraint =
                         Trees.traverse(constraint.getFormula(), new FormulaToUVLConstraintVisitor());
                 problems.addAll(uvlConstraint.getProblems());
                 if (uvlConstraint.isEmpty()) {
