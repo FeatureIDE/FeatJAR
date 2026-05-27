@@ -21,38 +21,44 @@
 package de.featjar.analysis.javasmt.cli;
 
 import de.featjar.analysis.javasmt.computation.ComputeJavaSMTFormula;
-import de.featjar.analysis.javasmt.computation.ComputeSolution;
+import de.featjar.analysis.javasmt.computation.ComputeMaximalVariableRange;
+import de.featjar.analysis.javasmt.computation.ComputeMinimalVariableRange;
+import de.featjar.base.cli.Option;
 import de.featjar.base.cli.OptionList;
 import de.featjar.base.computation.IComputation;
-import de.featjar.base.io.format.IFormat;
-import de.featjar.formula.assignment.ValueAssignment;
-import de.featjar.formula.io.textual.ValueAssignmentFormat;
 import de.featjar.formula.structure.IFormula;
+import de.featjar.formula.structure.term.value.Variable;
+import java.util.Map;
 import java.util.Optional;
 import org.sosy_lab.java_smt.SolverContextFactory.Solvers;
 
-public class SolutionCommand extends AJavasmtAnalysisCommand<ValueAssignment> {
+public class VariableRangesCommand extends AJavasmtAnalysisCommand<Map<Variable, Object>> {
+
+    public static final Option<Boolean> MIN =
+            Option.newFlag("min").setDescription("Finds the minimal value for each numerical variable in a Term.");
 
     @Override
     public Optional<String> getDescription() {
-        return Optional.of("Computes a solution for a given formula using javasmt");
+        return Optional.of("Computes the minimal and maximal values for each numerical variable in a Term.");
     }
 
     @Override
-    public IComputation<ValueAssignment> newAnalysis(
+    public IComputation<Map<Variable, Object>> newAnalysis(
             OptionList optionParser, IComputation<? extends IFormula> formula) {
-        return formula.map(ComputeJavaSMTFormula::new)
-                .set(ComputeJavaSMTFormula.SOLVER, Solvers.Z3)
-                .map(ComputeSolution::new);
-    }
-
-    @Override
-    protected IFormat<ValueAssignment> getOuputFormat(OptionList optionParser) {
-        return new ValueAssignmentFormat();
+        Boolean min = optionParser.get(MIN);
+        if (min) {
+            return formula.map(ComputeJavaSMTFormula::new)
+                    .set(ComputeJavaSMTFormula.SOLVER, Solvers.Z3)
+                    .map(ComputeMinimalVariableRange::new);
+        } else {
+            return formula.map(ComputeJavaSMTFormula::new)
+                    .set(ComputeJavaSMTFormula.SOLVER, Solvers.Z3)
+                    .map(ComputeMaximalVariableRange::new);
+        }
     }
 
     @Override
     public Optional<String> getShortName() {
-        return Optional.of("solution-javasmt");
+        return Optional.of("variable-ranges-javasmt");
     }
 }

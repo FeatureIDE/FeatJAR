@@ -20,12 +20,14 @@
  */
 package de.featjar.analysis.javasmt.computation;
 
+import de.featjar.analysis.javasmt.solver.JavaSMTFormula;
+import de.featjar.analysis.javasmt.solver.JavaSMTSolver;
 import de.featjar.base.computation.IComputation;
 import de.featjar.base.computation.Progress;
 import de.featjar.base.data.Result;
-import de.featjar.formula.structure.IExpression;
 import java.math.BigInteger;
 import java.util.List;
+import org.sosy_lab.java_smt.SolverContextFactory.Solvers;
 
 /**
  * Counts the number of valid solutions to a formula.
@@ -34,12 +36,13 @@ import java.util.List;
  */
 public class ComputeSolutionCount extends AJavaSMTAnalysis<BigInteger> {
 
-    public ComputeSolutionCount(IComputation<? extends IExpression> formula) {
+    public ComputeSolutionCount(IComputation<? extends JavaSMTFormula> formula) {
         super(formula);
     }
 
     @Override
     public Result<BigInteger> compute(List<Object> dependencyList, Progress progress) {
-        return initializeSolver(dependencyList).countSolutions();
+        return getCompatibleSolver(dependencyList, Solvers.MATHSAT5, Solvers.SMTINTERPOL)
+                .mapResult(JavaSMTSolver::countSolutions);
     }
 }

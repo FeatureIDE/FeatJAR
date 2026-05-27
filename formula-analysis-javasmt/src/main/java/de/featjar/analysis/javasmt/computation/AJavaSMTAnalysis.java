@@ -20,13 +20,17 @@
  */
 package de.featjar.analysis.javasmt.computation;
 
+import de.featjar.analysis.javasmt.solver.JavaSMTFormula;
 import de.featjar.analysis.javasmt.solver.JavaSMTSolver;
 import de.featjar.base.FeatJAR;
 import de.featjar.base.computation.AComputation;
+import de.featjar.base.computation.Computations;
 import de.featjar.base.computation.Dependency;
 import de.featjar.base.computation.IComputation;
-import de.featjar.formula.structure.IExpression;
+import de.featjar.base.data.Result;
+import java.time.Duration;
 import java.util.List;
+import java.util.Set;
 import org.sosy_lab.java_smt.SolverContextFactory.Solvers;
 
 /**
@@ -39,28 +43,30 @@ import org.sosy_lab.java_smt.SolverContextFactory.Solvers;
  */
 public abstract class AJavaSMTAnalysis<T> extends AComputation<T> {
 
-    public static final Dependency<IExpression> FORMULA = Dependency.newDependency(IExpression.class);
+    public static final Dependency<JavaSMTFormula> FORMULA = Dependency.newDependency(JavaSMTFormula.class);
+    public static final Dependency<Duration> SAT_TIMEOUT = Dependency.newDependency(Duration.class);
+    public static final Dependency<Long> RANDOM_SEED = Dependency.newDependency(Long.class);
 
-    public AJavaSMTAnalysis(IComputation<? extends IExpression> formula, Object... computations) {
-        super(formula, computations);
+    public AJavaSMTAnalysis(IComputation<? extends JavaSMTFormula> formula, Object... computations) {
+        super(formula, Computations.of(Duration.ZERO), Computations.of(1L), computations);
     }
 
     protected AJavaSMTAnalysis(AJavaSMTAnalysis<T> other) {
         super(other);
     }
 
-    protected JavaSMTSolver newSolver(IExpression formula) {
-        return new JavaSMTSolver(formula, Solvers.SMTINTERPOL);
+    protected JavaSMTSolver newSolver(JavaSMTFormula formula) {
+        return new JavaSMTSolver(formula);
     }
 
-    public JavaSMTSolver initializeSolver(List<Object> dependencyList, boolean empty) {
-        IExpression formula = FORMULA.get(dependencyList);
-        FeatJAR.log().debug("initializing JavaSmt");
+    protected Result<JavaSMTSolver> getCompatibleSolver(List<Object> dependencyList, Solvers... compatibleSolvers) {
+        JavaSMTFormula formula = FORMULA.get(dependencyList);
+        Solvers solverName = formula.getSolverName();
+        if (!Set.of(compatibleSolvers).contains(solverName)) {
+            return Result.empty(new IllegalArgumentException(String.format("%s is not supported.", solverName)));
+        }
+        FeatJAR.log().debug("Initializing JavaSmt with %s", solverName);
         FeatJAR.log().debug(formula);
-        return newSolver(formula);
-    }
-
-    public JavaSMTSolver initializeSolver(List<Object> dependencyList) {
-        return initializeSolver(dependencyList, false);
+        return Result.of(newSolver(formula));
     }
 }

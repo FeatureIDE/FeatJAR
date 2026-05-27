@@ -22,22 +22,15 @@ package de.featjar.analysis.javasmt.solver;
 
 import de.featjar.base.FeatJAR;
 import de.featjar.base.data.Result;
-import de.featjar.formula.structure.IExpression;
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import org.sosy_lab.common.ShutdownManager;
-import org.sosy_lab.common.configuration.Configuration;
-import org.sosy_lab.common.configuration.InvalidConfigurationException;
-import org.sosy_lab.common.log.BasicLogManager;
-import org.sosy_lab.common.log.LogManager;
 import org.sosy_lab.common.rationals.Rational;
-import org.sosy_lab.java_smt.SolverContextFactory;
-import org.sosy_lab.java_smt.SolverContextFactory.Solvers;
 import org.sosy_lab.java_smt.api.BasicProverEnvironment.AllSatCallback;
 import org.sosy_lab.java_smt.api.BooleanFormula;
 import org.sosy_lab.java_smt.api.Formula;
@@ -53,11 +46,13 @@ import org.sosy_lab.java_smt.api.SolverException;
  * SMT solver using JavaSMT.
  *
  * @author Joshua Sprey
+ * @author Sebastian Krieter
+ * @author Klara Surmeier
  */
 public class JavaSMTSolver {
 
-    private static final class SatCallback implements AllSatCallback<Result<BigInteger>> {
-        BigInteger count = BigInteger.ZERO;
+    private static final class CountSatCallback implements AllSatCallback<Result<BigInteger>> {
+        private BigInteger count = BigInteger.ZERO;
 
         @Override
         public void apply(List<BooleanFormula> model) {
@@ -72,7 +67,24 @@ public class JavaSMTSolver {
         }
     }
 
-    private JavaSMTFormula formula;
+    private static final class EnumerateSatCallback implements AllSatCallback<Result<List<List<BooleanFormula>>>> {
+        List<List<BooleanFormula>> models = new ArrayList<>();
+
+        @Override
+        public void apply(List<BooleanFormula> model) {
+            if (!model.isEmpty()) {
+                models.add(model);
+            }
+        }
+
+        @Override
+        public Result<List<List<BooleanFormula>>> getResult() throws InterruptedException {
+            return Result.of(models);
+        }
+    }
+
+    private JavaSMTFormula javaSMTFormula;
+    private BooleanFormula formula;
 
     /**
      * The current context of the solver. Used by the translator to translate prop4J
@@ -80,35 +92,53 @@ public class JavaSMTSolver {
      */
     public SolverContext context;
 
-    public JavaSMTSolver(IExpression expression, Solvers solver) {
-        try {
-            final Configuration config = Configuration.defaultConfiguration();
-            final LogManager logManager = BasicLogManager.create(config);
-            final ShutdownManager shutdownManager = ShutdownManager.create();
-            context =
-                    SolverContextFactory.createSolverContext(config, logManager, shutdownManager.getNotifier(), solver);
-            this.formula = new JavaSMTFormula(context, expression);
-        } catch (final InvalidConfigurationException e) {
-            FeatJAR.log().error(e);
-        }
+    public JavaSMTSolver(JavaSMTFormula javaSMTFormula) {
+        this.javaSMTFormula = javaSMTFormula;
+        this.formula = javaSMTFormula.getTranslator().nodeToFormula(javaSMTFormula.getOriginalFormula());
+        this.context = javaSMTFormula.getContext();
     }
 
     public Result<BigInteger> countSolutions() {
+        try (ProverEnvironment prover =
+                javaSMTFormula.getContext().newProverEnvironment(ProverOptions.GENERATE_ALL_SAT)) {
+            prover.addConstraint(formula);
+            List<BooleanFormula> booleanVariables = javaSMTFormula.getTranslator().getVariableFormulas().stream()
+                    .filter(f -> f instanceof BooleanFormula)
+                    .map(f -> (BooleanFormula) f)
+                    .collect(Collectors.toList());
+            return prover.allSat(new CountSatCallback(), booleanVariables);
+        } catch (final Exception e) {
+            return Result.empty(e);
+        }
+    }
+
+    public Result<List<List<BooleanFormula>>> enumerateSolutions() {
         try (ProverEnvironment prover = context.newProverEnvironment(ProverOptions.GENERATE_ALL_SAT)) {
-            prover.addConstraint(formula.getFormula());
-            return prover.allSat(new SatCallback(), formula.getBooleanVariables());
+            prover.addConstraint(this.formula);
+            List<BooleanFormula> booleanVariables = javaSMTFormula.getTranslator().getVariableFormulas().stream()
+                    .filter(f -> f instanceof BooleanFormula)
+                    .map(f -> (BooleanFormula) f)
+                    .collect(Collectors.toList());
+            return prover.allSat(new EnumerateSatCallback(), booleanVariables);
         } catch (final Exception e) {
             return Result.empty(e);
         }
     }
 
     public de.featjar.formula.assignment.ValueAssignment getSolution() {
-        try (ProverEnvironment prover = context.newProverEnvironment()) {
-            prover.addConstraint(formula.getFormula());
+        try (ProverEnvironment prover =
+                javaSMTFormula.getContext().newProverEnvironment(ProverOptions.GENERATE_MODELS)) {
+            prover.addConstraint(formula);
             if (!prover.isUnsat()) {
-                final LinkedHashMap<String, Object> solution = new LinkedHashMap<>();
+                final LinkedHashMap<Integer, Object> solution = new LinkedHashMap<>();
+
                 for (ValueAssignment assignment : prover.getModel()) {
-                    solution.put(assignment.getName(), assignment.getValue());
+                    solution.put(
+                            javaSMTFormula
+                                    .getVariableMap()
+                                    .get(assignment.getName())
+                                    .orElseThrow(),
+                            assignment.getValue());
                 }
                 return new de.featjar.formula.assignment.ValueAssignment(solution);
             } else {
@@ -125,10 +155,10 @@ public class JavaSMTSolver {
         return Result.ofNullable(getSolution());
     }
 
-    public Rational minimize(Formula formula) {
-        try (OptimizationProverEnvironment prover = context.newOptimizationProverEnvironment()) {
-            prover.addConstraint(this.formula.getFormula());
-            final int handleY = prover.minimize(formula);
+    public Rational minimize(Formula term) {
+        try (OptimizationProverEnvironment prover = javaSMTFormula.getContext().newOptimizationProverEnvironment()) {
+            prover.addConstraint(formula);
+            final int handleY = prover.minimize(term);
             final OptStatus status = prover.check();
             assert status == OptStatus.OPT;
             final Optional<Rational> lower = prover.lower(handleY, Rational.ofString("1/1000"));
@@ -139,10 +169,10 @@ public class JavaSMTSolver {
         }
     }
 
-    public Rational maximize(Formula formula) {
-        try (OptimizationProverEnvironment prover = context.newOptimizationProverEnvironment()) {
-            prover.addConstraint(this.formula.getFormula());
-            final int handleX = prover.maximize(formula);
+    public Rational maximize(Formula term) {
+        try (OptimizationProverEnvironment prover = javaSMTFormula.getContext().newOptimizationProverEnvironment()) {
+            prover.addConstraint(formula);
+            final int handleX = prover.maximize(term);
             final OptStatus status = prover.check();
             assert status == OptStatus.OPT;
             final Optional<Rational> upper = prover.upper(handleX, Rational.ofString("1/1000"));
@@ -154,8 +184,8 @@ public class JavaSMTSolver {
     }
 
     public Result<Boolean> hasSolution() {
-        try (ProverEnvironment prover = context.newProverEnvironment()) {
-            prover.addConstraint(formula.getFormula());
+        try (ProverEnvironment prover = javaSMTFormula.getContext().newProverEnvironment()) {
+            prover.addConstraint(formula);
             return Result.of(!prover.isUnsat());
         } catch (final Exception e) {
             return Result.empty(e);
@@ -163,8 +193,8 @@ public class JavaSMTSolver {
     }
 
     public List<BooleanFormula> getMinimalUnsatisfiableSubset() throws IllegalStateException {
-        try (ProverEnvironment prover = context.newProverEnvironment()) {
-            prover.addConstraint(formula.getFormula());
+        try (ProverEnvironment prover = javaSMTFormula.getContext().newProverEnvironment()) {
+            prover.addConstraint(formula);
             if (prover.isUnsat()) {
                 final List<BooleanFormula> formula = prover.getUnsatCore();
                 return formula.stream().filter(Objects::nonNull).collect(Collectors.toList());
@@ -180,7 +210,15 @@ public class JavaSMTSolver {
         return Collections.singletonList(getMinimalUnsatisfiableSubset());
     }
 
-    public JavaSMTFormula getSolverFormula() {
+    public BooleanFormula getFormula() {
         return formula;
+    }
+
+    public void setFormula(BooleanFormula formula) {
+        this.formula = formula;
+    }
+
+    public JavaSMTFormula getSolverFormula() {
+        return javaSMTFormula;
     }
 }

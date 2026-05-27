@@ -21,38 +21,52 @@
 package de.featjar.analysis.javasmt.cli;
 
 import de.featjar.analysis.javasmt.computation.ComputeJavaSMTFormula;
-import de.featjar.analysis.javasmt.computation.ComputeSolution;
+import de.featjar.analysis.javasmt.computation.ComputeRedundantClauses;
+import de.featjar.analysis.javasmt.computation.ComputeRedundantClausesIncrementally;
+import de.featjar.base.cli.Option;
 import de.featjar.base.cli.OptionList;
 import de.featjar.base.computation.IComputation;
 import de.featjar.base.io.format.IFormat;
-import de.featjar.formula.assignment.ValueAssignment;
-import de.featjar.formula.io.textual.ValueAssignmentFormat;
+import de.featjar.formula.io.textual.ExpressionListStringFormat;
+import de.featjar.formula.structure.IExpression;
 import de.featjar.formula.structure.IFormula;
+import java.util.List;
 import java.util.Optional;
 import org.sosy_lab.java_smt.SolverContextFactory.Solvers;
 
-public class SolutionCommand extends AJavasmtAnalysisCommand<ValueAssignment> {
+public class RedundantClausesCommand extends AJavasmtAnalysisCommand<List<IExpression>> {
+
+    public static final Option<Boolean> REMOVE = Option.newFlag("remove")
+            .setDescription("Finds redundant clauses by iteratively removing clauses from the formula.");
 
     @Override
     public Optional<String> getDescription() {
-        return Optional.of("Computes a solution for a given formula using javasmt");
+        return Optional.of(
+                "Computes redundant clauses either by iteratively adding clauses to the formula or by removing them.");
     }
 
     @Override
-    public IComputation<ValueAssignment> newAnalysis(
+    public IComputation<List<IExpression>> newAnalysis(
             OptionList optionParser, IComputation<? extends IFormula> formula) {
-        return formula.map(ComputeJavaSMTFormula::new)
-                .set(ComputeJavaSMTFormula.SOLVER, Solvers.Z3)
-                .map(ComputeSolution::new);
+        Boolean remove = optionParser.get(REMOVE);
+        if (remove) {
+            return formula.map(ComputeJavaSMTFormula::new)
+                    .set(ComputeJavaSMTFormula.SOLVER, Solvers.Z3)
+                    .map(ComputeRedundantClauses::new);
+        } else {
+            return formula.map(ComputeJavaSMTFormula::new)
+                    .set(ComputeJavaSMTFormula.SOLVER, Solvers.Z3)
+                    .map(ComputeRedundantClausesIncrementally::new);
+        }
     }
 
     @Override
-    protected IFormat<ValueAssignment> getOuputFormat(OptionList optionParser) {
-        return new ValueAssignmentFormat();
+    protected IFormat<List<IExpression>> getOuputFormat(OptionList optionParser) {
+        return new ExpressionListStringFormat();
     }
 
     @Override
     public Optional<String> getShortName() {
-        return Optional.of("solution-javasmt");
+        return Optional.of("redundant-clauses-javasmt");
     }
 }

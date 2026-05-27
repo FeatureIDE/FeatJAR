@@ -23,13 +23,15 @@ package de.featjar.analysis.javasmt;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import de.featjar.Common;
 import de.featjar.analysis.javasmt.computation.ComputeJavaSMTFormula;
-import de.featjar.analysis.javasmt.computation.ComputeSolutionCount;
+import de.featjar.analysis.javasmt.computation.ComputeSolution;
+import de.featjar.analysis.javasmt.solver.JavaSMTFormula;
 import de.featjar.base.FeatJAR;
 import de.featjar.base.computation.Computations;
 import de.featjar.base.data.Problem;
 import de.featjar.base.data.Result;
+import de.featjar.formula.VariableMap;
+import de.featjar.formula.assignment.ValueAssignment;
 import de.featjar.formula.structure.Expressions;
 import de.featjar.formula.structure.IFormula;
 import de.featjar.formula.structure.connective.And;
@@ -37,13 +39,12 @@ import de.featjar.formula.structure.connective.BiImplies;
 import de.featjar.formula.structure.connective.Implies;
 import de.featjar.formula.structure.connective.Or;
 import de.featjar.formula.structure.predicate.Literal;
-import java.math.BigInteger;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.sosy_lab.java_smt.SolverContextFactory.Solvers;
 
-public class CountSolutionsAnalysisTest extends Common {
+public class SolutionAnalysisTest {
 
     @BeforeAll
     public static void begin() {
@@ -56,7 +57,7 @@ public class CountSolutionsAnalysisTest extends Common {
     }
 
     @Test
-    public void formulaHas3Solutions() {
+    public void formulaHasSatisfyingAssignment() {
         final Literal a = Expressions.literal("a");
         final Literal b = Expressions.literal("b");
         final Literal c = Expressions.literal("c");
@@ -67,62 +68,27 @@ public class CountSolutionsAnalysisTest extends Common {
         final And and = new And(equals, c);
         final Implies formula = new Implies(or, and);
 
-        checkCount(formula, 3);
-    }
-
-    @Test
-    public void gplHas960Solutions() {
-        IFormula formula = loadFormula("testFeatureModels/gpl_medium_model.xml");
-        checkCount(formula, 960);
-    }
-
-    @Test
-    public void carHas7Solutions() {
-        IFormula formula = loadFormula("testFeatureModels/car.xml");
-        checkCount(formula, 7);
-    }
-
-    private void checkCount(final IFormula formula, int count) {
         IFormula cnf = formula.toCNF().orElseThrow();
-        final Result<BigInteger> result = Computations.of(cnf)
-                .map(ComputeJavaSMTFormula::new)
-                .set(ComputeJavaSMTFormula.SOLVER, Solvers.MATHSAT5)
-                .map(ComputeSolutionCount::new)
-                .computeResult();
-        assertTrue(result.isPresent(), () -> Problem.printProblems(result.getProblems()));
-        assertEquals(BigInteger.valueOf(count), result.get());
-    }
 
-    @Test
-    public void countDoesNotWorkWithPrincess() {
-        final Result<BigInteger> result = Computations.of(Expressions.literal("a"))
-                .map(ComputeJavaSMTFormula::new)
-                .set(ComputeJavaSMTFormula.SOLVER, Solvers.PRINCESS)
-                .map(ComputeSolutionCount::new)
-                .computeResult();
-        assertTrue(result.isEmpty());
-        assertEquals("PRINCESS is not supported.", result.getProblems().get(0).getMessage());
-    }
-
-    @Test
-    public void countDoesNotWorkWithZ3() {
-        final Result<BigInteger> result = Computations.of(Expressions.literal("a"))
+        // retrieve variableMap from first computation using ComputeJavaSMTFormula
+        final Result<JavaSMTFormula> javaSMTFormulaResult = Computations.of(cnf)
                 .map(ComputeJavaSMTFormula::new)
                 .set(ComputeJavaSMTFormula.SOLVER, Solvers.Z3)
-                .map(ComputeSolutionCount::new)
                 .computeResult();
-        assertTrue(result.isEmpty());
-        assertEquals("Z3 is not supported.", result.getProblems().get(0).getMessage());
-    }
+        assertTrue(javaSMTFormulaResult.isPresent(), () -> Problem.printProblems(javaSMTFormulaResult.getProblems()));
+        JavaSMTFormula javaSMTFormula = javaSMTFormulaResult.get();
+        VariableMap variableMap = javaSMTFormula.getVariableMap();
 
-    @Test
-    public void countDoesWorkWithMATHSAT5() {
-        final Result<BigInteger> result = Computations.of(Expressions.literal("a"))
-                .map(ComputeJavaSMTFormula::new)
-                .set(ComputeJavaSMTFormula.SOLVER, Solvers.SMTINTERPOL)
-                .map(ComputeSolutionCount::new)
-                .computeResult();
-        assertTrue(result.isPresent(), () -> Problem.printProblems(result.getProblems()));
-        assertEquals(BigInteger.valueOf(1), result.get());
+        // get a satisfying assignment
+        final Result<ValueAssignment> valueAssignmentResult =
+                Computations.of(javaSMTFormula).map(ComputeSolution::new).computeResult();
+        assertTrue(valueAssignmentResult.isPresent(), () -> Problem.printProblems(valueAssignmentResult.getProblems()));
+        ValueAssignment valueAssignment = valueAssignmentResult.get();
+
+        // use variableMap for evaluation of formula with the assignment
+        boolean satisfiesFormula =
+                (Boolean) formula.evaluate(valueAssignment, variableMap).orElseThrow();
+
+        assertEquals(true, satisfiesFormula);
     }
 }

@@ -3,6 +3,10 @@
 	<point id="de.featjar.base.cli.Commands">
 		<extension id="de.featjar.analysis.javasmt.cli.CountCommand" />
 		<extension id="de.featjar.analysis.javasmt.cli.SolutionCommand" />
+		<extension id="de.featjar.analysis.javasmt.cli.RedundantClausesCommand" />
+		<extension id="de.featjar.analysis.javasmt.cli.VariableRangesCommand" />
+		<extension id="de.featjar.analysis.javasmt.cli.CoreCommand" />
+		<extension id="de.featjar.analysis.javasmt.cli.AtomicSetCommand" />
 	</point>
 	<point id="de.featjar.base.env.Binaries">
 		<extension id="de.featjar.analysis.javasmt.bin.JavaSMTBinary" />

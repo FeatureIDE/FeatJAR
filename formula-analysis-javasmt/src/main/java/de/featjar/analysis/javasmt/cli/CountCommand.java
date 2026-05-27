@@ -20,11 +20,14 @@
  */
 package de.featjar.analysis.javasmt.cli;
 
+import de.featjar.analysis.javasmt.computation.ComputeJavaSMTFormula;
 import de.featjar.analysis.javasmt.computation.ComputeSolutionCount;
+import de.featjar.base.cli.OptionList;
 import de.featjar.base.computation.IComputation;
 import de.featjar.formula.structure.IFormula;
 import java.math.BigInteger;
 import java.util.Optional;
+import org.sosy_lab.java_smt.SolverContextFactory.Solvers;
 
 public class CountCommand extends AJavasmtAnalysisCommand<BigInteger> {
 
@@ -34,8 +37,10 @@ public class CountCommand extends AJavasmtAnalysisCommand<BigInteger> {
     }
 
     @Override
-    public IComputation<BigInteger> newAnalysis(IComputation<? extends IFormula> formula) {
-        return formula.map(ComputeSolutionCount::new);
+    public IComputation<BigInteger> newAnalysis(OptionList optionParser, IComputation<? extends IFormula> formula) {
+        return formula.map(ComputeJavaSMTFormula::new)
+                .set(ComputeJavaSMTFormula.SOLVER, Solvers.Z3)
+                .map(ComputeSolutionCount::new);
     }
 
     @Override

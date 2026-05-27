@@ -20,32 +20,14 @@
  */
 package de.featjar.analysis.javasmt.computation;
 
-import de.featjar.analysis.javasmt.solver.JavaSMTFormula;
-import de.featjar.analysis.javasmt.solver.JavaSMTSolver;
-import de.featjar.base.computation.IComputation;
-import de.featjar.base.computation.Progress;
-import de.featjar.base.data.Result;
-import java.util.List;
-import org.sosy_lab.java_smt.SolverContextFactory.Solvers;
+import java.util.ArrayList;
 
 /**
- * Counts the number of valid solutions to a formula.
+ * Represents an ArrayList for use in Dependencies.
  *
  * @author Sebastian Krieter
  */
-public class ComputeSatisfiability extends AJavaSMTAnalysis<Boolean> {
+public class VariableNamesList extends ArrayList<String> {
 
-    public ComputeSatisfiability(IComputation<? extends JavaSMTFormula> formula) {
-        super(formula);
-    }
-
-    protected ComputeSatisfiability(ComputeSatisfiability other) {
-        super(other);
-    }
-
-    @Override
-    public Result<Boolean> compute(List<Object> dependencyList, Progress progress) {
-        return getCompatibleSolver(dependencyList, Solvers.Z3, Solvers.SMTINTERPOL, Solvers.PRINCESS, Solvers.MATHSAT5)
-                .mapResult(JavaSMTSolver::hasSolution);
-    }
+    private static final long serialVersionUID = 1L;
 }
