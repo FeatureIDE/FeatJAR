@@ -26,6 +26,7 @@ import de.featjar.base.data.combination.CombinationStream;
 import de.featjar.formula.VariableMap;
 import de.featjar.formula.assignment.BooleanAssignment;
 import de.featjar.formula.assignment.BooleanAssignmentList;
+import java.util.Arrays;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -33,7 +34,7 @@ import java.util.stream.IntStream;
 
 public class LiteralSetsCombinationSpecification extends ASetsCombinationSpecification {
 
-    static int[][] convert(BooleanAssignmentList list) {
+    public static int[][] convert(BooleanAssignmentList list) {
         int[][] elementSets = new int[list.size()][];
         int index = 0;
         for (BooleanAssignment booleanAssignment : list) {
@@ -44,11 +45,16 @@ public class LiteralSetsCombinationSpecification extends ASetsCombinationSpecifi
     }
 
     public LiteralSetsCombinationSpecification(int[] t, BooleanAssignmentList list) {
-        super(convert(list), t, list.getVariableMap());
+        super(list.stream().map(BooleanAssignment::get).toArray(int[][]::new), t, list.getVariableMap());
     }
 
-    public LiteralSetsCombinationSpecification(int[] reducedTValues, int[][] elementSets, VariableMap variableMap) {
-        super(elementSets, reducedTValues, variableMap);
+    public LiteralSetsCombinationSpecification(int[] tValues, int[][] elementSets, VariableMap variableMap) {
+        super(elementSets, tValues, variableMap);
+    }
+
+    public LiteralSetsCombinationSpecification(
+            int[] tValues, BooleanAssignment[] literalSets, VariableMap variableMap) {
+        super(Arrays.stream(literalSets).map(BooleanAssignment::get).toArray(int[][]::new), tValues, variableMap);
     }
 
     public void forEach(Consumer<int[]> consumer) {

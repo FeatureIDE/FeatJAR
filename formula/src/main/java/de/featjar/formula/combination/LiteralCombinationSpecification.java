@@ -37,8 +37,8 @@ public class LiteralCombinationSpecification extends ACombinationSpecification {
         super(IntStream.of(list.getFirst().get()).distinct().toArray(), t, list.getVariableMap());
     }
 
-    public LiteralCombinationSpecification(int t, BooleanAssignment variables, VariableMap variableMap) {
-        super(IntStream.of(variables.get()).distinct().toArray(), t, variableMap);
+    public LiteralCombinationSpecification(int t, BooleanAssignment literals, VariableMap variableMap) {
+        super(IntStream.of(literals.get()).distinct().toArray(), t, variableMap);
     }
 
     public LiteralCombinationSpecification(int t, int[] variables, VariableMap variableMap) {

@@ -81,10 +81,6 @@ public class VariableCombinationSpecification extends ACombinationSpecification 
         super(IntStream.of(variables).map(Math::abs).distinct().toArray(), t, variableMap);
     }
 
-    public VariableCombinationSpecification(int t) {
-        super(t);
-    }
-
     public VariableCombinationSpecification(VariableCombinationSpecification other) {
         super(other);
     }

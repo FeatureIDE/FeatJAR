@@ -21,6 +21,10 @@
 package de.featjar.formula.combination;
 
 import de.featjar.formula.VariableMap;
+import de.featjar.formula.assignment.BooleanAssignment;
+import de.featjar.formula.assignment.BooleanAssignmentList;
+import de.featjar.formula.assignment.Variables;
+import java.util.List;
 import java.util.Random;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -30,6 +34,35 @@ import java.util.function.Supplier;
  * A generic specification of a set of literal combinations.
  */
 public interface ICombinationSpecification {
+
+    public static MultiCombinationSpecification concat(ICombinationSpecification... combinationSets) {
+        return new MultiCombinationSpecification(combinationSets);
+    }
+
+    public static MultiCombinationSpecification concat(List<ICombinationSpecification> combinationSets) {
+        return new MultiCombinationSpecification(combinationSets);
+    }
+
+    public static BooleanAssignmentListCombinationSpecification of(BooleanAssignmentList combinations) {
+        return new BooleanAssignmentListCombinationSpecification(combinations);
+    }
+
+    public static VariableCombinationSpecification of(Variables variables, VariableMap variableMap, int t) {
+        return new VariableCombinationSpecification(t, variables, variableMap);
+    }
+
+    public static LiteralCombinationSpecification of(BooleanAssignment literals, VariableMap variableMap, int t) {
+        return new LiteralCombinationSpecification(t, literals, variableMap);
+    }
+
+    public static VariableSetsCombinationSpecification of(Variables[] variables, VariableMap variableMap, int[] t) {
+        return new VariableSetsCombinationSpecification(t, variables, variableMap);
+    }
+
+    public static LiteralSetsCombinationSpecification of(
+            BooleanAssignment[] variables, VariableMap variableMap, int[] t) {
+        return new LiteralSetsCombinationSpecification(t, variables, variableMap);
+    }
 
     /**
      * {@return the number of combinations described by this specification}

@@ -24,8 +24,9 @@ import de.featjar.base.FeatJAR;
 import de.featjar.base.data.BinomialCalculator;
 import de.featjar.base.data.combination.CombinationStream;
 import de.featjar.formula.VariableMap;
-import de.featjar.formula.assignment.BooleanAssignment;
 import de.featjar.formula.assignment.BooleanAssignmentList;
+import de.featjar.formula.assignment.Variables;
+import java.util.Arrays;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -33,22 +34,16 @@ import java.util.stream.IntStream;
 
 public class VariableSetsCombinationSpecification extends ASetsCombinationSpecification {
 
-    static int[][] convert(BooleanAssignmentList list) {
-        int[][] elementSets = new int[list.size()][];
-        int index = 0;
-        for (BooleanAssignment booleanAssignment : list) {
-            elementSets[index++] =
-                    IntStream.of(booleanAssignment.get()).distinct().toArray();
-        }
-        return elementSets;
-    }
-
     public VariableSetsCombinationSpecification(int[] t, BooleanAssignmentList list) {
-        super(convert(list), t, list.getVariableMap());
+        super(list.stream().map(a -> a.toVariables().get()).toArray(int[][]::new), t, list.getVariableMap());
     }
 
-    public VariableSetsCombinationSpecification(int[] reducedTValues, int[][] elementSets, VariableMap variableMap) {
-        super(elementSets, reducedTValues, variableMap);
+    public VariableSetsCombinationSpecification(int[] tValues, int[][] elementSets, VariableMap variableMap) {
+        super(elementSets, tValues, variableMap);
+    }
+
+    public VariableSetsCombinationSpecification(int[] tValues, Variables[] variableSets, VariableMap variableMap) {
+        super(Arrays.stream(variableSets).map(Variables::get).toArray(int[][]::new), tValues, variableMap);
     }
 
     public void forEach(Consumer<int[]> consumer) {
