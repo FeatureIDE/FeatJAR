@@ -54,9 +54,10 @@ import de.featjar.feature.model.computation.ComputeFeatureTreeNumberOfLeaves;
 import de.featjar.feature.model.computation.ComputeFeatureTreeNumberOfTopNodes;
 import de.featjar.feature.model.transformer.ComputeFeatureModelSlice;
 import de.featjar.feature.model.transformer.ComputeFormula;
+import de.featjar.formula.VariableMap;
 import de.featjar.formula.assignment.BooleanAssignmentList;
 import de.featjar.formula.assignment.conversion.ComputeBooleanClauseList;
-import de.featjar.formula.combination.VariableCombinationSpecification.VariableCombinationSpecificationComputation;
+import de.featjar.formula.combination.VariableCombinationSpecification;
 import de.featjar.formula.computation.ComputeCNFFormula;
 import de.featjar.formula.computation.ComputeNNFFormula;
 import de.featjar.formula.structure.IFormula;
@@ -339,21 +340,19 @@ public class FeatureModelAnalyzer {
      * @param t the value of t
      */
     public Result<List<Configuration>> twiseConfigurations(int t) {
-        ComputeBooleanClauseList clauseList = fmComputation
+        ComputeBooleanClauseList clauseListComputation = fmComputation
                 .map(ComputeFormula::new)
                 .map(ComputeNNFFormula::new)
                 .map(ComputeCNFFormula::new)
                 .map(ComputeBooleanClauseList::new);
-        return clauseList
+        BooleanAssignmentList clauseList = clauseListComputation.compute();
+        VariableMap variableMap = clauseList.getVariableMap();
+        return Computations.of(clauseList)
                 .map(YASA::new)
                 .set(YASA.ITERATIONS, 1)
-                .set(
-                        YASA.COMBINATION_SET,
-                        clauseList
-                                .map(VariableCombinationSpecificationComputation::new)
-                                .set(VariableCombinationSpecificationComputation.T, t))
+                .set(YASA.COMBINATION_SET, new VariableCombinationSpecification(t, variableMap))
                 .map(ComputeCompleteSample::new)
-                .set(ComputeCompleteSample.BOOLEAN_CLAUSE_LIST, clauseList)
+                .set(ComputeCompleteSample.BOOLEAN_CLAUSE_LIST, clauseListComputation)
                 .set(ComputeCompleteSample.SELECTION_STRATEGY, ISelectionStrategy.NonParameterStrategy.NEGATIVE)
                 .map(ComputeConfigurationFromAssignment::new)
                 .computeResult();

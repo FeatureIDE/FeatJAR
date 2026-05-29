@@ -38,6 +38,7 @@ import de.featjar.feature.model.IFeatureTree;
 import de.featjar.feature.model.PseudoFeatureTreeRoot;
 import de.featjar.formula.assignment.BooleanAssignment;
 import de.featjar.formula.assignment.BooleanAssignmentList;
+import de.featjar.formula.assignment.Variables;
 import de.featjar.formula.assignment.conversion.ComputeBooleanClauseList;
 import de.featjar.formula.computation.ComputeCNFFormula;
 import de.featjar.formula.computation.ComputeNNFFormula;
@@ -99,7 +100,7 @@ public class ComputeFeatureModelSlice extends AComputation<IFeatureModel> {
 
         BooleanAssignmentList slicedCnf = Computations.of(cnf)
                 .map(CNFSlicer::new)
-                .set(CNFSlicer.VARIABLES_TO_KEEP, new BooleanAssignment(literalsToKeep))
+                .set(CNFSlicer.VARIABLES_TO_KEEP, new Variables(literalsToKeep))
                 .compute();
 
         IFeatureModel slicedModel = featureModel.clone();

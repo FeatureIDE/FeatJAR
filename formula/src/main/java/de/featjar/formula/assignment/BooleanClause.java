@@ -42,7 +42,6 @@ public class BooleanClause extends BooleanAssignment implements IClause<Integer,
 
     public BooleanClause(int... integers) {
         this(integers, true);
-        assert Arrays.stream(integers).noneMatch(a -> a == 0) : "contains zero: " + Arrays.toString(integers);
     }
 
     public BooleanClause(int[] integers, boolean sort) {

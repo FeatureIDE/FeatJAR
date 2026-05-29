@@ -23,7 +23,6 @@ package de.featjar.analysis.sat4j.solver;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import de.featjar.base.data.Problem;
 import de.featjar.base.data.Result;
 import de.featjar.formula.VariableMap;
 import de.featjar.formula.assignment.BooleanAssignment;
@@ -37,23 +36,25 @@ public class SAT4JSolutionSolverTest {
     @Test
     void solverSolutionsContainCorrectValuesForFreeVariables() {
         VariableMap variableMap = new VariableMap(Arrays.asList("A", "B", "C"));
-        BooleanAssignment clause1 = variableMap.getVariables(Arrays.asList("A"));
-        BooleanAssignment clause2 = variableMap.getVariables(Arrays.asList("B"));
-        BooleanAssignment clause3 = variableMap.getVariables(Arrays.asList("A", "B"));
+        BooleanAssignment clause1 = variableMap.toVariables("A");
+        BooleanAssignment clause2 = variableMap.toVariables("B");
+        BooleanAssignment clause3 = variableMap.toVariables("A", "B");
         SAT4JSolutionSolver solver =
                 new SAT4JSolutionSolver(new BooleanAssignmentList(variableMap, clause1, clause2, clause3), false);
 
         solver.setSelectionStrategy(ISelectionStrategy.positive());
         final Result<BooleanSolution> positiveSolution = solver.findSolution();
-        assertTrue(positiveSolution.isPresent(), () -> Problem.printProblems(positiveSolution.getProblems()));
-        BooleanSolution positiveAssignment =
-                variableMap.getVariables(Arrays.asList("A", "B", "C")).toSolution();
+        assertTrue(positiveSolution.isPresent(), positiveSolution::printProblems);
+
+        BooleanSolution positiveAssignment = variableMap.getVariables().toSolution();
         assertEquals(positiveAssignment, positiveSolution.get());
 
         solver.setSelectionStrategy(ISelectionStrategy.negative());
         final Result<BooleanSolution> negativeSolution = solver.findSolution();
-        assertTrue(negativeSolution.isPresent(), () -> Problem.printProblems(negativeSolution.getProblems()));
-        BooleanSolution negativeAssignment = new BooleanSolution(new int[] {1, 2, -3});
+        assertTrue(negativeSolution.isPresent(), negativeSolution::printProblems);
+
+        BooleanSolution negativeAssignment = new BooleanSolution(
+                variableMap.getVariable("A"), variableMap.getVariable("B"), -variableMap.getVariable("C"));
         assertEquals(negativeAssignment, negativeSolution.get());
     }
 }

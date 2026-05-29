@@ -26,8 +26,8 @@ import de.featjar.base.computation.IComputation;
 import de.featjar.base.computation.Progress;
 import de.featjar.base.data.Result;
 import de.featjar.formula.VariableMap;
-import de.featjar.formula.assignment.BooleanAssignment;
 import de.featjar.formula.assignment.BooleanAssignmentList;
+import de.featjar.formula.assignment.Variables;
 import java.util.List;
 
 /**
@@ -35,9 +35,9 @@ import java.util.List;
  *
  * @author Sebastian Krieter
  */
-public class BooleanAssignmentListToVariables extends AComputation<BooleanAssignment> {
+public class BooleanAssignmentListToVariables extends AComputation<Variables> {
 
-    protected static final Dependency<BooleanAssignmentList> CNF =
+    protected static final Dependency<BooleanAssignmentList> ASSIGNMENTS =
             Dependency.newDependency(BooleanAssignmentList.class);
 
     public BooleanAssignmentListToVariables(IComputation<BooleanAssignmentList> cnf) {
@@ -49,7 +49,8 @@ public class BooleanAssignmentListToVariables extends AComputation<BooleanAssign
     }
 
     @Override
-    public Result<BooleanAssignment> compute(List<Object> dependencyList, Progress progress) {
-        return Result.of(CNF.get(dependencyList).getVariableMap().getVariables());
+    public Result<Variables> compute(List<Object> dependencyList, Progress progress) {
+        return Result.ofNullable(ASSIGNMENTS.get(dependencyList).getVariableMap())
+                .map(VariableMap::getVariables);
     }
 }

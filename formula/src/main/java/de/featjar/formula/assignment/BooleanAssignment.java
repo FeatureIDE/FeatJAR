@@ -21,10 +21,6 @@
 package de.featjar.formula.assignment;
 
 import de.featjar.analysis.ISolver;
-import de.featjar.base.computation.AComputation;
-import de.featjar.base.computation.Dependency;
-import de.featjar.base.computation.IComputation;
-import de.featjar.base.computation.Progress;
 import de.featjar.base.data.IntegerList;
 import de.featjar.base.data.Maps;
 import de.featjar.base.data.Result;
@@ -34,7 +30,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Random;
 import java.util.stream.IntStream;
 
@@ -53,21 +48,6 @@ import java.util.stream.IntStream;
  * @author Elias Kuiter
  */
 public class BooleanAssignment extends IntegerList implements IAssignment<Integer, Boolean>, IBooleanRepresentation {
-
-    public static class VariablesComputation extends AComputation<BooleanAssignment> {
-
-        public static final Dependency<BooleanAssignmentList> ASSIGNMENTS =
-                Dependency.newDependency(BooleanAssignmentList.class);
-
-        public VariablesComputation(IComputation<BooleanAssignmentList> computation) {
-            super(computation);
-        }
-
-        @Override
-        public Result<BooleanAssignment> compute(List<Object> dependencyList, Progress progress) {
-            return Result.of(ASSIGNMENTS.get(dependencyList).getVariableMap()).map(VariableMap::getVariables);
-        }
-    }
 
     private static final long serialVersionUID = 1614980283996088122L;
 
@@ -399,8 +379,8 @@ public class BooleanAssignment extends IntegerList implements IAssignment<Intege
         return new BooleanSolution(IntStream.of(elements).map(Math::abs).max().orElse(0), elements);
     }
 
-    public BooleanAssignment toVariables() {
-        return new BooleanAssignment(IntStream.of(elements).map(Math::abs).toArray());
+    public Variables toVariables() {
+        return new Variables(this);
     }
 
     public BooleanSolution toSolution(int variableCount) {

@@ -41,6 +41,8 @@ import de.featjar.formula.assignment.BooleanAssignment;
 import de.featjar.formula.assignment.BooleanAssignmentList;
 import de.featjar.formula.assignment.BooleanClause;
 import de.featjar.formula.assignment.BooleanSolution;
+import de.featjar.formula.assignment.Variables;
+import de.featjar.formula.assignment.conversion.BooleanAssignmentListToVariables;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -57,7 +59,7 @@ import java.util.Random;
  */
 public class YASALegacy extends ASAT4JAnalysis<BooleanAssignmentList> {
 
-    public static final Dependency<BooleanAssignment> VARIABLES = Dependency.newDependency(BooleanAssignment.class);
+    public static final Dependency<Variables> VARIABLES = Dependency.newDependency(Variables.class);
 
     public static final Dependency<Integer> T = Dependency.newDependency(Integer.class);
 
@@ -77,9 +79,7 @@ public class YASALegacy extends ASAT4JAnalysis<BooleanAssignmentList> {
     public YASALegacy(IComputation<BooleanAssignmentList> clauseList) {
         super(
                 clauseList,
-                clauseList.flatMapResult(YASALegacy.class, "variables", l -> {
-                    return Result.of(l.getVariableMap().getVariables());
-                }),
+                clauseList.map(BooleanAssignmentListToVariables::new),
                 Computations.of(2),
                 Computations.of(Integer.MAX_VALUE),
                 Computations.of(new BooleanAssignmentList((VariableMap) null)),
@@ -208,7 +208,7 @@ public class YASALegacy extends ASAT4JAnalysis<BooleanAssignmentList> {
     protected int maxSampleSize, variableCount;
     protected boolean allowChangeToInitialSample, initialSampleCountsTowardsConfigurationLimit;
 
-    protected BooleanAssignment variables;
+    protected Variables variables;
 
     protected SAT4JSolutionSolver solver;
     protected VariableMap variableMap;
@@ -265,9 +265,8 @@ public class YASALegacy extends ASAT4JAnalysis<BooleanAssignmentList> {
         mig = MIG.get(dependencyList);
 
         t = T.get(dependencyList);
-        BooleanAssignment filteredVariables = variables.removeAllVariables(
-                Arrays.stream(mig.getCore()).map(Math::abs).toArray());
-        literals = new BooleanAssignment(filteredVariables.addAll(filteredVariables.negate()));
+        literals = variables.removeAll(new Variables(mig.getCore())).toAssignment();
+        literals = literals.addAll(literals.negate());
 
         progress.setTotalSteps(iterations * BinomialCalculator.computeBinomial(literals.size(), t));
 

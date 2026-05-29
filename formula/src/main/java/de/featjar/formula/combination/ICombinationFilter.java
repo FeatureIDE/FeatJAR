@@ -37,8 +37,18 @@ public interface ICombinationFilter {
         };
     }
 
+    /**
+     * {@return true iff the given literal combination matches the filter}
+     *
+     * @param literals the literal combination to check
+     */
     boolean test(int... literals);
 
+    /**
+     * {@return an instance of the filter with remapped variable indices}
+     *
+     * @param variableMap the new variableMap
+     */
     default ICombinationFilter remap(VariableMap variableMap) {
         return this;
     }

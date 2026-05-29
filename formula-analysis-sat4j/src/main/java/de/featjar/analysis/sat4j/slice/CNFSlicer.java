@@ -22,7 +22,7 @@ package de.featjar.analysis.sat4j.slice;
 
 import de.featjar.analysis.sat4j.solver.SAT4JSolutionSolver;
 import de.featjar.base.computation.AComputation;
-import de.featjar.base.computation.ComputeConstant;
+import de.featjar.base.computation.Computations;
 import de.featjar.base.computation.Dependency;
 import de.featjar.base.computation.IComputation;
 import de.featjar.base.computation.Progress;
@@ -30,6 +30,7 @@ import de.featjar.base.data.Result;
 import de.featjar.formula.assignment.BooleanAssignment;
 import de.featjar.formula.assignment.BooleanAssignmentList;
 import de.featjar.formula.assignment.BooleanClause;
+import de.featjar.formula.assignment.Variables;
 import de.featjar.formula.assignment.conversion.BooleanAssignmentListToVariables;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -48,10 +49,8 @@ import java.util.stream.Collectors;
 public class CNFSlicer extends AComputation<BooleanAssignmentList> {
     protected static final Dependency<BooleanAssignmentList> CNF =
             Dependency.newDependency(BooleanAssignmentList.class);
-    public static final Dependency<BooleanAssignment> VARIABLES_TO_KEEP =
-            Dependency.newDependency(BooleanAssignment.class);
-    public static final Dependency<BooleanAssignment> VARIABLES_TO_REMOVE =
-            Dependency.newDependency(BooleanAssignment.class);
+    public static final Dependency<Variables> VARIABLES_TO_KEEP = Dependency.newDependency(Variables.class);
+    public static final Dependency<Variables> VARIABLES_TO_REMOVE = Dependency.newDependency(Variables.class);
 
     protected static final Comparator<BooleanAssignment> lengthComparator =
             Comparator.comparing(BooleanAssignment::size);
@@ -66,7 +65,7 @@ public class CNFSlicer extends AComputation<BooleanAssignmentList> {
     protected final Set<DirtyClause> dirtyClauseSet = new HashSet<>();
     protected final Set<DirtyClause> cleanClauseSet = new HashSet<>();
 
-    protected BooleanAssignment dirtyVariables;
+    protected Variables dirtyVariables;
     private int numberOfDirtyFeatures = 0;
 
     protected int[] helper;
@@ -83,10 +82,7 @@ public class CNFSlicer extends AComputation<BooleanAssignmentList> {
     protected int newDirtyListDelIndex = 0;
 
     public CNFSlicer(IComputation<BooleanAssignmentList> clauseList) {
-        super(
-                clauseList,
-                new BooleanAssignmentListToVariables(clauseList),
-                new ComputeConstant<>(new BooleanAssignment()));
+        super(clauseList, new BooleanAssignmentListToVariables(clauseList), Computations.of(new Variables()));
     }
 
     int cr = 0, cnr = 0, dr = 0, dnr = 0;
@@ -94,13 +90,10 @@ public class CNFSlicer extends AComputation<BooleanAssignmentList> {
     @Override
     public Result<BooleanAssignmentList> compute(List<Object> dependencyList, Progress progress) {
         orgCNF = CNF.get(dependencyList);
-        BooleanAssignment inlcude = VARIABLES_TO_KEEP.get(dependencyList);
-        BooleanAssignment exclude = VARIABLES_TO_REMOVE.get(dependencyList);
+        Variables inlcude = VARIABLES_TO_KEEP.get(dependencyList);
+        Variables exclude = VARIABLES_TO_REMOVE.get(dependencyList);
 
-        dirtyVariables = orgCNF.getVariableMap()
-                .getVariables()
-                .removeAll(
-                        inlcude.removeAllVariables(exclude.getAbsoluteValues()).getAbsoluteValues());
+        dirtyVariables = orgCNF.getVariableMap().getVariables().removeAll(inlcude.removeAll(exclude));
 
         cnfCopy = new BooleanAssignmentList(orgCNF.getVariableMap());
 

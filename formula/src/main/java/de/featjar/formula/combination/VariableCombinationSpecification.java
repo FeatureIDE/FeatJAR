@@ -31,8 +31,8 @@ import de.featjar.base.data.Ints;
 import de.featjar.base.data.Result;
 import de.featjar.base.data.combination.CombinationStream;
 import de.featjar.formula.VariableMap;
-import de.featjar.formula.assignment.BooleanAssignment;
 import de.featjar.formula.assignment.BooleanAssignmentList;
+import de.featjar.formula.assignment.Variables;
 import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -73,8 +73,8 @@ public class VariableCombinationSpecification extends ACombinationSpecification 
         super(variableMap.getVariables().get(), t, variableMap);
     }
 
-    public VariableCombinationSpecification(int t, BooleanAssignment variables, VariableMap variableMap) {
-        super(IntStream.of(variables.get()).map(Math::abs).distinct().toArray(), t, variableMap);
+    public VariableCombinationSpecification(int t, Variables variables, VariableMap variableMap) {
+        super(variables.get(), t, variableMap);
     }
 
     public VariableCombinationSpecification(int t, int[] variables, VariableMap variableMap) {

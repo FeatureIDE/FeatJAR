@@ -30,21 +30,21 @@ import de.featjar.base.data.Result;
 import de.featjar.formula.VariableMap;
 import de.featjar.formula.assignment.BooleanAssignment;
 import de.featjar.formula.assignment.BooleanAssignmentList;
+import de.featjar.formula.assignment.Variables;
 import java.time.Duration;
 import java.util.BitSet;
 import java.util.List;
 
 public class ComputeAtomicCadiCal extends ACadiCalAnalysis<BooleanAssignmentList> {
 
-    public static final Dependency<BooleanAssignment> VARIABLES_OF_INTEREST =
-            Dependency.newDependency(BooleanAssignment.class);
+    public static final Dependency<Variables> VARIABLES_OF_INTEREST = Dependency.newDependency(Variables.class);
     public static final Dependency<Boolean> OMIT_SINGLE_SETS = Dependency.newDependency(Boolean.class);
     public static final Dependency<Boolean> OMIT_CORE = Dependency.newDependency(Boolean.class);
 
     public ComputeAtomicCadiCal(IComputation<BooleanAssignmentList> clauseList) {
         super(
                 clauseList,
-                Computations.of(new BooleanAssignment()),
+                Computations.of(new Variables()),
                 Computations.of(Boolean.FALSE),
                 Computations.of(Boolean.FALSE));
     }
@@ -62,7 +62,7 @@ public class ComputeAtomicCadiCal extends ACadiCalAnalysis<BooleanAssignmentList
         VariableMap variableMap = formula.getVariableMap();
 
         BitSet computedVariables = new BitSet(variableMap.size() + 1);
-        BooleanAssignment variables = VARIABLES_OF_INTEREST.get(dependencyList);
+        Variables variables = VARIABLES_OF_INTEREST.get(dependencyList);
         if (variables.isEmpty()) {
             variables = variableMap.getVariables();
         }

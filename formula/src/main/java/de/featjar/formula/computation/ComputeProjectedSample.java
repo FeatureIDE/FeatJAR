@@ -20,10 +20,17 @@
  */
 package de.featjar.formula.computation;
 
-import de.featjar.base.computation.*;
+import de.featjar.base.computation.AComputation;
+import de.featjar.base.computation.Computations;
+import de.featjar.base.computation.Dependency;
+import de.featjar.base.computation.IComputation;
+import de.featjar.base.computation.Progress;
 import de.featjar.base.data.Result;
 import de.featjar.formula.VariableMap;
-import de.featjar.formula.assignment.*;
+import de.featjar.formula.assignment.BooleanAssignment;
+import de.featjar.formula.assignment.BooleanAssignmentList;
+import de.featjar.formula.assignment.Variables;
+import de.featjar.formula.assignment.conversion.BooleanAssignmentListToVariables;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -36,10 +43,8 @@ public class ComputeProjectedSample extends AComputation<BooleanAssignmentList> 
 
     public static final Dependency<BooleanAssignmentList> SAMPLE =
             Dependency.newDependency(BooleanAssignmentList.class);
-    public static final Dependency<BooleanAssignment> INCLUDE_VARIABLES =
-            Dependency.newDependency(BooleanAssignment.class);
-    public static final Dependency<BooleanAssignment> EXCLUDE_VARIABLES =
-            Dependency.newDependency(BooleanAssignment.class);
+    public static final Dependency<Variables> INCLUDE_VARIABLES = Dependency.newDependency(Variables.class);
+    public static final Dependency<Variables> EXCLUDE_VARIABLES = Dependency.newDependency(Variables.class);
     /**
      * Whether to change the index in the variable map. Default: {@code false}
      * <ul>
@@ -52,24 +57,24 @@ public class ComputeProjectedSample extends AComputation<BooleanAssignmentList> 
     public ComputeProjectedSample(IComputation<BooleanAssignmentList> sample) {
         super(
                 sample,
-                sample.map(BooleanAssignment.VariablesComputation::new),
-                Computations.of(new BooleanAssignment()),
+                sample.map(BooleanAssignmentListToVariables::new),
+                Computations.of(new Variables()),
                 Computations.of(Boolean.FALSE));
     }
 
     @Override
     public final Result<BooleanAssignmentList> compute(List<Object> dependencyList, Progress progress) {
         BooleanAssignmentList sample = SAMPLE.get(dependencyList);
-        BooleanAssignment includeVariables = INCLUDE_VARIABLES.get(dependencyList);
-        BooleanAssignment excludeVariables = EXCLUDE_VARIABLES.get(dependencyList);
-        BooleanAssignment projectedVariables = includeVariables.removeAllVariables(excludeVariables);
+        Variables includeVariables = INCLUDE_VARIABLES.get(dependencyList);
+        Variables excludeVariables = EXCLUDE_VARIABLES.get(dependencyList);
+        Variables projectedVariables = includeVariables.removeAll(excludeVariables);
 
         Stream<BooleanAssignment> projectedSample =
                 sample.stream().map(assignment -> assignment.retainAllVariables(projectedVariables));
 
         VariableMap newVariableMap = sample.getVariableMap().clone();
         if (REMAP_VARIABLES.get(dependencyList)) {
-            BooleanAssignment removalVariables = newVariableMap.getVariables().removeAllVariables(projectedVariables);
+            Variables removalVariables = newVariableMap.getVariables().removeAll(projectedVariables);
             for (int variable : removalVariables.get()) {
                 newVariableMap.remove(variable);
             }

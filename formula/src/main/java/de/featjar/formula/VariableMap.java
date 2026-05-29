@@ -35,9 +35,11 @@ import de.featjar.formula.assignment.ValueAssignment;
 import de.featjar.formula.assignment.ValueAssignmentList;
 import de.featjar.formula.assignment.ValueClause;
 import de.featjar.formula.assignment.ValueSolution;
+import de.featjar.formula.assignment.Variables;
 import de.featjar.formula.structure.IExpression;
 import de.featjar.formula.structure.IFormula;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -123,16 +125,82 @@ public class VariableMap extends RangeMap<String> {
 
     /**
      * {@return a BooleanAssignment containing all variables mapped to the given names}
+     * Keeps the order of the given list.
+     * Contains a zero at positions where the given name is not mapped.
+     *
      * @param names the list of names
      */
-    public BooleanAssignment getVariables(Collection<String> names) {
-        return new BooleanAssignment(names.stream().mapToInt(objectToIndex::get).toArray());
+    public BooleanAssignment toVariables(List<String> names) {
+        return new BooleanAssignment(
+                names.stream().mapToInt(this::getVariableOrZero).toArray());
     }
+
     /**
-     * {@return a BooleanAssignment containing all variables in this map}
+     * {@return a BooleanAssignment containing all variables mapped to the given names}
+     * Keeps the order of the given list.
+     * Contains a zero at positions where the given name is not mapped.
+     *
+     * @param names the list of names
      */
-    public BooleanAssignment getVariables() {
-        return new BooleanAssignment(entryStream().mapToInt(e -> e.getValue()).toArray());
+    public BooleanAssignment toVariables(String... names) {
+        return new BooleanAssignment(
+                Arrays.stream(names).mapToInt(this::getVariableOrZero).toArray());
+    }
+
+    /**
+     * {@return a variable set containing all variables mapped to the given names}
+     *
+     * @param names the list of names
+     *
+     * @throws IllegalArgumentException if this map does not contain a given name
+     */
+    public Variables getVariables(Collection<String> names) {
+        return new Variables(names.stream().mapToInt(this::getVariable).toArray());
+    }
+
+    /**
+     * {@return a variable set containing all variables mapped to the given names}
+     * The returned set may have a different order than the given names.
+     *
+     * @param names the list of names
+     *
+     * @throws IllegalArgumentException if this map does not contain a given name
+     */
+    public Variables getVariables(String... names) {
+        return new Variables(Arrays.stream(names).mapToInt(this::getVariable).toArray());
+    }
+
+    /**
+     * {@return a variable set containing all variables in this map}
+     */
+    public Variables getVariables() {
+        return new Variables(objectToIndex.values());
+    }
+
+    /**
+     * {@return the index of a name}
+     *
+     * @param name the name
+     *
+     * @throws IllegalArgumentException if this map does not contain the given name
+     */
+    public int getVariable(String name) {
+        Integer index = objectToIndex.get(name);
+        if (index == null) {
+            throw new IllegalArgumentException(name);
+        } else {
+            return index;
+        }
+    }
+
+    /**
+     * {@return the index of a name or zero if the name is not mapped}
+     *
+     * @param name the name
+     */
+    public int getVariableOrZero(String name) {
+        Integer index = objectToIndex.get(name);
+        return index == null ? 0 : index;
     }
 
     /**

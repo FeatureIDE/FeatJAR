@@ -32,8 +32,8 @@ import de.featjar.base.data.Result;
 import de.featjar.base.io.IO;
 import de.featjar.base.io.format.IFormat;
 import de.featjar.formula.VariableMap;
-import de.featjar.formula.assignment.BooleanAssignment;
 import de.featjar.formula.assignment.BooleanAssignmentList;
+import de.featjar.formula.assignment.Variables;
 import de.featjar.formula.assignment.conversion.ComputeBooleanClauseList;
 import de.featjar.formula.io.BooleanAssignmentListFormats;
 import de.featjar.formula.io.FormulaFormats;
@@ -130,9 +130,8 @@ public class ProjectionCommand extends ACommand {
                 .mapToInt(Result::get)
                 .toArray();
 
-        IComputation<BooleanAssignmentList> computation = Computations.of(cnf)
-                .map(CNFSlicer::new)
-                .set(CNFSlicer.VARIABLES_TO_REMOVE, new BooleanAssignment(array));
+        IComputation<BooleanAssignmentList> computation =
+                Computations.of(cnf).map(CNFSlicer::new).set(CNFSlicer.VARIABLES_TO_REMOVE, new Variables(array));
 
         Result<BooleanAssignmentList> result;
 
