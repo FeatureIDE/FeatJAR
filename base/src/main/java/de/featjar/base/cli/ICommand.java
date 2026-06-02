@@ -32,7 +32,7 @@ import java.util.Optional;
  * @author Sebastian Krieter
  * @author Elias Kuiter
  */
-public interface ICommand extends IExtension {
+public interface ICommand extends IHasOptions, IExtension {
 
     /**
      * {@return this command's description, if any}

@@ -20,8 +20,9 @@
  */
 package de.featjar.base;
 
-import de.featjar.base.cli.Commands;
+import de.featjar.base.cli.FeatJAROptions;
 import de.featjar.base.cli.ICommand;
+import de.featjar.base.cli.LogOptions;
 import de.featjar.base.cli.Option;
 import de.featjar.base.cli.OptionList;
 import de.featjar.base.computation.Cache;
@@ -44,7 +45,6 @@ import de.featjar.base.log.ProgressThread;
 import de.featjar.base.log.TimeStampFormatter;
 import de.featjar.base.log.VerbosityFormatter;
 import de.featjar.base.shell.Shell;
-import java.nio.file.Path;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -139,99 +139,6 @@ public final class FeatJAR extends IO implements AutoCloseable {
             FeatJAR.initialize(this);
         }
     }
-
-    /**
-     * Option for setting the configuration file.
-     */
-    public static final Option<List<String>> CONFIGURATION_OPTION =
-            Option.newListOption("config", Option.StringParser).setDescription("The names of configuration files");
-
-    /**
-     * Option for setting a directory containing configuration files.
-     */
-    public static final Option<Path> CONFIGURATION_DIR_OPTION =
-            Option.newOption("config_dir", Option.PathParser).setDescription("The path to the configuration files");
-
-    /**
-     * Option for printing usage information.
-     */
-    public static final Option<ICommand> COMMAND_OPTION = Option.newOption(
-                    "command", s -> FeatJAR.extensionPoint(Commands.class)
-                            .getMatchingExtension(s)
-                            .orElseThrow())
-            .setDescription("Classpath from command to execute");
-
-    /**
-     * Option for printing usage information.
-     */
-    public static final Option<Boolean> HELP_OPTION = Option.newFlag("help").setDescription("Print usage information");
-
-    /**
-     * Option for printing version information.
-     */
-    public static final Option<Boolean> VERSION_OPTION =
-            Option.newFlag("version").setDescription("Print version information");
-
-    /**
-     * Option for printing version information.
-     */
-    public static final Option<Boolean> STACKTRACE_OPTION =
-            Option.newFlag("print-stacktrace").setDescription("Print a stacktrace for all logged exceptions");
-
-    /**
-     * Option for writing less output to the console.
-     */
-    public static final Option<Boolean> QUIET_OPTION = Option.newFlag("quiet")
-            .setDescription("Suppress all unnecessary output. (Overwrites --log-info and --log-error options)");
-
-    /**
-     * Option for writing progress regularly to the console.
-     */
-    public static final Option<Boolean> PROGRESS_OPTION =
-            Option.newFlag("progress").setDescription("Shows progress regularly.");
-
-    /**
-     * Option to specify a path to a log file for non-error messages.
-     */
-    public static final Option<Path> INFO_FILE_OPTION =
-            Option.newOption("info-file", Option.PathParser).setDescription("Path to info log file");
-
-    /**
-     * Option to specify a path to a log file for error messages.
-     */
-    public static final Option<Path> ERROR_FILE_OPTION =
-            Option.newOption("error-file", Option.PathParser).setDescription("Path to error log file");
-
-    /**
-     * Option to configure which logging types count as non-error messages.
-     */
-    public static final Option<List<Log.Verbosity>> LOG_INFO_OPTION = Option.newEnumListOption(
-                    "log-info", Log.Verbosity.class)
-            .setDescription("Message types printed to the info stream")
-            .setDefaultValue(List.of(Log.Verbosity.MESSAGE, Log.Verbosity.INFO, Log.Verbosity.PROGRESS));
-    /**
-     * Option to configure which logging types count as error messages.
-     */
-    public static final Option<List<Log.Verbosity>> LOG_ERROR_OPTION = Option.newEnumListOption(
-                    "log-error", Log.Verbosity.class)
-            .setDescription("Message types printed to the error stream.")
-            .setDefaultValue(List.of(Log.Verbosity.WARNING, Log.Verbosity.ERROR));
-
-    /**
-     * Option to configure which logging types are written to the non-error log file (if one exists).
-     */
-    public static final Option<List<Log.Verbosity>> LOG_INFO_FILE_OPTION = Option.newEnumListOption(
-                    "log-info-file", Log.Verbosity.class)
-            .setDescription("Message types printed to the info file.")
-            .setDefaultValue(List.of(Log.Verbosity.MESSAGE, Log.Verbosity.INFO, Log.Verbosity.DEBUG));
-
-    /**
-     * Option to configure which logging types are written to the error log file (if one exists).
-     */
-    public static final Option<List<Log.Verbosity>> LOG_ERROR_FILE_OPTION = Option.newEnumListOption(
-                    "log-error-file", Log.Verbosity.class)
-            .setDescription("Message types printed to the error file.")
-            .setDefaultValue(List.of(Log.Verbosity.ERROR, Log.Verbosity.WARNING));
 
     /**
      * The current instance of FeatJAR. Only one instance can exist at a time.
@@ -376,6 +283,7 @@ public final class FeatJAR extends IO implements AutoCloseable {
             if (instance.extensionManager != null) {
                 instance.extensionManager.close();
             }
+            instance.extensionManager = null;
 
             if (instance.cache != null) {
                 instance.cache.close();
@@ -486,7 +394,9 @@ public final class FeatJAR extends IO implements AutoCloseable {
     }
 
     private int runAfterInitialization(boolean configure, String... arguments) {
-        OptionList optionInput = new OptionList(Option.getAllOptions(FeatJAR.class), arguments);
+        OptionList optionInput = new OptionList(arguments);
+        optionInput.addOptions(Option.getAllOptions(FeatJAROptions.class));
+        optionInput.addOptions(Option.getAllOptions(LogOptions.class));
 
         List<Problem> problems = optionInput.parseArguments();
 

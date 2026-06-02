@@ -20,9 +20,9 @@
  */
 package de.featjar.base.cli;
 
-import de.featjar.base.FeatJAR;
-import de.featjar.base.data.Pair;
 import de.featjar.base.data.Result;
+import de.featjar.base.env.Parameter;
+import de.featjar.base.env.ParameterList;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -31,7 +31,6 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 /**
  * An option for an {@link ICommand}. Parses a string value into an object.
@@ -40,7 +39,14 @@ import java.util.stream.Collectors;
  * @param <T> the type of the option's value
  * @author Elias Kuiter
  */
-public class Option<T> {
+public class Option<T> extends Parameter {
+
+    private static ParameterList<Option<?>> optionList = new ParameterList<>(IHasOptions.class);
+
+    static {
+        FeatJAROptions.init();
+        LogOptions.init();
+    }
 
     /**
      * Default parser for boolean values.
@@ -86,8 +92,6 @@ public class Option<T> {
      */
     public static final Predicate<Path> PathValidator = Files::exists;
 
-    private static List<Pair<Class<?>, Option<?>>> list = new ArrayList<>();
-
     /**
      * Registers a new {@link Option} for the calling class.
      *
@@ -99,9 +103,7 @@ public class Option<T> {
      * @return the newly created option
      */
     public static <U> Option<U> newOption(String name, Function<String, U> parser, U defaultValue) {
-        Option<U> option = new Option<>(name, parser, defaultValue);
-        list.add(new Pair<>(getCallingClass(), option));
-        return option;
+        return addOption(new Option<>(name, parser, defaultValue));
     }
 
     /**
@@ -114,9 +116,7 @@ public class Option<T> {
      * @return the newly created option
      */
     public static <U> Option<U> newOption(String name, Function<String, U> parser) {
-        Option<U> option = new Option<>(name, parser);
-        list.add(new Pair<>(getCallingClass(), option));
-        return option;
+        return addOption(new Option<>(name, parser));
     }
 
     /**
@@ -129,9 +129,7 @@ public class Option<T> {
      * @return the newly created list option
      */
     public static <U> ListOption<U> newListOption(String name, Function<String, U> parser) {
-        ListOption<U> option = new ListOption<>(name, parser);
-        list.add(new Pair<>(getCallingClass(), option));
-        return option;
+        return addOption(new ListOption<>(name, parser));
     }
 
     /**
@@ -144,9 +142,7 @@ public class Option<T> {
      * @return the newly created enum list option
      */
     public static <E extends Enum<E>> EnumListOption<E> newEnumListOption(String name, Class<E> enumClass) {
-        EnumListOption<E> option = new EnumListOption<>(name, enumClass);
-        list.add(new Pair<>(getCallingClass(), option));
-        return option;
+        return addOption(new EnumListOption<>(name, enumClass));
     }
 
     /**
@@ -157,9 +153,7 @@ public class Option<T> {
      * @return the newly created range option
      */
     public static RangeOption newRangeOption(String name) {
-        RangeOption option = new RangeOption(name);
-        list.add(new Pair<>(getCallingClass(), option));
-        return option;
+        return addOption(new RangeOption(name));
     }
 
     /**
@@ -170,9 +164,7 @@ public class Option<T> {
      * @return the newly created flag option
      */
     public static Flag newFlag(String name) {
-        Flag option = new Flag(name);
-        list.add(new Pair<>(getCallingClass(), option));
-        return option;
+        return addOption(new Flag(name));
     }
 
     /**
@@ -185,9 +177,7 @@ public class Option<T> {
      * @return the newly created enum option
      */
     public static <E extends Enum<E>> EnumOption<E> newEnumOption(String name, Class<E> enumClass) {
-        EnumOption<E> option = new EnumOption<>(name, enumClass);
-        list.add(new Pair<>(getCallingClass(), option));
-        return option;
+        return addOption(new EnumOption<>(name, enumClass));
     }
 
     /**
@@ -199,9 +189,7 @@ public class Option<T> {
      * @return the newly created string enum option
      */
     public static StringEnumOption newStringEnumOption(String name, String... possibleValues) {
-        StringEnumOption option = new StringEnumOption(name, Arrays.asList(possibleValues));
-        list.add(new Pair<>(getCallingClass(), option));
-        return option;
+        return addOption(new StringEnumOption(name, Arrays.asList(possibleValues)));
     }
 
     /**
@@ -213,38 +201,21 @@ public class Option<T> {
      * @return the newly created string enum option
      */
     public static StringEnumOption newStringEnumOption(String name, List<String> possibleValues) {
-        StringEnumOption option = new StringEnumOption(name, possibleValues);
-        list.add(new Pair<>(getCallingClass(), option));
+        return addOption(new StringEnumOption(name, possibleValues));
+    }
+
+    private static <T extends Option<?>> T addOption(T option) {
+        optionList.addParameter(option);
         return option;
     }
 
     /**
      * {@return all options registered for a given class}
      *
-     * @param clazz the class for which the options are registered
+     * @param introducingClass the class for which the options are registered
      */
-    public static List<Option<?>> getAllOptions(Class<?> clazz) {
-        return list.stream()
-                .filter(e -> e.getKey().isAssignableFrom(clazz))
-                .map(e -> e.getValue())
-                .collect(Collectors.toList());
-    }
-
-    /**
-     * Deregisters all {@link Option options} for all classes.
-     */
-    public static void deleteAllOptions() {
-        list.clear();
-        list = null;
-    }
-
-    private static Class<?> getCallingClass() {
-        try {
-            return Class.forName(Thread.currentThread().getStackTrace()[3].getClassName());
-        } catch (ClassNotFoundException e) {
-            FeatJAR.log().error(e);
-            throw new RuntimeException(e);
-        }
+    public static List<Option<?>> getAllOptions(Class<?> introducingClass) {
+        return new ArrayList<>(optionList.getParameterList(introducingClass));
     }
 
     /**
@@ -292,6 +263,7 @@ public class Option<T> {
      * @param defaultValue the default value in case no other is provided or can be parsed
      */
     protected Option(String name, Function<String, T> parser, T defaultValue) {
+        super();
         this.name = name;
         this.parser = parser;
         this.defaultValue = defaultValue;

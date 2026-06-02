@@ -140,7 +140,7 @@ public class OptionList {
         if (!arguments.isEmpty() && !arguments.get(0).startsWith("--")) {
             Result<ICommand> command = Commands.getCommandByName(arguments.get(0));
             if (command.isPresent()) {
-                properties.put(FeatJAR.COMMAND_OPTION.getName(), command.get());
+                properties.put(FeatJAROptions.COMMAND_OPTION.getName(), command.get());
             } else {
                 problemList.addAll(command.getProblems());
             }
@@ -149,7 +149,7 @@ public class OptionList {
     }
 
     private void parseCommand(LinkedList<String> arguments, List<Problem> problemList) {
-        int commandIndex = arguments.indexOf("--" + FeatJAR.COMMAND_OPTION.getName());
+        int commandIndex = arguments.indexOf("--" + FeatJAROptions.COMMAND_OPTION.getName());
         if (commandIndex >= 0) {
             int argumentIndex = commandIndex + 1;
             if (argumentIndex >= arguments.size()) {
@@ -157,11 +157,11 @@ public class OptionList {
                         problemList,
                         Severity.ERROR,
                         "Option %s is supplied without value, but a value is required",
-                        FeatJAR.COMMAND_OPTION.getName());
+                        FeatJAROptions.COMMAND_OPTION.getName());
                 return;
             }
-            parseOption(FeatJAR.COMMAND_OPTION, arguments.get(argumentIndex), problemList);
-            Result<ICommand> command = getResult(FeatJAR.COMMAND_OPTION);
+            parseOption(FeatJAROptions.COMMAND_OPTION, arguments.get(argumentIndex), problemList);
+            Result<ICommand> command = getResult(FeatJAROptions.COMMAND_OPTION);
             if (command.isEmpty()) {
                 problemList.addAll(command.getProblems());
                 return;
@@ -173,7 +173,8 @@ public class OptionList {
     private List<String> parseConfigurationFiles(List<String> commandLineArguments, List<Problem> problemList) {
         List<String> configFileArguments = new ArrayList<>();
         final Path configDir;
-        int configurationDirIndex = commandLineArguments.indexOf("--" + FeatJAR.CONFIGURATION_DIR_OPTION.getName());
+        int configurationDirIndex =
+                commandLineArguments.indexOf("--" + FeatJAROptions.CONFIGURATION_DIR_OPTION.getName());
         if (configurationDirIndex < 0) {
             configDir = Path.of("");
         } else {
@@ -183,11 +184,11 @@ public class OptionList {
                         problemList,
                         Severity.ERROR,
                         "Option %s is supplied without value, but a value is required",
-                        FeatJAR.CONFIGURATION_DIR_OPTION.getName());
+                        FeatJAROptions.CONFIGURATION_DIR_OPTION.getName());
                 return configFileArguments;
             }
-            parseOption(FeatJAR.CONFIGURATION_DIR_OPTION, commandLineArguments.get(argumentIndex), problemList);
-            Result<Path> configDirValue = getResult(FeatJAR.CONFIGURATION_DIR_OPTION);
+            parseOption(FeatJAROptions.CONFIGURATION_DIR_OPTION, commandLineArguments.get(argumentIndex), problemList);
+            Result<Path> configDirValue = getResult(FeatJAROptions.CONFIGURATION_DIR_OPTION);
             if (configDirValue.isEmpty()) {
                 problemList.addAll(configDirValue.getProblems());
                 return configFileArguments;
@@ -206,7 +207,8 @@ public class OptionList {
             }
         }
 
-        int configurationNamesIndex = commandLineArguments.indexOf("--" + FeatJAR.CONFIGURATION_OPTION.getName());
+        int configurationNamesIndex =
+                commandLineArguments.indexOf("--" + FeatJAROptions.CONFIGURATION_OPTION.getName());
         if (configurationNamesIndex >= 0) {
             int argumentIndex = configurationNamesIndex + 1;
             if (argumentIndex >= commandLineArguments.size()) {
@@ -214,11 +216,11 @@ public class OptionList {
                         problemList,
                         Severity.ERROR,
                         "Option %s is supplied without value, but a value is required",
-                        FeatJAR.CONFIGURATION_OPTION.getName());
+                        FeatJAROptions.CONFIGURATION_OPTION.getName());
                 return configFileArguments;
             }
-            parseOption(FeatJAR.CONFIGURATION_OPTION, commandLineArguments.get(argumentIndex), problemList);
-            Result<List<String>> config = getResult(FeatJAR.CONFIGURATION_OPTION);
+            parseOption(FeatJAROptions.CONFIGURATION_OPTION, commandLineArguments.get(argumentIndex), problemList);
+            Result<List<String>> config = getResult(FeatJAROptions.CONFIGURATION_OPTION);
             if (config.isEmpty()) {
                 problemList.addAll(config.getProblems());
                 return configFileArguments;
@@ -275,7 +277,7 @@ public class OptionList {
             }
 
             Option<?> option = optionalOption.get();
-            if (option.equals(FeatJAR.CONFIGURATION_OPTION)) {
+            if (option.equals(FeatJAROptions.CONFIGURATION_OPTION)) {
                 listIterator.remove();
                 listIterator.next();
                 listIterator.remove();
@@ -414,7 +416,7 @@ public class OptionList {
      * {@return the commands supplied in this option input}
      */
     public Result<ICommand> getCommand() {
-        return getResult(FeatJAR.COMMAND_OPTION);
+        return getResult(FeatJAROptions.COMMAND_OPTION);
     }
 
     /**
@@ -483,11 +485,14 @@ public class OptionList {
 
     private static void printGeneralOptions(IndentStringBuilder sb) {
         sb.appendLine(String.format(
-                "Usage: java -jar %s [<command> | --command <classpath>] [--<flag> | --<option> <value>]...",
-                FeatJAR.LIBRARY_NAME));
-        sb.appendLine();
-        sb.appendLine("General options:").addIndent();
-        sb.appendLine(Option.getAllOptions(OptionList.class)).removeIndent();
+                        "Usage: java -jar %s [<command> | --command <classpath>] [--<flag> | --<option> <value>]...",
+                        FeatJAR.LIBRARY_NAME))
+                .appendLine()
+                .appendLine("General options:")
+                .addIndent()
+                .appendLine(Option.getAllOptions(FeatJAROptions.class))
+                .appendLine(Option.getAllOptions(LogOptions.class))
+                .removeIndent();
     }
 
     private static void printCommandHelp(IndentStringBuilder sb, ICommand command) {
@@ -534,22 +539,24 @@ public class OptionList {
      */
     public Configuration getConfiguration() {
         final Configuration configuration = FeatJAR.configure();
-        getResult(FeatJAR.INFO_FILE_OPTION).ifPresent(p -> logToFile(configuration, p, FeatJAR.LOG_INFO_FILE_OPTION));
-        getResult(FeatJAR.ERROR_FILE_OPTION).ifPresent(p -> logToFile(configuration, p, FeatJAR.LOG_ERROR_FILE_OPTION));
-        if (get(FeatJAR.QUIET_OPTION)) {
-            if (get(FeatJAR.PROGRESS_OPTION)) {
+        getResult(LogOptions.INFO_FILE_OPTION)
+                .ifPresent(p -> logToFile(configuration, p, LogOptions.LOG_INFO_FILE_OPTION));
+        getResult(LogOptions.ERROR_FILE_OPTION)
+                .ifPresent(p -> logToFile(configuration, p, LogOptions.LOG_ERROR_FILE_OPTION));
+        if (get(LogOptions.QUIET_OPTION)) {
+            if (get(LogOptions.PROGRESS_OPTION)) {
                 configuration.useProgressThread = true;
                 configuration.logConfig.logToSystemOut(Log.Verbosity.MESSAGE, Log.Verbosity.PROGRESS);
             } else {
                 configuration.logConfig.logToSystemOut(Log.Verbosity.MESSAGE);
             }
         } else {
-            configuration.useProgressThread = get(FeatJAR.PROGRESS_OPTION);
+            configuration.useProgressThread = get(LogOptions.PROGRESS_OPTION);
             configuration
                     .logConfig
-                    .logToSystemOut(get(FeatJAR.LOG_INFO_OPTION).toArray(new Log.Verbosity[0]))
-                    .logToSystemErr(get(FeatJAR.LOG_ERROR_OPTION).toArray(new Log.Verbosity[0]))
-                    .setPrintStacktrace(get(FeatJAR.STACKTRACE_OPTION))
+                    .logToSystemOut(get(LogOptions.LOG_INFO_OPTION).toArray(new Log.Verbosity[0]))
+                    .logToSystemErr(get(LogOptions.LOG_ERROR_OPTION).toArray(new Log.Verbosity[0]))
+                    .setPrintStacktrace(get(LogOptions.STACKTRACE_OPTION))
                     .addFormatter(new TimeStampFormatter())
                     .addFormatter(new VerbosityFormatter());
         }
@@ -568,14 +575,14 @@ public class OptionList {
      * {@return whether this option input requests help information}
      */
     public boolean isHelp() {
-        return getResult(FeatJAR.HELP_OPTION).orElse(Boolean.FALSE);
+        return getResult(FeatJAROptions.HELP_OPTION).orElse(Boolean.FALSE);
     }
 
     /**
      * {@return whether this option input requests version information}
      */
     public boolean isVersion() {
-        return getResult(FeatJAR.VERSION_OPTION).orElse(Boolean.FALSE);
+        return getResult(FeatJAROptions.VERSION_OPTION).orElse(Boolean.FALSE);
     }
 
     /**
