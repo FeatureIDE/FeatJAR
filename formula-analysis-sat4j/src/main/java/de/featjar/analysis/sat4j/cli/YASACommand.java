@@ -24,6 +24,7 @@ import de.featjar.analysis.sat4j.computation.CompactYASA;
 import de.featjar.analysis.sat4j.computation.YASA;
 import de.featjar.base.cli.Option;
 import de.featjar.base.cli.OptionList;
+import de.featjar.base.cli.Options;
 import de.featjar.base.computation.IComputation;
 import de.featjar.base.data.Result;
 import de.featjar.base.io.IO;
@@ -46,28 +47,30 @@ public class YASACommand extends ATWiseCommand {
     /**
      * Number of iterations.
      */
-    public static final Option<Integer> ITERATIONS_OPTION = Option.newOption("i", Option.IntegerParser) //
+    public static final Option<Integer> ITERATIONS_OPTION = Options.newOption("i", Options.IntegerParser) //
             .setDescription("Number of iterations.") //
-            .setDefaultValue(1);
+            .setDefaultArgument("1");
 
-    public static final Option<Integer> INTERNAL_SOLUTION_LIMIT = Option.newOption(
-                    "internal-limit", Option.IntegerParser) //
+    public static final Option<Integer> INTERNAL_SOLUTION_LIMIT = Options.newOption(
+                    "internal-limit", Options.IntegerParser) //
             .setDescription("Number of internally cached configurations.")
-            .setDefaultValue(65_536);
+            .setDefaultArgument("65536");
 
-    public static final Option<Boolean> COMPACT = Option.newFlag("c") //
+    public static final Option<Boolean> COMPACT = Options.newFlag("c") //
             .setDescription("Use a more memory efficient version of YASA.");
 
-    public static final Option<Boolean> INCREMENTAL = Option.newFlag("incremental") //
+    public static final Option<Boolean> INCREMENTAL = Options.newFlag("incremental") //
             .setDescription("Start with smaller values for t.");
 
-    public static final Option<Path> INCLUDE_INTERACTIONS = Option.newOption("include-interactions", Option.PathParser)
+    public static final Option<Path> INCLUDE_INTERACTIONS = Options.newOption(
+                    "include-interactions", Options.PathParser)
             .setDescription("Path to list of interactions that will be considered.")
-            .setValidator(Option.PathValidator);
+            .setValidator(Options.PathValidator);
 
-    public static final Option<Path> EXCLUDE_INTERACTIONS = Option.newOption("exclude-interactions", Option.PathParser)
+    public static final Option<Path> EXCLUDE_INTERACTIONS = Options.newOption(
+                    "exclude-interactions", Options.PathParser)
             .setDescription("Path to list of interactions that will be ignored.")
-            .setValidator(Option.PathValidator);
+            .setValidator(Options.PathValidator);
 
     @Override
     public Optional<String> getDescription() {

@@ -24,6 +24,7 @@ import de.featjar.analysis.ExternalConfigurationTester;
 import de.featjar.analysis.sat4j.computation.Inciident;
 import de.featjar.base.cli.Option;
 import de.featjar.base.cli.OptionList;
+import de.featjar.base.cli.Options;
 import de.featjar.base.computation.IComputation;
 import de.featjar.base.data.Result;
 import de.featjar.base.io.IO;
@@ -33,6 +34,7 @@ import de.featjar.formula.assignment.BooleanAssignment;
 import de.featjar.formula.assignment.BooleanAssignmentGroups;
 import de.featjar.formula.assignment.BooleanAssignmentList;
 import de.featjar.formula.io.BooleanAssignmentGroupsFormats;
+import de.featjar.formula.io.BooleanAssignmentListFormats;
 import de.featjar.formula.io.dimacs.BooleanAssignmentListDimacsFormat;
 import java.nio.file.Path;
 import java.util.Optional;
@@ -47,31 +49,33 @@ public class InciidentCommand extends ASAT4JAnalysisCommand<BooleanAssignmentLis
     /**
      * Maximum number of tests to be performed.
      */
-    public static final Option<Integer> LIMIT_OPTION = Option.newOption("n", Option.IntegerParser) //
+    public static final Option<Integer> LIMIT_OPTION = Options.newOption("n", Options.IntegerParser) //
             .setDescription("Maximum number of tests to be performed.") //
-            .setDefaultValue(Integer.MAX_VALUE);
+            .setDefaultArgument(Integer.toString(Integer.MAX_VALUE));
 
     /**
      * Value of t.
      */
-    public static final Option<Integer> T_OPTION = Option.newOption("t", Option.IntegerParser) //
+    public static final Option<Integer> T_OPTION = Options.newOption("t", Options.IntegerParser) //
             .setDescription("Value(s) of parameter t.") //
-            .setDefaultValue(1);
+            .setDefaultArgument("1");
 
     /**
      * Path option for initial sample.
      */
-    public static final Option<Path> INITIAL_SAMPLE_OPTION = Option.newOption("initial-sample", Option.PathParser)
+    public static final Option<Path> INITIAL_SAMPLE_OPTION = Options.newOption("initial-sample", Options.PathParser)
             .setDescription("Path to initial sample file.")
-            .setDefaultValue(null)
-            .setValidator(Option.PathValidator);
+            .setValidator(Options.PathValidator);
 
     /**
      * Path option for initial sample.
      */
-    public static final Option<Path> TESTER_EXECUTABLE = Option.newOption("verifier", Option.PathParser)
+    public static final Option<Path> TESTER_EXECUTABLE = Options.newOption("verifier", Options.PathParser)
             .setDescription("Path to initial sample file.")
-            .setValidator(Option.PathValidator);
+            .setValidator(Options.PathValidator);
+
+    public static final Option<IFormat<BooleanAssignmentList>> FORMAT = Options.newOutputFormatOption(
+            BooleanAssignmentListFormats.class, new BooleanAssignmentListDimacsFormat().getName());
 
     @Override
     public IComputation<BooleanAssignmentList> newAnalysis(
@@ -97,7 +101,7 @@ public class InciidentCommand extends ASAT4JAnalysisCommand<BooleanAssignmentLis
 
     @Override
     protected IFormat<BooleanAssignmentList> getOuputFormat(OptionList optionParser) {
-        return new BooleanAssignmentListDimacsFormat();
+        return optionParser.get(FORMAT);
     }
 
     @Override

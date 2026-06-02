@@ -25,6 +25,7 @@ import de.featjar.analysis.sat4j.computation.ComputeCompleteSample;
 import de.featjar.analysis.sat4j.solver.ISelectionStrategy;
 import de.featjar.base.cli.Option;
 import de.featjar.base.cli.OptionList;
+import de.featjar.base.cli.Options;
 import de.featjar.base.computation.IComputation;
 import de.featjar.base.data.Result;
 import de.featjar.base.io.IO;
@@ -35,7 +36,6 @@ import de.featjar.formula.assignment.BooleanAssignmentList;
 import de.featjar.formula.io.BooleanAssignmentGroupsFormats;
 import de.featjar.formula.io.BooleanAssignmentListFormats;
 import de.featjar.formula.io.csv.BooleanAssignmentListCSVFormat;
-import de.featjar.formula.io.dimacs.BooleanAssignmentListDimacsFormat;
 import java.nio.file.Path;
 
 /**
@@ -56,44 +56,43 @@ public abstract class ATWiseCommand extends ASAT4JAnalysisCommand<BooleanAssignm
     /**
      * Value of t.
      */
-    public static final Option<Integer> T_OPTION = Option.newOption("t", Option.IntegerParser) //
+    public static final Option<Integer> T_OPTION = Options.newOption("t", Options.IntegerParser) //
             .setDescription("Value(s) of parameter t.") //
-            .setDefaultValue(2);
+            .setDefaultArgument("2");
 
     /**
      * Maximum number of configurations to be generated.
      */
-    public static final Option<Integer> LIMIT_OPTION = Option.newOption("n", Option.IntegerParser) //
+    public static final Option<Integer> LIMIT_OPTION = Options.newOption("n", Options.IntegerParser) //
             .setDescription("Maximum number of configurations to be generated.") //
-            .setDefaultValue(Integer.MAX_VALUE);
+            .setDefaultArgument(Integer.toString(Integer.MAX_VALUE));
 
     /**
      * Path option for initial fixed sample.
      */
-    public static final Option<Path> INITIAL_FIXED_SAMPLE_OPTION = Option.newOption("initial-sample", Option.PathParser)
+    public static final Option<Path> INITIAL_FIXED_SAMPLE_OPTION = Options.newOption(
+                    "initial-sample", Options.PathParser)
             .setDescription("Path to initial fixed sample file. Configurations in this sample will not be modified.")
-            .setValidator(Option.PathValidator);
+            .setValidator(Options.PathValidator);
 
     /**
      * Path option for initial variable sample.
      */
-    public static final Option<Path> INITIAL_VARIABLE_SAMPLE_OPTION = Option.newOption(
-                    "initial-variable-sample", Option.PathParser)
+    public static final Option<Path> INITIAL_VARIABLE_SAMPLE_OPTION = Options.newOption(
+                    "initial-variable-sample", Options.PathParser)
             .setDescription("Path to initial variable sample file. Configurations in this sample can be modified.")
-            .setValidator(Option.PathValidator);
+            .setValidator(Options.PathValidator);
 
     /**
      * Strategy for completing partial configurations.
      */
-    public static final Option<CompletionStrategy> COMPLETION_STRATEGY_OPTION = Option.newEnumOption(
+    public static final Option<CompletionStrategy> COMPLETION_STRATEGY_OPTION = Options.newEnumOption(
                     "completion", CompletionStrategy.class) //
-            .setDescription("Strategy for completing partial configurations.") //
-            .setDefaultValue(CompletionStrategy.NONE);
+            .setDefaultArgument(CompletionStrategy.NONE.name())
+            .setDescription("Strategy for completing partial configurations."); //
 
-    public static final Option<String> FORMAT = Option.newStringEnumOption(
-                    "format", BooleanAssignmentListFormats.getInstance().getNames())
-            .setDefaultValue(new BooleanAssignmentListCSVFormat().getName())
-            .setDescription("Format of the output");
+    public static final Option<IFormat<BooleanAssignmentList>> FORMAT = Options.newOutputFormatOption(
+            BooleanAssignmentListFormats.class, new BooleanAssignmentListCSVFormat().getName());
 
     @Override
     public IComputation<BooleanAssignmentList> newAnalysis(
@@ -144,8 +143,6 @@ public abstract class ATWiseCommand extends ASAT4JAnalysisCommand<BooleanAssignm
 
     @Override
     protected IFormat<BooleanAssignmentList> getOuputFormat(OptionList optionParser) {
-        return BooleanAssignmentListFormats.getInstance()
-                .getFormatByName(optionParser.get(FORMAT))
-                .orElse(new BooleanAssignmentListDimacsFormat());
+        return optionParser.get(FORMAT);
     }
 }

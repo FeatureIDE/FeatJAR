@@ -45,7 +45,9 @@ class ArgumentParserTest {
     }
 
     OptionList parser(String... args) {
-        OptionList optionList = new OptionList(Option.getAllOptions(FeatJAR.class), args);
+        OptionList optionList = new OptionList(args);
+        optionList.addOptions(Options.getAllOptions(FeatJAROptions.class));
+        optionList.addOptions(Options.getAllOptions(LogOptions.class));
         List<Problem> problems = optionList.parseArguments();
         assertTrue(problems.isEmpty(), Problem.printProblems(problems));
         return optionList;
@@ -61,13 +63,13 @@ class ArgumentParserTest {
         // assertEquals(Log.Verbosity.DEBUG, parser("arg", "--log-info").getVerbosity()); TODO: mock System.exit
         OptionList parser = parser("--log-info", "debug");
         parser.parseArguments();
-        assertEquals(Log.Verbosity.DEBUG, parser.get(FeatJAR.LOG_INFO_OPTION).get(0));
+        assertEquals(Log.Verbosity.DEBUG, parser.get(LogOptions.LOG_INFO_OPTION).get(0));
     }
 
     @Test
     void parseOption() {
-        Option<Integer> option1 = new Option<>("x", Integer::valueOf);
-        Option<Integer> option2 = new Option<>("y", Integer::valueOf);
+        Option<Integer> option1 = new SingleOption<>("x", Integer::valueOf);
+        Option<Integer> option2 = new SingleOption<>("y", Integer::valueOf);
 
         OptionList parser = new OptionList("--x", "42");
         parser.parseArguments();

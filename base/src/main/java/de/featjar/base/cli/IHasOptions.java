@@ -20,27 +20,4 @@
  */
 package de.featjar.base.cli;
 
-import java.util.List;
-import java.util.stream.IntStream;
-
-/**
- * A range option, representing a list of integer values from 1 to n.
- *
- * @author Sebastian Krieter
- */
-public class RangeOption extends SingleOption<List<Integer>> {
-
-    /**
-     * Creates a range option.
-     *
-     * @param name the name
-     */
-    protected RangeOption(String name) {
-        super(name, s -> IntStream.rangeClosed(1, Integer.parseInt(s)).boxed().toList(), "");
-    }
-
-    @Override
-    protected String getArgumentPlaceHolder() {
-        return "<maxValue>";
-    }
-}
+public interface IHasOptions {}

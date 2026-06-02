@@ -24,17 +24,22 @@ import de.featjar.analysis.ddnnife.computation.ComputeDdnnifeWrapper;
 import de.featjar.analysis.ddnnife.computation.ComputeRandomSolutionsDdnnife;
 import de.featjar.base.cli.Option;
 import de.featjar.base.cli.OptionList;
+import de.featjar.base.cli.Options;
 import de.featjar.base.computation.IComputation;
 import de.featjar.base.io.format.IFormat;
-import de.featjar.formula.assignment.BooleanAssignmentGroups;
-import de.featjar.formula.io.csv.BooleanAssignmentGroupsCSVFormat;
+import de.featjar.formula.assignment.BooleanAssignmentList;
+import de.featjar.formula.io.BooleanAssignmentListFormats;
+import de.featjar.formula.io.csv.BooleanAssignmentListCSVFormat;
 import java.util.Optional;
 
-public class RandomSolutionsCommand extends ADdnnifeAnalysisCommand<BooleanAssignmentGroups> {
+public class RandomSolutionsCommand extends ADdnnifeAnalysisCommand<BooleanAssignmentList> {
 
-    public static final Option<Integer> SOLUTION_COUNT_OPTION = Option.newOption("limit", Option.IntegerParser) //
+    public static final Option<IFormat<BooleanAssignmentList>> FORMAT = Options.newOutputFormatOption(
+            BooleanAssignmentListFormats.class, new BooleanAssignmentListCSVFormat().getName());
+
+    public static final Option<Integer> SOLUTION_COUNT_OPTION = Options.newOption("limit", Options.IntegerParser) //
             .setDescription("Number of solutions to compute") //
-            .setDefaultValue(1);
+            .setDefaultArgument("1");
 
     @Override
     public Optional<String> getDescription() {
@@ -42,16 +47,15 @@ public class RandomSolutionsCommand extends ADdnnifeAnalysisCommand<BooleanAssig
     }
 
     @Override
-    public IComputation<BooleanAssignmentGroups> newAnalysis(OptionList optionParser, ComputeDdnnifeWrapper formula) {
+    public IComputation<BooleanAssignmentList> newAnalysis(OptionList optionParser, ComputeDdnnifeWrapper formula) {
         return formula.map(ComputeRandomSolutionsDdnnife::new)
                 .set(ComputeRandomSolutionsDdnnife.SOLUTION_COUNT, optionParser.get(SOLUTION_COUNT_OPTION))
-                .set(ComputeRandomSolutionsDdnnife.RANDOM_SEED, optionParser.get(RANDOM_SEED_OPTION))
-                .mapResult(RandomSolutionsCommand.class, "group", BooleanAssignmentGroups::new);
+                .set(ComputeRandomSolutionsDdnnife.RANDOM_SEED, optionParser.get(RANDOM_SEED_OPTION));
     }
 
     @Override
-    protected IFormat<BooleanAssignmentGroups> getOuputFormat(OptionList optionaParser) {
-        return new BooleanAssignmentGroupsCSVFormat();
+    protected IFormat<BooleanAssignmentList> getOuputFormat(OptionList optionParser) {
+        return optionParser.get(FORMAT);
     }
 
     @Override

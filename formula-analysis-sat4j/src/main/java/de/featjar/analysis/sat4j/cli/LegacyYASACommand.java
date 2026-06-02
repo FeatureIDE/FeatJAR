@@ -23,6 +23,7 @@ package de.featjar.analysis.sat4j.cli;
 import de.featjar.analysis.sat4j.computation.YASALegacy;
 import de.featjar.base.cli.Option;
 import de.featjar.base.cli.OptionList;
+import de.featjar.base.cli.Options;
 import de.featjar.base.computation.IComputation;
 import de.featjar.formula.assignment.BooleanAssignmentList;
 import java.util.Optional;
@@ -38,14 +39,14 @@ public class LegacyYASACommand extends ATWiseCommand {
     /**
      * Number of iterations.
      */
-    public static final Option<Integer> ITERATIONS_OPTION = Option.newOption("i", Option.IntegerParser) //
+    public static final Option<Integer> ITERATIONS_OPTION = Options.newOption("i", Options.IntegerParser) //
             .setDescription("Number of iterations.") //
-            .setDefaultValue(1);
+            .setDefaultArgument("1");
 
-    public static final Option<Integer> INTERNAL_SOLUTION_LIMIT = Option.newOption(
-                    "internal-limit", Option.IntegerParser) //
+    public static final Option<Integer> INTERNAL_SOLUTION_LIMIT = Options.newOption(
+                    "internal-limit", Options.IntegerParser) //
             .setDescription("Number of internally cached configurations.")
-            .setDefaultValue(65_536);
+            .setDefaultArgument("65_536");
 
     @Override
     public Optional<String> getDescription() {

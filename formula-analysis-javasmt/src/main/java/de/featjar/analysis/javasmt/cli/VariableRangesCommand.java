@@ -25,6 +25,7 @@ import de.featjar.analysis.javasmt.computation.ComputeMaximalVariableRange;
 import de.featjar.analysis.javasmt.computation.ComputeMinimalVariableRange;
 import de.featjar.base.cli.Option;
 import de.featjar.base.cli.OptionList;
+import de.featjar.base.cli.Options;
 import de.featjar.base.computation.IComputation;
 import de.featjar.formula.structure.IFormula;
 import de.featjar.formula.structure.term.value.Variable;
@@ -35,7 +36,7 @@ import org.sosy_lab.java_smt.SolverContextFactory.Solvers;
 public class VariableRangesCommand extends AJavasmtAnalysisCommand<Map<Variable, Object>> {
 
     public static final Option<Boolean> MIN =
-            Option.newFlag("min").setDescription("Finds the minimal value for each numerical variable in a Term.");
+            Options.newFlag("min").setDescription("Finds the minimal value for each numerical variable in a Term.");
 
     @Override
     public Optional<String> getDescription() {

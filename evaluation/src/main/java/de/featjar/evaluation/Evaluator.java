@@ -22,9 +22,10 @@ package de.featjar.evaluation;
 
 import de.featjar.base.FeatJAR;
 import de.featjar.base.cli.ACommand;
-import de.featjar.base.cli.ListOption;
+import de.featjar.base.cli.MultiOption;
 import de.featjar.base.cli.Option;
 import de.featjar.base.cli.OptionList;
+import de.featjar.base.cli.Options;
 import de.featjar.base.cli.RangeOption;
 import de.featjar.base.io.csv.CSVFile;
 import de.featjar.evaluation.util.OptionCombiner;
@@ -54,30 +55,31 @@ public abstract class Evaluator extends ACommand {
         return new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss").format(new Timestamp(System.currentTimeMillis()));
     }
 
-    public static final Option<Path> modelsPathOption = Option.newOption("models", Option.PathParser)
-            .setDefaultValue(Path.of("models"))
+    public static final Option<Path> modelsPathOption = Options.newOption("models", Options.PathParser)
+            .setDefaultArgument("models")
             .setDescription("Path to feature model files.")
-            .setValidator(Option.PathValidator);
-    public static final Option<Path> resourcesPathOption = Option.newOption("resources", Option.PathParser)
-            .setDefaultValue(Path.of("resources"))
+            .setValidator(Options.PathValidator);
+    public static final Option<Path> resourcesPathOption = Options.newOption("resources", Options.PathParser)
+            .setDefaultArgument("resources")
             .setDescription("Path to other resources necessary for the evaluation.")
-            .setValidator(Option.PathValidator);
+            .setValidator(Options.PathValidator);
 
-    public static final Option<Long> timeout = Option.newOption("timeout", Option.LongParser, Long.MAX_VALUE)
+    public static final Option<Long> timeout = Options.newOption(
+                    "timeout", Options.LongParser, Long.toString(Long.MAX_VALUE))
             .setDescription("The timeout value for individual runs in milliseconds.");
-    public static final Option<Integer> memory = Option.newOption("memory", Option.IntegerParser, -1)
+    public static final Option<Integer> memory = Options.newOption("memory", Options.IntegerParser, "-1")
             .setDescription(
                     "The max memory used by started Java processes in gigabytes. Sets the JVM -Xmx parameter of started java process. A negative value defaults to the standard value for the JVM. (Does not affect the memory of this process!)");
     public static final Option<Long> randomSeed =
-            Option.newOption("seed", Option.LongParser).setDescription("The seed used by some random operations.");
+            Options.newOption("seed", Options.LongParser).setDescription("The seed used by some random operations.");
 
-    public static final Option<Boolean> overwrite = Option.newOption("overwrite", Option.BooleanParser, Boolean.FALSE);
+    public static final Option<Boolean> overwrite = Options.newOption("overwrite", Options.BooleanParser, "false");
 
-    public static final ListOption<String> systemsOption =
-            (ListOption<String>) Option.newListOption("systems", Option.StringParser)
+    public static final MultiOption<String> systemsOption =
+            (MultiOption<String>) Options.newListOption("systems", Options.StringParser)
                     .setDescription("The systems considered in the evaluation.");
-    public static final RangeOption systemIterationsOption = Option.newRangeOption("systemIterations");
-    public static final RangeOption algorithmIterationsOption = Option.newRangeOption("algorithmIterations");
+    public static final RangeOption systemIterationsOption = Options.newRangeOption("systemIterations");
+    public static final RangeOption algorithmIterationsOption = Options.newRangeOption("algorithmIterations");
 
     public OptionList optionParser;
     public OptionCombiner optionCombiner;

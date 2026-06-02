@@ -20,11 +20,10 @@
  */
 package de.featjar.base.computation;
 
-import de.featjar.base.FeatJAR;
+import de.featjar.base.env.IParameter;
+import de.featjar.base.env.ParameterList;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * A dependency of a computation. Describes the dependency without storing its
@@ -34,44 +33,22 @@ import java.util.Map;
  * @param <U> the type of the dependency's computation result
  * @author Elias Kuiter
  */
-public class Dependency<U> {
+public class Dependency<U> implements IParameter {
 
-    private static Map<Class<?>, List<Dependency<?>>> map = new LinkedHashMap<>();
+    private static ParameterList<Dependency<?>> map = new ParameterList<>(IComputation.class);
 
     public static Dependency<Object> newDependency() {
-        return addDependency(getCallingClass(), Object.class);
+        return addDependency(Object.class);
     }
 
     public static <U> Dependency<U> newDependency(Class<U> type) {
-        return addDependency(getCallingClass(), type);
+        return addDependency(type);
     }
 
-    private static Class<?> getCallingClass() {
-        try {
-            Class<?> callingClass =
-                    Class.forName(Thread.currentThread().getStackTrace()[3].getClassName());
-            assert isComputation(callingClass);
-            return callingClass;
-        } catch (ClassNotFoundException e) {
-            FeatJAR.log().error(e);
-            throw new RuntimeException(e);
-        }
-    }
-
-    private static boolean isComputation(Class<?> callingClass) {
-        if (callingClass == null) {
-            return false;
-        }
-        if (callingClass == AComputation.class) {
-            return true;
-        }
-        return isComputation(callingClass.getSuperclass());
-    }
-
-    private static <U> Dependency<U> addDependency(Class<?> clazz, Class<U> type) {
-        final List<Dependency<?>> list = getDependencyList(clazz);
-        Dependency<U> newDependency = new Dependency<>(type, list.size());
-        list.add(newDependency);
+    private static <U> Dependency<U> addDependency(Class<U> type) {
+        Dependency<U> newDependency =
+                new Dependency<>(type, map.getParameterList().size());
+        map.addParameter(newDependency);
         return newDependency;
     }
 
@@ -84,17 +61,8 @@ public class Dependency<U> {
         return getDependencyList(clazz).size();
     }
 
-    public static List<Dependency<?>> getDependencyList(Class<?> clazz) {
-        final List<Dependency<?>> list = map.get(clazz);
-        if (list != null) {
-            return list;
-        } else {
-            final Class<?> superClazz = clazz.getSuperclass();
-            ArrayList<Dependency<?>> clazzDependencyList =
-                    (superClazz == null) ? new ArrayList<>() : new ArrayList<>(getDependencyList(superClazz));
-            map.put(clazz, clazzDependencyList);
-            return clazzDependencyList;
-        }
+    public static List<Dependency<?>> getDependencyList(Class<?> introducingClass) {
+        return new ArrayList<>(map.getParameterList(introducingClass));
     }
 
     private final Class<U> type;

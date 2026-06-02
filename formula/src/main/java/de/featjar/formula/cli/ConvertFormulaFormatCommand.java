@@ -20,20 +20,16 @@
  */
 package de.featjar.formula.cli;
 
-import de.featjar.base.FeatJAR;
 import de.featjar.base.cli.ACommand;
 import de.featjar.base.cli.Option;
 import de.featjar.base.cli.OptionList;
-import de.featjar.base.data.Result;
+import de.featjar.base.cli.Options;
 import de.featjar.base.io.format.IFormat;
-import de.featjar.base.log.Log.Verbosity;
+import de.featjar.base.io.format.IFormatSupplier;
 import de.featjar.formula.assignment.BooleanAssignmentGroups;
 import de.featjar.formula.io.FormulaFormats;
-import de.featjar.formula.io.dimacs.CNFFormulaDimacsFormat;
 import de.featjar.formula.structure.IFormula;
-import java.io.IOException;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 /**
  * Reads and writes {@link BooleanAssignmentGroups a set of assignments} in different formats.
@@ -45,22 +41,11 @@ import java.util.stream.Collectors;
  */
 public class ConvertFormulaFormatCommand extends ACommand {
 
-    public static final Option<String> INPUT_FORMAT = Option.newStringEnumOption(
-                    "input-format",
-                    FormulaFormats.getInstance().getExtensions().stream()
-                            .filter(IFormat::supportsParse)
-                            .map(IFormat::getName)
-                            .collect(Collectors.toList()))
-            .setDescription("Format of the input. If not specified, tries to auto detect.");
+    public static final Option<IFormatSupplier<IFormula>> INPUT_FORMAT =
+            Options.newInputFormatOption(FormulaFormats.class);
 
-    public static final Option<String> OUTPUT_FORMAT = Option.newStringEnumOption(
-                    "output-format",
-                    FormulaFormats.getInstance().getExtensions().stream()
-                            .filter(IFormat::supportsWrite)
-                            .map(IFormat::getName)
-                            .collect(Collectors.toList()))
-            .setDefaultValue(new CNFFormulaDimacsFormat().getName())
-            .setDescription("Format of the output");
+    public static final Option<IFormat<IFormula>> OUTPUT_FORMAT =
+            Options.newOutputFormatOption(FormulaFormats.class, null);
 
     @Override
     public Optional<String> getDescription() {
@@ -74,26 +59,9 @@ public class ConvertFormulaFormatCommand extends ACommand {
 
     @Override
     public int run(OptionList optionParser) {
-        Result<IFormat<IFormula>> userInputFormat =
-                optionParser.getResult(INPUT_FORMAT).mapOptional(FormulaFormats.getInstance()::getFormatByName);
-        Result<IFormula> parseResult = userInputFormat.isPresent()
-                ? readFromInput(optionParser, userInputFormat.get())
-                : readFromInput(optionParser, FormulaFormats.getInstance());
-        if (parseResult.isEmpty()) {
-            FeatJAR.log().problems(parseResult, Verbosity.ERROR);
-            return FeatJAR.ERROR_COMPUTING_RESULT;
-        }
-        try {
-            writeToOutput(
-                    parseResult.get(),
-                    FormulaFormats.getInstance()
-                            .getFormatByName(optionParser.get(OUTPUT_FORMAT))
-                            .orElseThrow(),
-                    optionParser);
-            return 0;
-        } catch (IOException e) {
-            FeatJAR.log().error(e);
-            return FeatJAR.ERROR_WRITING_RESULT;
-        }
+        return writeResult(
+                optionParser,
+                readFromInput(optionParser, optionParser.getResult(INPUT_FORMAT).get()),
+                optionParser.get(OUTPUT_FORMAT));
     }
 }

@@ -21,7 +21,7 @@
 package de.featjar.evaluation.util;
 
 import de.featjar.base.FeatJAR;
-import de.featjar.base.cli.ListOption;
+import de.featjar.base.cli.MultiOption;
 import de.featjar.base.cli.Option;
 import de.featjar.base.cli.OptionList;
 import java.util.List;
@@ -30,7 +30,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 /**
- * Iterates over a list of {@link ListOption list options}.
+ * Iterates over a list of {@link MultiOption list options}.
  *
  * @author Sebastian Krieter
  */

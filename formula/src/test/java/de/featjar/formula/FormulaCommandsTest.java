@@ -79,6 +79,7 @@ public class FormulaCommandsTest {
                 "NEWLINE",
                 "--enforce-parentheses",
                 "--enquote-whitespace",
+                "--overwrite",
                 "--output",
                 tempFile.toString());
         Assertions.assertEquals(0, exitCode);
