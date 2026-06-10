@@ -22,8 +22,9 @@ package de.featjar.composition.cli;
 
 import de.featjar.base.FeatJAR;
 import de.featjar.base.cli.ACommand;
-import de.featjar.base.cli.Option;
+import de.featjar.base.cli.AOption;
 import de.featjar.base.cli.OptionList;
+import de.featjar.base.cli.Options;
 import de.featjar.base.data.Result;
 import de.featjar.base.io.IO;
 import de.featjar.composition.Preprocessor;
@@ -56,20 +57,20 @@ public class PreprocessorCommand extends ACommand {
         FALSE
     }
 
-    public static final Option<Path> CONFIGURATION_OPTION = Option.newOption("configuration", Option.PathParser)
+    public static final AOption<Path> CONFIGURATION_OPTION = Options.newOption("configuration", Options.PathParser)
             .setDescription("Path to configuration file")
-            .setValidator(Option.PathValidator);
+            .setValidator(Options.PathValidator);
 
-    public static final Option<Mode> MODE_OPTION = Option.newEnumOption("mode", Mode.class)
-            .setDefaultValue(Mode.PROCESS)
+    public static final AOption<Mode> MODE_OPTION = Options.newEnumOption("mode", Mode.class)
+            .setDefaultValue(Mode.PROCESS.name())
             .setDescription("Mode of operation");
 
-    public static final Option<MissingVariables> MISSING_VARIABLES_OPTION = Option.newEnumOption(
+    public static final AOption<MissingVariables> MISSING_VARIABLES_OPTION = Options.newEnumOption(
                     "missing-variables", MissingVariables.class)
-            .setDefaultValue(MissingVariables.IGNORE)
+            .setDefaultValue(MissingVariables.IGNORE.name())
             .setDescription("How to deal with variables in the processed file that do not appear in the given config");
 
-    public static final Option<String> PREFIX_OPTION = Option.newOption("annotation-prefix", Option.StringParser)
+    public static final AOption<String> PREFIX_OPTION = Options.newOption("annotation-prefix", Options.StringParser)
             .setDefaultValue("#")
             .setDescription("The prefix that precedes each annotation");
 

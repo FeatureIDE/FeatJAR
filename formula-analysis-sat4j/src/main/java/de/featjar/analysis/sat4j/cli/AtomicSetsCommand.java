@@ -21,8 +21,9 @@
 package de.featjar.analysis.sat4j.cli;
 
 import de.featjar.analysis.sat4j.computation.ComputeAtomicSetsSAT4J;
-import de.featjar.base.cli.Option;
+import de.featjar.base.cli.AOption;
 import de.featjar.base.cli.OptionList;
+import de.featjar.base.cli.Options;
 import de.featjar.base.computation.IComputation;
 import de.featjar.base.io.format.IFormat;
 import de.featjar.formula.assignment.BooleanAssignmentList;
@@ -39,17 +40,15 @@ import java.util.Optional;
  */
 public class AtomicSetsCommand extends ASAT4JAnalysisCommand<BooleanAssignmentList> {
 
-    public static final Option<Boolean> OMIT_SINGLE_SETS =
-            Option.newFlag("omit-singles").setDescription("Omits sets with only one element");
-    public static final Option<Boolean> OMIT_CORE =
-            Option.newFlag("omit-core").setDescription("Omits set containing core");
-    public static final Option<Boolean> OMIT_COMPLEMENTS =
-            Option.newFlag("omit-complements").setDescription("Omits complementary literals within a set.");
+    public static final AOption<Boolean> OMIT_SINGLE_SETS =
+            Options.newFlag("omit-singles").setDescription("Omits sets with only one element");
+    public static final AOption<Boolean> OMIT_CORE =
+            Options.newFlag("omit-core").setDescription("Omits set containing core");
+    public static final AOption<Boolean> OMIT_COMPLEMENTS =
+            Options.newFlag("omit-complements").setDescription("Omits complementary literals within a set.");
 
-    public static final Option<String> FORMAT = Option.newStringEnumOption(
-                    "format", BooleanAssignmentListFormats.getInstance().getNames())
-            .setDefaultValue(new BooleanAssignmentListDimacsFormat().getName())
-            .setDescription("Format of the output");
+    public static final AOption<IFormat<BooleanAssignmentList>> FORMAT = Options.newOutputFormatOption(
+            BooleanAssignmentListFormats.class, new BooleanAssignmentListDimacsFormat().getName());
 
     @Override
     public Optional<String> getDescription() {
@@ -67,9 +66,7 @@ public class AtomicSetsCommand extends ASAT4JAnalysisCommand<BooleanAssignmentLi
 
     @Override
     protected IFormat<BooleanAssignmentList> getOuputFormat(OptionList optionParser) {
-        return BooleanAssignmentListFormats.getInstance()
-                .getFormatByName(optionParser.get(FORMAT))
-                .orElse(new BooleanAssignmentListDimacsFormat());
+        return optionParser.get(FORMAT);
     }
 
     @Override

@@ -43,9 +43,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map.Entry;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Properties;
+import java.util.stream.Collectors;
 
 /**
  * Parses a list of strings.
@@ -57,7 +57,7 @@ public class OptionList {
 
     private static final String GENERAL_CONFIG_NAME = "general";
 
-    private final List<Option<?>> options;
+    private final List<AOption<?>> options;
 
     private final List<String> originalCommandLineArguments;
 
@@ -88,7 +88,7 @@ public class OptionList {
      * @param options the list of options
      * @param arguments the arguments
      */
-    public OptionList(List<Option<?>> options, String... arguments) {
+    public OptionList(List<AOption<?>> options, String... arguments) {
         this(options, List.of(arguments));
     }
 
@@ -98,7 +98,7 @@ public class OptionList {
      * @param options the list of options
      * @param arguments the arguments
      */
-    public OptionList(List<Option<?>> options, List<String> arguments) {
+    public OptionList(List<AOption<?>> options, List<String> arguments) {
         this.originalCommandLineArguments = new ArrayList<>(arguments);
         this.options = new ArrayList<>(options);
     }
@@ -133,7 +133,18 @@ public class OptionList {
 
         parseRemainingArguments(arguments, problemList);
 
+        addDefaultValues();
+
         return problemList;
+    }
+
+    private void addDefaultValues() {
+        for (AOption<?> option : options) {
+            String optionName = option.getName();
+            if (!properties.containsKey(optionName)) {
+                properties.put(optionName, option.getDefaultValue().orElse(null));
+            }
+        }
     }
 
     private void parseBareCommand(List<String> arguments, List<Problem> problemList) {
@@ -269,14 +280,14 @@ public class OptionList {
             }
 
             String optionName = argument.substring(2);
-            Optional<Option<?>> optionalOption =
+            Optional<AOption<?>> optionalOption =
                     options.stream().filter(o -> o.getName().equals(optionName)).findFirst();
             if (!optionalOption.isPresent()) {
                 addProblem(problemList, Severity.WARNING, "Ignoring unrecognized option %s", argument);
                 continue;
             }
 
-            Option<?> option = optionalOption.get();
+            AOption<?> option = optionalOption.get();
             if (option.equals(FeatJAROptions.CONFIGURATION_OPTION)) {
                 listIterator.remove();
                 listIterator.next();
@@ -326,7 +337,7 @@ public class OptionList {
                         Severity.WARNING,
                         "Option %s is supplied without value, but a value is required, using default value (%s)",
                         option.getName(),
-                        String.valueOf(option.defaultValue));
+                        String.valueOf(option.defaultArgument));
                 continue;
             }
             String nextArgument = listIterator.next();
@@ -337,7 +348,7 @@ public class OptionList {
                         Severity.WARNING,
                         "Option %s is supplied without value, but a value is required, using default value (%s)",
                         option.getName(),
-                        String.valueOf(option.defaultValue));
+                        String.valueOf(option.defaultArgument));
                 continue;
             }
             listIterator.remove();
@@ -349,37 +360,60 @@ public class OptionList {
         return problemList.add(new Problem(String.format(message, arguments), severity));
     }
 
-    public <T> List<Problem> parseOption(Option<T> option, String value) {
+    public <T> List<Problem> parseOption(AOption<T> option, String value) {
         List<Problem> problemList = new ArrayList<>();
         parseOption(option, value, problemList);
         return problemList;
     }
 
-    private <T> void parseOption(Option<T> option, String nextArgument, List<Problem> problemList) {
-        Result<T> parseResult = option.parse(nextArgument);
-        if (parseResult.isEmpty()) {
-            problemList.addAll(parseResult.getProblems());
-            addProblem(
-                    problemList,
-                    Severity.WARNING,
-                    "Could not parse argument %s for option %s, using default value (%s)",
-                    nextArgument,
-                    option.getName(),
-                    String.valueOf(option.defaultValue));
-            return;
-        }
+    private <T> void parseOption(AOption<T> option, String nextArgument, List<Problem> problemList) {
+        properties.put(
+                option.getName(),
+                parseArgument(option, nextArgument, problemList)
+                        .orGet(option::getDefaultValue)
+                        .orElse(null));
+    }
 
-        if (!option.validator.test(parseResult.get())) {
+    private <T> Result<T> parseArgument(AOption<T> option, String nextArgument, List<Problem> problemList) {
+        if (!option.validateArgument(nextArgument)) {
             addProblem(
                     problemList,
                     Severity.WARNING,
                     "Invalid argument %s for option %s, using default value (%s)",
                     nextArgument,
                     option.getName(),
-                    String.valueOf(option.defaultValue));
-            return;
+                    String.valueOf(option.defaultArgument));
+            return Result.empty();
         }
-        properties.put(option.getName(), parseResult.get());
+
+        Result<T> parseResult = option.parse(nextArgument);
+        if (parseResult.isEmpty()) {
+            problemList.addAll(parseResult.getProblems());
+            addProblem(
+                    problemList,
+                    Severity.WARNING,
+                    "Could not parse argument %s for option %s, using default value (%s)%s",
+                    nextArgument,
+                    option.getName(),
+                    String.valueOf(option.defaultArgument),
+                    option.getPossibleValues()
+                            .map(list -> " (possible values: " + list.stream().collect(Collectors.joining(",")) + ")")
+                            .orElse(""));
+            return Result.empty();
+        }
+
+        if (!option.validateValue(parseResult.get())) {
+            addProblem(
+                    problemList,
+                    Severity.WARNING,
+                    "Invalid argument %s for option %s, using default value (%s)",
+                    nextArgument,
+                    option.getName(),
+                    String.valueOf(option.defaultArgument));
+            return Result.empty();
+        }
+
+        return parseResult;
     }
 
     /**
@@ -391,8 +425,8 @@ public class OptionList {
      * @param option the option
      */
     @SuppressWarnings("unchecked")
-    public <T> Result<T> getResult(Option<T> option) {
-        T optionValue = (T) properties.getOrDefault(option.getName(), option.defaultValue);
+    public <T> Result<T> getResult(AOption<T> option) {
+        T optionValue = (T) properties.get(option.getName());
         return optionValue != null
                 ? Result.of(optionValue)
                 : Result.empty(new IllegalArgumentException(
@@ -408,8 +442,13 @@ public class OptionList {
      * @param option the option
      */
     @SuppressWarnings("unchecked")
-    public <T> T get(Option<T> option) {
-        return Objects.requireNonNull((T) properties.getOrDefault(option.getName(), option.defaultValue));
+    public <T> T get(AOption<T> option) {
+        T optionValue = (T) properties.get(option.getName());
+        if (optionValue == null) {
+            throw new IllegalArgumentException(
+                    String.format("Argument <%s> is required, but was not set", option.name));
+        }
+        return optionValue;
     }
 
     /**
@@ -422,7 +461,7 @@ public class OptionList {
     /**
      * {@return the general options of this option input}
      */
-    public List<Option<?>> getOptions() {
+    public List<AOption<?>> getOptions() {
         return Collections.unmodifiableList(options);
     }
 
@@ -432,7 +471,7 @@ public class OptionList {
      * @param options the options to add
      * @return this option list
      */
-    public OptionList addOptions(List<Option<?>> options) {
+    public OptionList addOptions(List<AOption<?>> options) {
         this.options.addAll(options);
         return this;
     }
@@ -490,8 +529,8 @@ public class OptionList {
                 .appendLine()
                 .appendLine("General options:")
                 .addIndent()
-                .appendLine(Option.getAllOptions(FeatJAROptions.class))
-                .appendLine(Option.getAllOptions(LogOptions.class))
+                .appendLine(Options.getAllOptions(FeatJAROptions.class))
+                .appendLine(Options.getAllOptions(LogOptions.class))
                 .removeIndent();
     }
 
@@ -499,9 +538,9 @@ public class OptionList {
         sb.appendLine(String.format("Help for %s", command.getIdentifier())).addIndent();
         sb.appendLine(command.getDescription().orElse(""));
 
-        List<Option<?>> options = new ArrayList<>(command.getOptions());
+        List<AOption<?>> options = new ArrayList<>(command.getOptions());
         if (!options.isEmpty()) {
-            Collections.sort(options, Comparator.comparing(Option::getArgumentName));
+            Collections.sort(options, Comparator.comparing(AOption::getArgumentName));
             sb.appendLine();
             sb.appendLine(String.format("Options of command %s:", command.getIdentifier()));
             sb.addIndent();
@@ -563,7 +602,7 @@ public class OptionList {
         return configuration;
     }
 
-    private void logToFile(Configuration configuration, Path path, Option<List<Verbosity>> verbosities) {
+    private void logToFile(Configuration configuration, Path path, AOption<List<Verbosity>> verbosities) {
         try {
             configuration.logConfig.logToFile(path, get(verbosities).toArray(new Log.Verbosity[0]));
         } catch (FileNotFoundException e) {
@@ -589,7 +628,7 @@ public class OptionList {
      * {@return whether the given option has a custom value}
      * @param option the option
      */
-    public boolean has(Option<?> option) {
+    public boolean has(AOption<?> option) {
         return properties.get(option.getName()) != null;
     }
 }

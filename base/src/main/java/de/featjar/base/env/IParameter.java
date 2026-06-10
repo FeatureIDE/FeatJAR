@@ -24,15 +24,4 @@ package de.featjar.base.env;
  *
  * @author Sebastian Krieter
  */
-public abstract class Parameter {
-
-    private int id = -1;
-
-    public int getID() {
-        return id;
-    }
-
-    void setID(int id) {
-        this.id = id;
-    }
-}
+public interface IParameter {}

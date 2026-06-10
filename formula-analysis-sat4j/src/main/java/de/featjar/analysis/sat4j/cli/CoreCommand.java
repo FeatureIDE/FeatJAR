@@ -21,10 +21,13 @@
 package de.featjar.analysis.sat4j.cli;
 
 import de.featjar.analysis.sat4j.computation.ComputeCoreDeadMIG;
+import de.featjar.base.cli.AOption;
 import de.featjar.base.cli.OptionList;
+import de.featjar.base.cli.Options;
 import de.featjar.base.computation.IComputation;
 import de.featjar.base.io.format.IFormat;
 import de.featjar.formula.assignment.BooleanAssignmentList;
+import de.featjar.formula.io.BooleanAssignmentListFormats;
 import de.featjar.formula.io.dimacs.BooleanAssignmentListDimacsFormat;
 import java.util.Optional;
 
@@ -35,6 +38,9 @@ import java.util.Optional;
  * @author Andreas Gerasimow
  */
 public class CoreCommand extends ASAT4JAnalysisCommand<BooleanAssignmentList> {
+
+    public static final AOption<IFormat<BooleanAssignmentList>> FORMAT = Options.newOutputFormatOption(
+            BooleanAssignmentListFormats.class, new BooleanAssignmentListDimacsFormat().getName());
 
     @Override
     public Optional<String> getDescription() {
@@ -50,7 +56,7 @@ public class CoreCommand extends ASAT4JAnalysisCommand<BooleanAssignmentList> {
 
     @Override
     protected IFormat<BooleanAssignmentList> getOuputFormat(OptionList optionParser) {
-        return new BooleanAssignmentListDimacsFormat();
+        return optionParser.get(FORMAT);
     }
 
     @Override

@@ -20,12 +20,14 @@
  */
 package de.featjar.feature.model.cli;
 
-import de.featjar.base.FeatJAR;
 import de.featjar.base.cli.ACommand;
-import de.featjar.base.cli.Option;
+import de.featjar.base.cli.AOption;
 import de.featjar.base.cli.OptionList;
+import de.featjar.base.cli.Options;
 import de.featjar.base.computation.Computations;
+import de.featjar.base.data.Result;
 import de.featjar.base.io.DataTreeFormats;
+import de.featjar.base.io.format.IFormat;
 import de.featjar.base.io.text.DataTreeTextFormat;
 import de.featjar.base.tree.DataTree;
 import de.featjar.feature.configuration.computation.ComputeNumberOfConfigurations;
@@ -34,7 +36,6 @@ import de.featjar.feature.configuration.computation.ComputeNumberOfSelectionsPer
 import de.featjar.feature.configuration.computation.ComputeNumberOfVariables;
 import de.featjar.formula.assignment.BooleanAssignmentList;
 import de.featjar.formula.io.BooleanAssignmentListFormats;
-import java.io.IOException;
 import java.util.Optional;
 
 /**
@@ -46,10 +47,8 @@ import java.util.Optional;
  */
 public class PrintConfigurationStatistics extends ACommand {
 
-    public static final Option<String> OUTPUT_FORMAT = Option.newStringEnumOption(
-                    "format", DataTreeFormats.getInstance().getNames())
-            .setDefaultValue(new DataTreeTextFormat().getName())
-            .setDescription("Format of the output");
+    public static final AOption<IFormat<DataTree<?>>> OUTPUT_FORMAT =
+            Options.newOutputFormatOption(DataTreeFormats.class, new DataTreeTextFormat().getName());
 
     @Override
     public Optional<String> getDescription() {
@@ -63,36 +62,31 @@ public class PrintConfigurationStatistics extends ACommand {
 
     @Override
     public int run(OptionList optionParser) {
-        DataTree<?> data = collectStats(readFromInput(optionParser, BooleanAssignmentListFormats.getInstance())
-                .orElseThrow());
-        try {
-            writeToOutput(
-                    data,
-                    DataTreeFormats.getInstance()
-                            .getFormatByName(optionParser.get(OUTPUT_FORMAT))
-                            .orElse(null),
-                    optionParser);
-            return 0;
-        } catch (IOException e) {
-            FeatJAR.log().error(e);
-            return FeatJAR.ERROR_WRITING_RESULT;
-        }
+        return writeResult(
+                optionParser,
+                readFromInput(optionParser, BooleanAssignmentListFormats.getInstance())
+                        .mapResult(this::collectStats),
+                optionParser.get(OUTPUT_FORMAT));
     }
 
-    private DataTree<?> collectStats(BooleanAssignmentList configurations) {
-        DataTree<?> data = DataTree.of("ConfigurationStatistics");
-        data.addChild(Computations.of(configurations)
-                .map(ComputeNumberOfConfigurations::new)
-                .compute());
-        data.addChild(Computations.of(configurations)
-                .map(ComputeNumberOfVariables::new)
-                .compute());
-        data.addChild(Computations.of(configurations)
-                .map(ComputeNumberOfSelectionsPerConfiguration::new)
-                .compute());
-        data.addChild(Computations.of(configurations)
-                .map(ComputeNumberOfSelectionsPerFeature::new)
-                .compute());
-        return data;
+    private Result<DataTree<?>> collectStats(BooleanAssignmentList configurations) {
+        try {
+            DataTree<?> data = DataTree.of("ConfigurationStatistics");
+            data.addChild(Computations.of(configurations)
+                    .map(ComputeNumberOfConfigurations::new)
+                    .compute());
+            data.addChild(Computations.of(configurations)
+                    .map(ComputeNumberOfVariables::new)
+                    .compute());
+            data.addChild(Computations.of(configurations)
+                    .map(ComputeNumberOfSelectionsPerConfiguration::new)
+                    .compute());
+            data.addChild(Computations.of(configurations)
+                    .map(ComputeNumberOfSelectionsPerFeature::new)
+                    .compute());
+            return Result.of(data);
+        } catch (Exception e) {
+            return Result.empty(e);
+        }
     }
 }

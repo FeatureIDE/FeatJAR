@@ -22,22 +22,15 @@ package de.featjar.formula.cli;
 
 import de.featjar.base.FeatJAR;
 import de.featjar.base.cli.ACommand;
-import de.featjar.base.cli.Option;
+import de.featjar.base.cli.AOption;
 import de.featjar.base.cli.OptionList;
-import de.featjar.base.data.Result;
-import de.featjar.base.io.IO;
+import de.featjar.base.cli.Options;
+import de.featjar.base.io.text.GenericTextFormat;
 import de.featjar.base.tree.Trees;
 import de.featjar.formula.io.FormulaFormats;
 import de.featjar.formula.io.textual.ExpressionSerializer;
+import de.featjar.formula.io.textual.ShortSymbols;
 import de.featjar.formula.io.textual.Symbols;
-import de.featjar.formula.structure.IFormula;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.StandardOpenOption;
-import java.util.Arrays;
-import java.util.Locale;
 import java.util.Optional;
 
 /**
@@ -63,30 +56,26 @@ public class PrintCommand extends ACommand {
         }
     }
 
-    public static final String CUSTOM_STRING_PREFIX = "CUSTOM:";
-
     /**
      * Defines the tab string.
      */
-    public static final Option<String> TAB_OPTION = Option.newOption("tab", Option.StringParser)
-            .setDescription("Defines the tab value. Possible options: "
-                    + Arrays.toString(WhitespaceString.values())
-                    + ". For custom value, type " + CUSTOM_STRING_PREFIX + "<value>")
-            .setDefaultValue(WhitespaceString.TAB.toString());
+    public static final AOption<WhitespaceString> TAB_OPTION = Options.newEnumOption("tab", WhitespaceString.class)
+            .setDescription("Defines the string used for tabs.")
+            .setDefaultValue(String.valueOf(WhitespaceString.TAB));
 
     /**
      * Defines the notation.
      */
-    public static final Option<ExpressionSerializer.Notation> NOTATION_OPTION = Option.newOption(
-                    "notation", (arg) -> ExpressionSerializer.Notation.valueOf(arg.toUpperCase(Locale.ENGLISH)))
-            .setDescription("Defines the notation. Possible options: "
-                    + Arrays.toString(ExpressionSerializer.Notation.values()))
-            .setDefaultValue(ExpressionSerializer.STANDARD_NOTATION);
+    public static final AOption<ExpressionSerializer.Notation> NOTATION_OPTION = Options.newEnumOption(
+                    "notation", ExpressionSerializer.Notation.class)
+            .setDescription("Defines the notation.")
+            .setDefaultValue(String.valueOf(ExpressionSerializer.STANDARD_NOTATION));
 
+    // TODO Use predefined list of symbol classes
     /**
      * Defines the symbols.
      */
-    public static final Option<Symbols> SYMBOLS_OPTION = Option.newOption("format", (arg) -> {
+    public static final AOption<Symbols> SYMBOLS_OPTION = Options.newOption("format", (arg) -> {
                 try {
                     return (Symbols) Class.forName(arg).getField("INSTANCE").get(null);
                 } catch (IllegalAccessException | NoSuchFieldException | ClassNotFoundException e) {
@@ -95,99 +84,50 @@ public class PrintCommand extends ACommand {
                 }
             })
             .setDescription("Defines the symbols.")
-            .setDefaultValue(ExpressionSerializer.STANDARD_SYMBOLS);
+            .setDefaultValue(ShortSymbols.class.getName());
 
     /**
      * Defines the new line string.
      */
-    public static final Option<String> NEW_LINE_OPTION = Option.newOption("newline", Option.StringParser)
-            .setDescription("Defines the new line value. Possible options: "
-                    + Arrays.toString(WhitespaceString.values())
-                    + ". For custom value, type " + CUSTOM_STRING_PREFIX + "<value>")
+    public static final AOption<WhitespaceString> NEW_LINE_OPTION = Options.newEnumOption(
+                    "newline", WhitespaceString.class)
+            .setDescription("Defines the string used for newline.")
             .setDefaultValue(WhitespaceString.NEWLINE.toString());
 
     /**
      * Enforces parentheses.
      */
-    public static final Option<Boolean> ENFORCE_PARENTHESES_OPTION = Option.newFlag("enforce-parentheses")
+    public static final AOption<Boolean> ENFORCE_PARENTHESES_OPTION = Options.newFlag("enforce-parentheses")
             .setDescription("Enforces parentheses.")
-            .setDefaultValue(ExpressionSerializer.STANDARD_ENFORCE_PARENTHESES);
+            .setDefaultValue(String.valueOf(ExpressionSerializer.STANDARD_ENFORCE_PARENTHESES));
 
     /**
      * Enquotes whitespace.
      */
-    public static final Option<Boolean> ENQUOTE_WHITESPACE_OPTION = Option.newFlag("enquote-whitespace")
+    public static final AOption<Boolean> ENQUOTE_WHITESPACE_OPTION = Options.newFlag("enquote-whitespace")
             .setDescription("Enquotes whitespace.")
-            .setDefaultValue(ExpressionSerializer.STANDARD_ENQUOTE_WHITESPACE);
+            .setDefaultValue(String.valueOf(ExpressionSerializer.STANDARD_ENQUOTE_WHITESPACE));
 
     @Override
     public int run(OptionList optionParser) {
-        String tab = optionParser.getResult(TAB_OPTION).get();
-        ExpressionSerializer.Notation notation =
-                optionParser.getResult(NOTATION_OPTION).get();
-        Symbols symbols = optionParser.getResult(SYMBOLS_OPTION).get();
-        String newLine = optionParser.getResult(NEW_LINE_OPTION).get();
-        boolean ep = optionParser.getResult(ENFORCE_PARENTHESES_OPTION).get();
-        boolean ew = optionParser.getResult(ENQUOTE_WHITESPACE_OPTION).get();
-
-        Path outputPath = optionParser.getResult(OUTPUT_OPTION).orElse(null);
-        Result<IFormula> formula =
-                optionParser.getResult(INPUT_OPTION).mapResult(p -> IO.load(p, FormulaFormats.getInstance()));
-
-        if (formula.isEmpty()) {
-            FeatJAR.log().problems(formula);
-            return FeatJAR.ERROR_COMPUTING_RESULT;
-        }
-
-        ExpressionSerializer serializer = new ExpressionSerializer();
-
-        tab = getWhitespaceString(tab);
-        newLine = getWhitespaceString(newLine);
-
-        if (tab == null || newLine == null) {
-            return 0;
-        }
-
-        serializer.setTab(tab);
-        serializer.setNotation(notation);
-        serializer.setSymbols(symbols);
-        serializer.setNewLine(newLine);
-        serializer.setEnforceParentheses(ep);
-        serializer.setEnquoteWhitespace(ew);
-
-        String formulaString = Trees.traverse(formula.get(), serializer).orElse("");
-        if (outputPath == null) {
-            FeatJAR.log().message(formulaString);
-        } else {
-            try {
-                if (Files.isDirectory(outputPath)) {
-                    FeatJAR.log().error(new IOException(outputPath.toString() + " is a directory"));
-                } else {
-                    Files.write(
-                            outputPath,
-                            formulaString.getBytes(StandardCharsets.UTF_8),
-                            StandardOpenOption.CREATE,
-                            StandardOpenOption.TRUNCATE_EXISTING);
-                }
-            } catch (IOException e) {
-                FeatJAR.log().error(e);
-                return FeatJAR.ERROR_COMPUTING_RESULT;
-            }
-        }
-        return 0;
+        return writeResult(
+                optionParser,
+                readFromInput(optionParser, FormulaFormats.getInstance())
+                        .mapResult(f -> Trees.traverse(f, getSerializer(optionParser))),
+                new GenericTextFormat<>());
     }
 
-    public String getWhitespaceString(String input) {
-        try {
-            WhitespaceString ws = WhitespaceString.valueOf(input);
-            return ws.getWhitespaceValue();
-        } catch (IllegalArgumentException e) {
-            if (!input.startsWith(CUSTOM_STRING_PREFIX)) {
-                FeatJAR.log().error("Illegal string: " + input);
-                return null;
-            }
-            return input.substring(CUSTOM_STRING_PREFIX.length());
-        }
+    private ExpressionSerializer getSerializer(OptionList optionParser) {
+        ExpressionSerializer serializer = new ExpressionSerializer();
+        serializer.setTab(optionParser.getResult(TAB_OPTION).get().getWhitespaceValue());
+        serializer.setNotation(optionParser.getResult(NOTATION_OPTION).get());
+        serializer.setSymbols(optionParser.getResult(SYMBOLS_OPTION).get());
+        serializer.setNewLine(optionParser.getResult(NEW_LINE_OPTION).get().getWhitespaceValue());
+        serializer.setEnforceParentheses(
+                optionParser.getResult(ENFORCE_PARENTHESES_OPTION).get());
+        serializer.setEnquoteWhitespace(
+                optionParser.getResult(ENQUOTE_WHITESPACE_OPTION).get());
+        return serializer;
     }
 
     @Override

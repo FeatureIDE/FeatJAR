@@ -20,12 +20,13 @@
  */
 package de.featjar.feature.model.cli;
 
-import de.featjar.base.FeatJAR;
 import de.featjar.base.cli.ACommand;
-import de.featjar.base.cli.Option;
+import de.featjar.base.cli.AOption;
 import de.featjar.base.cli.OptionList;
+import de.featjar.base.cli.Options;
 import de.featjar.base.computation.Computations;
 import de.featjar.base.io.DataTreeFormats;
+import de.featjar.base.io.format.IFormat;
 import de.featjar.base.io.text.DataTreeTextFormat;
 import de.featjar.base.tree.DataTree;
 import de.featjar.feature.model.IFeatureModel;
@@ -38,7 +39,6 @@ import de.featjar.feature.model.computation.ComputeFeatureTreeNumberOfGroups;
 import de.featjar.feature.model.computation.ComputeFeatureTreeNumberOfLeaves;
 import de.featjar.feature.model.computation.ComputeFeatureTreeNumberOfTopNodes;
 import de.featjar.feature.model.io.FeatureModelFormats;
-import java.io.IOException;
 import java.util.Optional;
 
 /**
@@ -57,14 +57,12 @@ public class PrintModelStatistics extends ACommand {
         CONSTRAINT_RELATED
     }
 
-    public static final Option<AnalysesScope> ANALYSES_SCOPE = Option.newEnumOption("scope", AnalysesScope.class)
-            .setDefaultValue(AnalysesScope.ALL)
+    public static final AOption<AnalysesScope> ANALYSES_SCOPE = Options.newEnumOption("scope", AnalysesScope.class)
+            .setDefaultValue(AnalysesScope.ALL.name())
             .setDescription("Specifies scope of statistics");
 
-    public static final Option<String> OUTPUT_FORMAT = Option.newStringEnumOption(
-                    "format", DataTreeFormats.getInstance().getNames())
-            .setDefaultValue(new DataTreeTextFormat().getName())
-            .setDescription("Format of the output");
+    public static final AOption<IFormat<DataTree<?>>> OUTPUT_FORMAT =
+            Options.newOutputFormatOption(DataTreeFormats.class, new DataTreeTextFormat().getName());
 
     @Override
     public Optional<String> getDescription() {
@@ -78,22 +76,13 @@ public class PrintModelStatistics extends ACommand {
 
     @Override
     public int run(OptionList optionParser) {
-        DataTree<?> data = collectStats(
-                readFromInput(optionParser, FeatureModelFormats.getInstance()).orElseThrow(),
-                optionParser.get(ANALYSES_SCOPE));
-
-        try {
-            writeToOutput(
-                    data,
-                    DataTreeFormats.getInstance()
-                            .getFormatByName(optionParser.get(OUTPUT_FORMAT))
-                            .orElse(null),
-                    optionParser);
-            return 0;
-        } catch (IOException e) {
-            FeatJAR.log().error(e);
-            return FeatJAR.ERROR_WRITING_RESULT;
-        }
+        return writeObject(
+                optionParser,
+                collectStats(
+                        readFromInput(optionParser, FeatureModelFormats.getInstance())
+                                .orElseThrow(),
+                        optionParser.get(ANALYSES_SCOPE)),
+                optionParser.get(OUTPUT_FORMAT));
     }
 
     /**

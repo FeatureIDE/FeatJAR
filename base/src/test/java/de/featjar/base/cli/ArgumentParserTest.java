@@ -46,8 +46,8 @@ class ArgumentParserTest {
 
     OptionList parser(String... args) {
         OptionList optionList = new OptionList(args);
-        optionList.addOptions(Option.getAllOptions(FeatJAROptions.class));
-        optionList.addOptions(Option.getAllOptions(LogOptions.class));
+        optionList.addOptions(Options.getAllOptions(FeatJAROptions.class));
+        optionList.addOptions(Options.getAllOptions(LogOptions.class));
         List<Problem> problems = optionList.parseArguments();
         assertTrue(problems.isEmpty(), Problem.printProblems(problems));
         return optionList;
@@ -68,8 +68,8 @@ class ArgumentParserTest {
 
     @Test
     void parseOption() {
-        Option<Integer> option1 = new Option<>("x", Integer::valueOf);
-        Option<Integer> option2 = new Option<>("y", Integer::valueOf);
+        AOption<Integer> option1 = new SingleOption<>("x", Integer::valueOf);
+        AOption<Integer> option2 = new SingleOption<>("y", Integer::valueOf);
 
         OptionList parser = new OptionList("--x", "42");
         parser.parseArguments();

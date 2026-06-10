@@ -99,9 +99,11 @@ public interface IFormatSupplier<T> {
      * @param name the name to match
      */
     default Optional<IFormat<T>> getFormatByName(String name) {
-        return getFormatList().stream()
-                .filter(f -> Objects.equals(name, f.getName()))
-                .findFirst();
+        return name == null
+                ? Optional.empty()
+                : getFormatList().stream()
+                        .filter(f -> name.equalsIgnoreCase(f.getName()))
+                        .findFirst();
     }
 
     /**

@@ -20,7 +20,7 @@
  */
 package de.featjar.base.computation;
 
-import de.featjar.base.env.Parameter;
+import de.featjar.base.env.IParameter;
 import de.featjar.base.env.ParameterList;
 import java.util.ArrayList;
 import java.util.List;
@@ -33,7 +33,7 @@ import java.util.List;
  * @param <U> the type of the dependency's computation result
  * @author Elias Kuiter
  */
-public class Dependency<U> extends Parameter {
+public class Dependency<U> implements IParameter {
 
     private static ParameterList<Dependency<?>> map = new ParameterList<>(IComputation.class);
 

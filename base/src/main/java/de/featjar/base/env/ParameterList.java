@@ -28,7 +28,7 @@ import de.featjar.base.tree.structure.ATree;
 import de.featjar.base.tree.structure.ITree;
 import de.featjar.base.tree.visitor.ITreeVisitor;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.SequencedCollection;
 
@@ -41,7 +41,7 @@ import java.util.SequencedCollection;
  * @author Elias Kuiter
  * @author Sebastian Krieter
  */
-public class ParameterList<P extends Parameter> {
+public class ParameterList<P extends IParameter> {
 
     private class ParameterizedType extends ATree<ParameterizedType> {
 
@@ -74,26 +74,15 @@ public class ParameterList<P extends Parameter> {
 
     private final Class<?> parameterizedSuperType;
 
-    private int lastID = -1;
-
     public ParameterList(Class<?> parameterizedSuperType) {
         this.parameterizedSuperType = parameterizedSuperType;
     }
 
     public void addParameter(P parameter) {
-        addParameter(parameter, null, getCallingClass());
+        addParameter(parameter, getCallingClass());
     }
 
-    public void addParameter(P parameter, P parentParameter) {
-        addParameter(parameter, parentParameter, getCallingClass());
-    }
-
-    public synchronized void addParameter(P parameter, P parentParameter, Class<?> callingClass) {
-        if (parentParameter != null) {
-            parameter.setID(parameter.getID());
-        } else {
-            parameter.setID(++lastID);
-        }
+    public synchronized void addParameter(P parameter, Class<?> callingClass) {
         ParameterizedType introducer = Trees.preOrderStream(parameterPerClassList)
                 .filter(i -> i.type == callingClass)
                 .findFirst()
@@ -113,7 +102,7 @@ public class ParameterList<P extends Parameter> {
         parameterPerClassList.clearChildren();
     }
 
-    public SequencedCollection<? extends Parameter> getParameterList() {
+    public SequencedCollection<? extends IParameter> getParameterList() {
         return getParameterList(getCallingClass());
     }
 
@@ -137,9 +126,9 @@ public class ParameterList<P extends Parameter> {
         }
     }
 
-    private class ParameterCollector implements ITreeVisitor<ParameterizedType, SequencedCollection<P>> {
+    private class ParameterCollector implements ITreeVisitor<ParameterizedType, List<P>> {
         private final Class<?> callingClass;
-        private final LinkedHashMap<Integer, P> parameters = new LinkedHashMap<>();
+        private final LinkedList<P> parameters = new LinkedList<>();
 
         public ParameterCollector(Class<?> callingClass) {
             this.callingClass = callingClass;
@@ -149,9 +138,7 @@ public class ParameterList<P extends Parameter> {
         public TraversalAction firstVisit(List<ParameterizedType> path) {
             ParameterizedType currentNode = ITreeVisitor.getCurrentNode(path);
             if (currentNode.type.isAssignableFrom(callingClass)) {
-                for (P parameter : currentNode.parameters) {
-                    parameters.put(parameter.getID(), parameter);
-                }
+                parameters.addAll(currentNode.parameters);
                 return ITreeVisitor.TraversalAction.CONTINUE;
             } else {
                 return ITreeVisitor.TraversalAction.SKIP_CHILDREN;
@@ -159,8 +146,8 @@ public class ParameterList<P extends Parameter> {
         }
 
         @Override
-        public Result<SequencedCollection<P>> getResult() {
-            return Result.of(parameters.sequencedValues());
+        public Result<List<P>> getResult() {
+            return Result.of(parameters);
         }
     }
 

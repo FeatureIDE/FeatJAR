@@ -22,7 +22,6 @@ package de.featjar.base.cli;
 
 import de.featjar.base.FeatJAR;
 import java.nio.file.Path;
-import java.util.List;
 
 public class FeatJAROptions implements IHasOptions {
 
@@ -31,19 +30,19 @@ public class FeatJAROptions implements IHasOptions {
     /**
      * Option for setting the configuration file.
      */
-    public static final Option<List<String>> CONFIGURATION_OPTION =
-            Option.newListOption("config", Option.StringParser).setDescription("The names of configuration files");
+    public static final ListOption<String> CONFIGURATION_OPTION =
+            Options.newListOption("config", Options.StringParser).setDescription("The names of configuration files");
 
     /**
      * Option for setting a directory containing configuration files.
      */
-    public static final Option<Path> CONFIGURATION_DIR_OPTION =
-            Option.newOption("config_dir", Option.PathParser).setDescription("The path to the configuration files");
+    public static final SingleOption<Path> CONFIGURATION_DIR_OPTION =
+            Options.newOption("config_dir", Options.PathParser).setDescription("The path to the configuration files");
 
     /**
      * Option for printing usage information.
      */
-    public static final Option<ICommand> COMMAND_OPTION = Option.newOption(
+    public static final SingleOption<ICommand> COMMAND_OPTION = Options.newOption(
                     "command", s -> FeatJAR.extensionPoint(Commands.class)
                             .getMatchingExtension(s)
                             .orElseThrow())
@@ -52,11 +51,12 @@ public class FeatJAROptions implements IHasOptions {
     /**
      * Option for printing usage information.
      */
-    public static final Option<Boolean> HELP_OPTION = Option.newFlag("help").setDescription("Print usage information");
+    public static final SingleOption<Boolean> HELP_OPTION =
+            Options.newFlag("help").setDescription("Print usage information");
 
     /**
      * Option for printing version information.
      */
-    public static final Option<Boolean> VERSION_OPTION =
-            Option.newFlag("version").setDescription("Print version information");
+    public static final SingleOption<Boolean> VERSION_OPTION =
+            Options.newFlag("version").setDescription("Print version information");
 }

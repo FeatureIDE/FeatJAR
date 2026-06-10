@@ -44,7 +44,7 @@ public interface ICommand extends IHasOptions, IExtension {
     /**
      * {@return this command's options}
      */
-    default List<Option<?>> getOptions() {
+    default List<AOption<?>> getOptions() {
         return new ArrayList<>();
     }
 

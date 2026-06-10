@@ -23,8 +23,8 @@ package de.featjar.base;
 import de.featjar.base.cli.FeatJAROptions;
 import de.featjar.base.cli.ICommand;
 import de.featjar.base.cli.LogOptions;
-import de.featjar.base.cli.Option;
 import de.featjar.base.cli.OptionList;
+import de.featjar.base.cli.Options;
 import de.featjar.base.computation.Cache;
 import de.featjar.base.computation.FallbackCache;
 import de.featjar.base.data.Problem;
@@ -78,17 +78,21 @@ public final class FeatJAR extends IO implements AutoCloseable {
     public static final String LIBRARY_NAME = "feat.jar";
 
     /**
-     * Error code for internal problems during computation.
+     * Exit code for internal problems during computation.
      */
     public static final int ERROR_COMPUTING_RESULT = 1;
     /**
-     * Error code for timeout during computation.
+     * Exit code for timeout during computation.
      */
     public static final int ERROR_TIMEOUT = 1;
     /**
-     * Error code for problems during output of the computed result.
+     * Exit code for problems during output of the computed result.
      */
     public static final int ERROR_WRITING_RESULT = 1;
+    /**
+     * Exit code for successful command.
+     */
+    public static final int EXIT_SUCCESS = 0;
 
     /**
      * Configures FeatJAR.
@@ -395,8 +399,8 @@ public final class FeatJAR extends IO implements AutoCloseable {
 
     private int runAfterInitialization(boolean configure, String... arguments) {
         OptionList optionInput = new OptionList(arguments);
-        optionInput.addOptions(Option.getAllOptions(FeatJAROptions.class));
-        optionInput.addOptions(Option.getAllOptions(LogOptions.class));
+        optionInput.addOptions(Options.getAllOptions(FeatJAROptions.class));
+        optionInput.addOptions(Options.getAllOptions(LogOptions.class));
 
         List<Problem> problems = optionInput.parseArguments();
 

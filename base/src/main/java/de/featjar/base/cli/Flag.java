@@ -24,8 +24,9 @@ package de.featjar.base.cli;
  * A Boolean flag option, which can either be present or not.
  *
  * @author Elias Kuiter
+ * @author Sebastian Krieter
  */
-public class Flag extends Option<Boolean> {
+public class Flag extends SingleOption<Boolean> {
 
     /**
      * Creates a flag option.
@@ -33,13 +34,12 @@ public class Flag extends Option<Boolean> {
      * @param name the name of the flag option
      */
     protected Flag(String name) {
-        super(name, BooleanParser);
-        defaultValue = Boolean.FALSE;
+        super(name, Options.BooleanParser);
+        defaultArgument = "false";
     }
 
     @Override
-    public String toString() {
-        return String.format(
-                "%s%s", getArgumentName(), getDescription().map(d -> ": " + d).orElse(""));
+    protected String getArgumentPlaceHolder() {
+        return "";
     }
 }

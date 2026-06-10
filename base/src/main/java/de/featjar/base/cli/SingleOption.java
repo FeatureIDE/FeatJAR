@@ -20,10 +20,7 @@
  */
 package de.featjar.base.cli;
 
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.List;
-import java.util.Locale;
 import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -36,7 +33,7 @@ import java.util.function.Supplier;
  * @param <T> the type of the option's value
  * @author Elias Kuiter
  */
-public class ListOption<T> extends AOption<List<T>> {
+public class SingleOption<T> extends AOption<T> {
 
     /**
      * A parser that parses a string into the type of the option.
@@ -54,7 +51,7 @@ public class ListOption<T> extends AOption<List<T>> {
      * @param name   the name of the option
      * @param parser the parser for the option's value
      */
-    protected ListOption(String name, Function<String, T> parser) {
+    protected SingleOption(String name, Function<String, T> parser) {
         this(name, parser, null, null, null);
     }
 
@@ -65,7 +62,7 @@ public class ListOption<T> extends AOption<List<T>> {
      * @param parser the parser for the option's value
      * @param validator the validator for the option's value
      */
-    protected ListOption(String name, Function<String, T> parser, Predicate<T> validator) {
+    protected SingleOption(String name, Function<String, T> parser, Predicate<T> validator) {
         this(name, parser, validator, null, null);
     }
 
@@ -76,7 +73,7 @@ public class ListOption<T> extends AOption<List<T>> {
      * @param parser the parser for the option's value
      * @param possibleValues the possibleValues for the option
      */
-    protected ListOption(String name, Function<String, T> parser, Collection<String> possibleValues) {
+    protected SingleOption(String name, Function<String, T> parser, Collection<String> possibleValues) {
         this(name, parser, null, possibleValues, null);
     }
 
@@ -87,7 +84,7 @@ public class ListOption<T> extends AOption<List<T>> {
      * @param parser the parser for the option's value
      * @param defaultValue the default value in case no other is provided or can be parsed
      */
-    protected ListOption(String name, Function<String, T> parser, String defaultValue) {
+    protected SingleOption(String name, Function<String, T> parser, String defaultValue) {
         this(name, parser, null, null, defaultValue);
     }
 
@@ -99,7 +96,7 @@ public class ListOption<T> extends AOption<List<T>> {
      * @param possibleValues the possibleValues for the option
      * @param defaultValue the default value in case no other is provided or can be parsed
      */
-    protected ListOption(
+    protected SingleOption(
             String name, Function<String, T> parser, Collection<String> possibleValues, String defaultValue) {
         this(name, parser, null, possibleValues, defaultValue);
     }
@@ -112,7 +109,7 @@ public class ListOption<T> extends AOption<List<T>> {
      * @param validator the validator for the option's value
      * @param defaultValue the default value in case no other is provided or can be parsed
      */
-    protected ListOption(String name, Function<String, T> parser, Predicate<T> validator, String defaultValue) {
+    protected SingleOption(String name, Function<String, T> parser, Predicate<T> validator, String defaultValue) {
         this(name, parser, validator, null, defaultValue);
     }
 
@@ -125,7 +122,7 @@ public class ListOption<T> extends AOption<List<T>> {
      * @param possibleValues the possibleValues for the option
      * @param defaultValue the default value in case no other is provided or can be parsed
      */
-    protected ListOption(
+    protected SingleOption(
             String name,
             Function<String, T> parser,
             Predicate<T> validator,
@@ -140,52 +137,38 @@ public class ListOption<T> extends AOption<List<T>> {
     /**
      * {@return this option's parser}
      */
-    public Function<String, List<T>> getParser() {
-        return arg -> Arrays.stream(arg.split("[,\n]")).map(parser).toList();
+    @Override
+    protected Function<String, T> getParser() {
+        return parser;
     }
 
     @Override
-    public boolean validateArgument(String argument) {
-        String[] splitArguments = argument.split("[,\n]");
-        return getPossibleValues()
-                .map(possibleValues -> Arrays.stream(splitArguments)
-                        .map(s -> s.toUpperCase(Locale.ENGLISH))
-                        .allMatch(possibleValues::contains))
-                .orElse(Boolean.TRUE);
+    public boolean validateValue(T value) {
+        return validator.test(value);
     }
 
-    @Override
-    public boolean validateValue(List<T> values) {
-        return values.stream().allMatch(validator::test);
-    }
-
-    public ListOption<T> setValidator(Predicate<T> validator) {
+    public SingleOption<T> setValidator(Predicate<T> validator) {
         this.validator = validator;
         return this;
     }
 
     @Override
-    public ListOption<T> setDefaultValue(String defaultValue) {
-        return (ListOption<T>) super.setDefaultValue(defaultValue);
+    public SingleOption<T> setDefaultValue(String defaultValue) {
+        return (SingleOption<T>) super.setDefaultValue(defaultValue);
     }
 
     @Override
-    public ListOption<T> setPossibleValues(Collection<String> possibleValues) {
-        return (ListOption<T>) super.setPossibleValues(possibleValues);
+    public SingleOption<T> setPossibleValues(Collection<String> possibleValues) {
+        return (SingleOption<T>) super.setPossibleValues(possibleValues);
     }
 
     @Override
-    public ListOption<T> setDescription(Supplier<String> descriptionSupplier) {
-        return (ListOption<T>) super.setDescription(descriptionSupplier);
+    public SingleOption<T> setDescription(Supplier<String> descriptionSupplier) {
+        return (SingleOption<T>) super.setDescription(descriptionSupplier);
     }
 
     @Override
-    public ListOption<T> setDescription(String description) {
-        return (ListOption<T>) super.setDescription(description);
-    }
-
-    @Override
-    protected String getArgumentPlaceHolder() {
-        return "value1,value2,...";
+    public SingleOption<T> setDescription(String description) {
+        return (SingleOption<T>) super.setDescription(description);
     }
 }

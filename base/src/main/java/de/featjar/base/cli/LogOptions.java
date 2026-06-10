@@ -31,61 +31,61 @@ public class LogOptions implements IHasOptions {
     /**
      * Option for printing version information.
      */
-    public static final Option<Boolean> STACKTRACE_OPTION =
-            Option.newFlag("print-stacktrace").setDescription("Print a stacktrace for all logged exceptions");
+    public static final AOption<Boolean> STACKTRACE_OPTION =
+            Options.newFlag("print-stacktrace").setDescription("Print a stacktrace for all logged exceptions");
 
     /**
      * Option for writing less output to the console.
      */
-    public static final Option<Boolean> QUIET_OPTION = Option.newFlag("quiet")
+    public static final AOption<Boolean> QUIET_OPTION = Options.newFlag("quiet")
             .setDescription("Suppress all unnecessary output. (Overwrites --log-info and --log-error options)");
 
     /**
      * Option for writing progress regularly to the console.
      */
-    public static final Option<Boolean> PROGRESS_OPTION =
-            Option.newFlag("progress").setDescription("Shows progress regularly.");
+    public static final AOption<Boolean> PROGRESS_OPTION =
+            Options.newFlag("progress").setDescription("Shows progress regularly.");
 
     /**
      * Option to specify a path to a log file for non-error messages.
      */
-    public static final Option<Path> INFO_FILE_OPTION =
-            Option.newOption("info-file", Option.PathParser).setDescription("Path to info log file");
+    public static final AOption<Path> INFO_FILE_OPTION =
+            Options.newOption("info-file", Options.PathParser).setDescription("Path to info log file");
 
     /**
      * Option to specify a path to a log file for error messages.
      */
-    public static final Option<Path> ERROR_FILE_OPTION =
-            Option.newOption("error-file", Option.PathParser).setDescription("Path to error log file");
+    public static final AOption<Path> ERROR_FILE_OPTION =
+            Options.newOption("error-file", Options.PathParser).setDescription("Path to error log file");
 
     /**
      * Option to configure which logging types count as non-error messages.
      */
-    public static final Option<List<Log.Verbosity>> LOG_INFO_OPTION = Option.newEnumListOption(
+    public static final AOption<List<Log.Verbosity>> LOG_INFO_OPTION = Options.newEnumListOption(
                     "log-info", Log.Verbosity.class)
             .setDescription("Message types printed to the info stream")
-            .setDefaultValue(List.of(Log.Verbosity.MESSAGE, Log.Verbosity.INFO, Log.Verbosity.PROGRESS));
+            .setDefaultValue(Options.joinToString(Log.Verbosity.MESSAGE, Log.Verbosity.INFO, Log.Verbosity.PROGRESS));
     /**
      * Option to configure which logging types count as error messages.
      */
-    public static final Option<List<Log.Verbosity>> LOG_ERROR_OPTION = Option.newEnumListOption(
+    public static final AOption<List<Log.Verbosity>> LOG_ERROR_OPTION = Options.newEnumListOption(
                     "log-error", Log.Verbosity.class)
             .setDescription("Message types printed to the error stream.")
-            .setDefaultValue(List.of(Log.Verbosity.WARNING, Log.Verbosity.ERROR));
+            .setDefaultValue(Options.joinToString(Log.Verbosity.WARNING, Log.Verbosity.ERROR));
 
     /**
      * Option to configure which logging types are written to the non-error log file (if one exists).
      */
-    public static final Option<List<Log.Verbosity>> LOG_INFO_FILE_OPTION = Option.newEnumListOption(
+    public static final AOption<List<Log.Verbosity>> LOG_INFO_FILE_OPTION = Options.newEnumListOption(
                     "log-info-file", Log.Verbosity.class)
             .setDescription("Message types printed to the info file.")
-            .setDefaultValue(List.of(Log.Verbosity.MESSAGE, Log.Verbosity.INFO, Log.Verbosity.DEBUG));
+            .setDefaultValue(Options.joinToString(Log.Verbosity.MESSAGE, Log.Verbosity.INFO, Log.Verbosity.DEBUG));
 
     /**
      * Option to configure which logging types are written to the error log file (if one exists).
      */
-    public static final Option<List<Log.Verbosity>> LOG_ERROR_FILE_OPTION = Option.newEnumListOption(
+    public static final AOption<List<Log.Verbosity>> LOG_ERROR_FILE_OPTION = Options.newEnumListOption(
                     "log-error-file", Log.Verbosity.class)
             .setDescription("Message types printed to the error file.")
-            .setDefaultValue(List.of(Log.Verbosity.ERROR, Log.Verbosity.WARNING));
+            .setDefaultValue(Options.joinToString(Log.Verbosity.ERROR, Log.Verbosity.WARNING));
 }

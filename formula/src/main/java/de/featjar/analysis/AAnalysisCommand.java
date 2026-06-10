@@ -22,8 +22,9 @@ package de.featjar.analysis;
 
 import de.featjar.base.FeatJAR;
 import de.featjar.base.cli.ACommand;
-import de.featjar.base.cli.Option;
+import de.featjar.base.cli.AOption;
 import de.featjar.base.cli.OptionList;
+import de.featjar.base.cli.Options;
 import de.featjar.base.computation.IComputation;
 import de.featjar.base.data.Result;
 import de.featjar.base.io.IO;
@@ -41,23 +42,23 @@ import java.time.Duration;
  */
 public abstract class AAnalysisCommand<T> extends ACommand {
 
-    public static final Option<Boolean> BROWSE_CACHE_OPTION =
-            Option.newFlag("browse-cache").setDescription("Show cache contents in default browser");
+    public static final AOption<Boolean> BROWSE_CACHE_OPTION =
+            Options.newFlag("browse-cache").setDescription("Show cache contents in default browser");
 
-    public static final Option<Boolean> NON_PARALLEL = Option.newFlag("non-parallel")
+    public static final AOption<Boolean> NON_PARALLEL = Options.newFlag("non-parallel")
             .setDescription(
                     "Disable parallel computation. (Ignored if timeout option is specified, as computations with timeout are always non-parallel.)");
 
-    public static final Option<Duration> TIMEOUT_OPTION = Option.newOption(
+    public static final AOption<Duration> TIMEOUT_OPTION = Options.newOption(
                     "timeout", s -> Duration.ofSeconds(Long.parseLong(s)))
             .setDescription("Timeout in seconds. (Disables parallel computing.)")
             .setValidator(timeout -> !timeout.isNegative())
-            .setDefaultValue(Duration.ZERO);
+            .setDefaultValue("0");
 
     /**
      * Output option for execution time.
      */
-    public static final Option<Path> TIME_OPTION = Option.newOption("write-time-to-file", Option.PathParser)
+    public static final AOption<Path> TIME_OPTION = Options.newOption("write-time-to-file", Options.PathParser)
             .setDescription("Path to file containig the execution time");
 
     @Override
@@ -106,19 +107,7 @@ public abstract class AAnalysisCommand<T> extends ACommand {
             FeatJAR.cache().browse(new GraphVizComputationTreeFormat());
         }
 
-        if (result.isPresent()) {
-            try {
-                writeToOutput(result.get(), getOuputFormat(optionParser), optionParser);
-            } catch (IOException e) {
-                FeatJAR.log().error(e);
-                return FeatJAR.ERROR_WRITING_RESULT;
-            }
-            return 0;
-        } else {
-            FeatJAR.log().problems(result.getProblems());
-            FeatJAR.log().error("Could not compute result.");
-            return FeatJAR.ERROR_COMPUTING_RESULT;
-        }
+        return writeResult(optionParser, result, getOuputFormat(optionParser));
     }
 
     protected abstract IComputation<T> newComputation(OptionList optionParser);

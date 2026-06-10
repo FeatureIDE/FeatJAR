@@ -21,8 +21,9 @@
 package de.featjar.analysis.sat4j.cli;
 
 import de.featjar.analysis.AAnalysisCommand;
-import de.featjar.base.cli.Option;
+import de.featjar.base.cli.AOption;
 import de.featjar.base.cli.OptionList;
+import de.featjar.base.cli.Options;
 import de.featjar.base.computation.Computations;
 import de.featjar.base.computation.IComputation;
 import de.featjar.base.io.IO;
@@ -41,18 +42,18 @@ public abstract class ASAT4JAnalysisCommand<T> extends AAnalysisCommand<T> {
     /**
      * Option for setting the seed for the pseudo random generator.
      */
-    public static final Option<Long> RANDOM_SEED_OPTION = Option.newOption("seed", Option.LongParser) //
+    public static final AOption<Long> RANDOM_SEED_OPTION = Options.newOption("seed", Options.LongParser) //
             .setDescription("Seed for the pseudo random generator") //
-            .setDefaultValue(1L);
+            .setDefaultValue("1");
 
     /**
      * Timeout option for canceling running computations.
      */
-    public static final Option<Duration> SAT_TIMEOUT_OPTION = Option.newOption(
+    public static final AOption<Duration> SAT_TIMEOUT_OPTION = Options.newOption(
                     "solver_timeout", s -> Duration.ofMillis(Long.parseLong(s)))
             .setDescription("Timeout in milliseconds")
             .setValidator(timeout -> !timeout.isNegative())
-            .setDefaultValue(Duration.ZERO);
+            .setDefaultValue("0");
 
     protected VariableMap variableMap;
 

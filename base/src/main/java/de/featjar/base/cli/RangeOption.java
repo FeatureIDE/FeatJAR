@@ -21,7 +21,6 @@
 package de.featjar.base.cli;
 
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 /**
@@ -29,7 +28,7 @@ import java.util.stream.IntStream;
  *
  * @author Sebastian Krieter
  */
-public class RangeOption extends Option<List<Integer>> {
+public class RangeOption extends SingleOption<List<Integer>> {
 
     /**
      * Creates a range option.
@@ -37,18 +36,16 @@ public class RangeOption extends Option<List<Integer>> {
      * @param name the name
      */
     protected RangeOption(String name) {
-        super(
-                name,
-                s -> IntStream.rangeClosed(1, Integer.parseInt(s)).boxed().collect(Collectors.toList()),
-                List.of(1));
+        super(name, s -> IntStream.rangeClosed(1, Integer.parseInt(s)).boxed().toList(), "");
     }
 
     @Override
-    public String toString() {
-        return String.format(
-                "%s <maxValue>%s%s",
-                getArgumentName(),
-                getDescription().map(d -> ": " + d).orElse(""),
-                getDefaultValue().map(s -> " (default: " + s + ")").orElse(""));
+    public boolean validateValue(List<Integer> value) {
+        return super.validateValue(value);
+    }
+
+    @Override
+    protected String getArgumentPlaceHolder() {
+        return "maxValue";
     }
 }

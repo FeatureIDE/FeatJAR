@@ -22,9 +22,9 @@ package de.featjar.base.shell.command;
 
 import de.featjar.base.FeatJAR;
 import de.featjar.base.cli.ACommand;
+import de.featjar.base.cli.AOption;
 import de.featjar.base.cli.Commands;
 import de.featjar.base.cli.ICommand;
-import de.featjar.base.cli.Option;
 import de.featjar.base.cli.OptionList;
 import de.featjar.base.data.Problem;
 import de.featjar.base.data.Result;
@@ -99,7 +99,7 @@ public class RunShellCommand implements IShellCommand {
                 break;
             }
 
-            Option<?> option;
+            AOption<?> option;
             try {
                 int index = Integer.parseInt(indexString);
                 if (1 <= index && index <= shellOptions.getOptions().size()) {

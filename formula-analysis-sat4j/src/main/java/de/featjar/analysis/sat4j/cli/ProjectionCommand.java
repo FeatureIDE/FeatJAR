@@ -23,13 +23,13 @@ package de.featjar.analysis.sat4j.cli;
 import de.featjar.analysis.sat4j.slice.CNFSlicer;
 import de.featjar.base.FeatJAR;
 import de.featjar.base.cli.ACommand;
+import de.featjar.base.cli.AOption;
 import de.featjar.base.cli.ListOption;
-import de.featjar.base.cli.Option;
 import de.featjar.base.cli.OptionList;
+import de.featjar.base.cli.Options;
 import de.featjar.base.computation.Computations;
 import de.featjar.base.computation.IComputation;
 import de.featjar.base.data.Result;
-import de.featjar.base.io.IO;
 import de.featjar.base.io.format.IFormat;
 import de.featjar.formula.VariableMap;
 import de.featjar.formula.assignment.BooleanAssignmentList;
@@ -39,14 +39,12 @@ import de.featjar.formula.io.BooleanAssignmentListFormats;
 import de.featjar.formula.io.FormulaFormats;
 import de.featjar.formula.io.csv.BooleanAssignmentListGroupedCSVFormat;
 import de.featjar.formula.structure.IFormula;
-import java.io.IOException;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * Removes literals of a given formula using SAT4J.
@@ -59,33 +57,27 @@ public class ProjectionCommand extends ACommand {
      * Literals to be removed
      */
     public static final ListOption<String> LITERALS_SLICE_OPTION = (ListOption<String>)
-            Option.newListOption("slice", Option.StringParser).setDescription("Literals to be removed.");
+            Options.newListOption("slice", Options.StringParser).setDescription("Literals to be removed.");
 
     /**
      * Literals to be kept
      */
     public static final ListOption<String> LITERALS_PROJECT_OPTION = (ListOption<String>)
-            Option.newListOption("project", Option.StringParser)
+            Options.newListOption("project", Options.StringParser)
                     .setDescription(
                             "Literals to be projected. If not set, all features will be projected. The slice option has a higher priority, i.e. if both the project and slice option contain the same literal, it will be removed.");
 
     /**
      * Timeout in seconds.
      */
-    public static final Option<Duration> TIMEOUT_OPTION = Option.newOption(
+    public static final AOption<Duration> TIMEOUT_OPTION = Options.newOption(
                     "timeout", s -> Duration.ofSeconds(Long.parseLong(s)))
             .setDescription("Timeout in seconds.")
             .setValidator(timeout -> !timeout.isNegative())
-            .setDefaultValue(Duration.ZERO);
+            .setDefaultValue("0");
 
-    public static final Option<String> OUTPUT_FORMAT = Option.newStringEnumOption(
-                    "output-format",
-                    BooleanAssignmentListFormats.getInstance().getExtensions().stream()
-                            .filter(IFormat::supportsWrite)
-                            .map(IFormat::getName)
-                            .collect(Collectors.toList()))
-            .setDefaultValue(new BooleanAssignmentListGroupedCSVFormat().getName())
-            .setDescription("Format of the output");
+    public static final AOption<IFormat<BooleanAssignmentList>> OUTPUT_FORMAT = Options.newOutputFormatOption(
+            BooleanAssignmentListFormats.class, new BooleanAssignmentListGroupedCSVFormat().getName());
 
     @Override
     public int run(OptionList optionParser) {
@@ -95,10 +87,8 @@ public class ProjectionCommand extends ACommand {
                 optionParser.getResult(LITERALS_SLICE_OPTION).orElse(List.of()));
         Duration timeout = optionParser.getResult(TIMEOUT_OPTION).get();
 
-        IFormula inputFormula = optionParser
-                .getResult(INPUT_OPTION)
-                .mapResult(p -> IO.load(p, FormulaFormats.getInstance()))
-                .orElseThrow();
+        IFormula inputFormula =
+                readFromInput(optionParser, FormulaFormats.getInstance()).orElseThrow();
 
         BooleanAssignmentList cnf =
                 ComputeBooleanClauseList.toBooleanAssignmentList(inputFormula).get();
@@ -144,25 +134,10 @@ public class ProjectionCommand extends ACommand {
             result = computation.computeResult(true, true);
         }
 
-        if (result.isPresent()) {
-            BooleanAssignmentList clauseList = result.get().remap(slicedVariableMap);
-            try {
-                writeToOutput(
-                        clauseList,
-                        BooleanAssignmentListFormats.getInstance()
-                                .getFormatByName(optionParser.get(OUTPUT_FORMAT))
-                                .orElseThrow(),
-                        optionParser);
-            } catch (IOException | RuntimeException e) {
-                FeatJAR.log().error(e);
-                return FeatJAR.ERROR_WRITING_RESULT;
-            }
-        } else {
-            FeatJAR.log().problems(result.getProblems());
-            FeatJAR.log().error("Couldn't compute result.");
-            return FeatJAR.ERROR_COMPUTING_RESULT;
-        }
-        return 0;
+        return writeResult(
+                optionParser,
+                result.map(clauseList -> clauseList.remap(slicedVariableMap)),
+                optionParser.get(OUTPUT_FORMAT));
     }
 
     @Override

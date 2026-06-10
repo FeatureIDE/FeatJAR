@@ -21,15 +21,20 @@
 package de.featjar.analysis.cadical.cli;
 
 import de.featjar.analysis.cadical.computation.ComputeCoreCadiCal;
+import de.featjar.base.cli.AOption;
 import de.featjar.base.cli.OptionList;
+import de.featjar.base.cli.Options;
 import de.featjar.base.computation.IComputation;
 import de.featjar.base.io.format.IFormat;
-import de.featjar.formula.assignment.BooleanAssignmentGroups;
 import de.featjar.formula.assignment.BooleanAssignmentList;
-import de.featjar.formula.io.dimacs.BooleanAssignmentGroupsDimacsFormat;
+import de.featjar.formula.io.BooleanAssignmentListFormats;
+import de.featjar.formula.io.dimacs.BooleanAssignmentListDimacsFormat;
 import java.util.Optional;
 
-public class CoreCommand extends ACadicalAnalysisCommand<BooleanAssignmentGroups> {
+public class CoreCommand extends ACadicalAnalysisCommand<BooleanAssignmentList> {
+
+    public static final AOption<IFormat<BooleanAssignmentList>> FORMAT = Options.newOutputFormatOption(
+            BooleanAssignmentListFormats.class, new BooleanAssignmentListDimacsFormat().getName());
 
     @Override
     public Optional<String> getDescription() {
@@ -37,15 +42,14 @@ public class CoreCommand extends ACadicalAnalysisCommand<BooleanAssignmentGroups
     }
 
     @Override
-    public IComputation<BooleanAssignmentGroups> newAnalysis(
+    public IComputation<BooleanAssignmentList> newAnalysis(
             OptionList optionParser, IComputation<BooleanAssignmentList> formula) {
-        return formula.map(ComputeCoreCadiCal::new)
-                .mapResult(CoreCommand.class, "group", a -> new BooleanAssignmentGroups(variableMap, a));
+        return formula.map(ComputeCoreCadiCal::new);
     }
 
     @Override
-    protected IFormat<BooleanAssignmentGroups> getOuputFormat(OptionList optionaParser) {
-        return new BooleanAssignmentGroupsDimacsFormat();
+    protected IFormat<BooleanAssignmentList> getOuputFormat(OptionList optionParser) {
+        return optionParser.get(FORMAT);
     }
 
     @Override

@@ -22,8 +22,9 @@ package de.featjar.analysis.sat4j.cli;
 
 import de.featjar.analysis.sat4j.computation.ComputeSolutionsSAT4J;
 import de.featjar.analysis.sat4j.solver.ISelectionStrategy;
-import de.featjar.base.cli.Option;
+import de.featjar.base.cli.AOption;
 import de.featjar.base.cli.OptionList;
+import de.featjar.base.cli.Options;
 import de.featjar.base.computation.IComputation;
 import de.featjar.base.io.format.IFormat;
 import de.featjar.formula.assignment.BooleanAssignmentGroups;
@@ -43,25 +44,25 @@ public class SolutionsCommand extends ASAT4JAnalysisCommand<BooleanAssignmentGro
     /**
      * Maximum number of configurations to be generated.
      */
-    public static final Option<Integer> LIMIT_OPTION = Option.newOption("limit", Option.IntegerParser) //
+    public static final AOption<Integer> LIMIT_OPTION = Options.newOption("limit", Options.IntegerParser) //
             .setDescription("Maximum number of configurations to be generated.") //
-            .setDefaultValue(1);
+            .setDefaultValue("1");
 
     /**
      * Strategy to use for generating each configuration (%s).
      */
-    public static final Option<ISelectionStrategy.NonParameterStrategy> SELECTION_STRATEGY_OPTION =
-            Option.newEnumOption("strategy", ISelectionStrategy.NonParameterStrategy.class) //
+    public static final AOption<ISelectionStrategy.NonParameterStrategy> SELECTION_STRATEGY_OPTION =
+            Options.newEnumOption("strategy", ISelectionStrategy.NonParameterStrategy.class) //
                     .setDescription("Strategy to use for generating each configuration.") //
-                    .setDefaultValue(ISelectionStrategy.NonParameterStrategy.ORIGINAL);
+                    .setDefaultValue(ISelectionStrategy.NonParameterStrategy.ORIGINAL.name());
 
     /**
      * Forbid duplicate configurations to be generated.
      */
-    public static final Option<Boolean> FORBID_DUPLICATES_OPTION = Option.newFlag("no-duplicates") //
+    public static final AOption<Boolean> FORBID_DUPLICATES_OPTION = Options.newFlag("no-duplicates") //
             .setDescription("Forbid dublicate configurations to be generated.");
 
-    public static final Option<String> FORMAT = Option.newStringEnumOption(
+    public static final AOption<String> FORMAT = Options.newStringEnumOption(
                     "format", BooleanAssignmentGroupsFormats.getInstance().getNames())
             .setDefaultValue(new BooleanAssignmentGroupsCSVFormat().getName())
             .setDescription("Format of the output");

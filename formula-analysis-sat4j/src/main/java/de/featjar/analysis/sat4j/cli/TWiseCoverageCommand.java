@@ -23,8 +23,9 @@ package de.featjar.analysis.sat4j.cli;
 import de.featjar.analysis.AAnalysisCommand;
 import de.featjar.analysis.sat4j.computation.ComputeConstraintedTWiseCoverage;
 import de.featjar.analysis.sat4j.io.textual.CoverageStatisticTextFormat;
-import de.featjar.base.cli.Option;
+import de.featjar.base.cli.AOption;
 import de.featjar.base.cli.OptionList;
+import de.featjar.base.cli.Options;
 import de.featjar.base.computation.Computations;
 import de.featjar.base.computation.IComputation;
 import de.featjar.base.data.Result;
@@ -59,36 +60,38 @@ public class TWiseCoverageCommand extends AAnalysisCommand<CoverageStatistic> {
     /**
      * Input option for feature model path.
      */
-    public static final Option<Path> FM_OPTION = Option.newOption("fm", Option.PathParser)
+    public static final AOption<Path> FM_OPTION = Options.newOption("fm", Options.PathParser)
             .setDescription("Path to feature model. Cannot be chosen together with --ref")
-            .setValidator(Option.PathValidator);
+            .setValidator(Options.PathValidator);
 
     /**
      * Input option for feature model path.
      */
-    public static final Option<Path> REFERENCE_SAMPLE_OPTION = Option.newOption("ref", Option.PathParser)
+    public static final AOption<Path> REFERENCE_SAMPLE_OPTION = Options.newOption("ref", Options.PathParser)
             .setDescription("Path to reference sample. Cannot be chosen together with --fm")
-            .setValidator(Option.PathValidator);
+            .setValidator(Options.PathValidator);
 
     /**
      * Value of t.
      */
-    public static final Option<Integer> T_OPTION = Option.newOption("t", Option.IntegerParser) //
+    public static final AOption<Integer> T_OPTION = Options.newOption("t", Options.IntegerParser) //
             .setDescription("Value of parameter t.") //
-            .setDefaultValue(2);
+            .setDefaultValue("2");
 
-    public static final Option<Path> INCLUDE_INTERACTIONS = Option.newOption("include-interactions", Option.PathParser)
+    public static final AOption<Path> INCLUDE_INTERACTIONS = Options.newOption(
+                    "include-interactions", Options.PathParser)
             .setDescription("Path to list of interactions that will be considered.")
-            .setValidator(Option.PathValidator);
+            .setValidator(Options.PathValidator);
 
-    public static final Option<Path> EXCLUDE_INTERACTIONS = Option.newOption("exclude-interactions", Option.PathParser)
+    public static final AOption<Path> EXCLUDE_INTERACTIONS = Options.newOption(
+                    "exclude-interactions", Options.PathParser)
             .setDescription("Path to list of interactions that will be ignored.")
-            .setValidator(Option.PathValidator);
+            .setValidator(Options.PathValidator);
 
-    public static final Option<Boolean> COVERAGE_ONLY_OPTION = Option.newFlag("coverage-only") //
+    public static final AOption<Boolean> COVERAGE_ONLY_OPTION = Options.newFlag("coverage-only") //
             .setDescription("Shows only coverage value.");
 
-    public static final Option<Boolean> COUNT_ONLY_OPTION = Option.newFlag("count-only") //
+    public static final AOption<Boolean> COUNT_ONLY_OPTION = Options.newFlag("count-only") //
             .setDescription("Shows only the interaction count: covered, uncovered, invalid, ignored (line separated)");
 
     private boolean coverageOnly, countOnly;

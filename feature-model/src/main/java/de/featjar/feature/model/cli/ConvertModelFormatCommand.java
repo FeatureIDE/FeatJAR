@@ -20,19 +20,15 @@
  */
 package de.featjar.feature.model.cli;
 
-import de.featjar.base.FeatJAR;
 import de.featjar.base.cli.ACommand;
-import de.featjar.base.cli.Option;
+import de.featjar.base.cli.AOption;
 import de.featjar.base.cli.OptionList;
-import de.featjar.base.data.Result;
+import de.featjar.base.cli.Options;
 import de.featjar.base.io.format.IFormat;
-import de.featjar.base.log.Log.Verbosity;
+import de.featjar.base.io.format.IFormatSupplier;
 import de.featjar.feature.model.IFeatureModel;
 import de.featjar.feature.model.io.FeatureModelFormats;
-import de.featjar.feature.model.io.xml.XMLFeatureModelFormat;
-import java.io.IOException;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 /**
  * Reads and writes a {@link IFeatureModel feature model} in different formats.
@@ -43,22 +39,11 @@ import java.util.stream.Collectors;
  */
 public class ConvertModelFormatCommand extends ACommand {
 
-    public static final Option<String> INPUT_FORMAT = Option.newStringEnumOption(
-                    "input-format",
-                    FeatureModelFormats.getInstance().getExtensions().stream()
-                            .filter(IFormat::supportsParse)
-                            .map(IFormat::getName)
-                            .collect(Collectors.toList()))
-            .setDescription("Format of the input. If not specified, tries to auto detect.");
+    public static final AOption<IFormatSupplier<IFeatureModel>> INPUT_FORMAT =
+            Options.newInputFormatOption(FeatureModelFormats.class);
 
-    public static final Option<String> OUTPUT_FORMAT = Option.newStringEnumOption(
-                    "output-format",
-                    FeatureModelFormats.getInstance().getExtensions().stream()
-                            .filter(IFormat::supportsWrite)
-                            .map(IFormat::getName)
-                            .collect(Collectors.toList()))
-            .setDefaultValue(new XMLFeatureModelFormat().getName())
-            .setDescription("Format of the output");
+    public static final AOption<IFormat<IFeatureModel>> OUTPUT_FORMAT =
+            Options.newOutputFormatOption(FeatureModelFormats.class, null);
 
     @Override
     public Optional<String> getDescription() {
@@ -72,26 +57,9 @@ public class ConvertModelFormatCommand extends ACommand {
 
     @Override
     public int run(OptionList optionParser) {
-        Result<IFormat<IFeatureModel>> userInputFormat =
-                optionParser.getResult(INPUT_FORMAT).mapOptional(FeatureModelFormats.getInstance()::getFormatByName);
-        Result<IFeatureModel> parseResult = userInputFormat.isPresent()
-                ? readFromInput(optionParser, userInputFormat.get())
-                : readFromInput(optionParser, FeatureModelFormats.getInstance());
-        if (parseResult.isEmpty()) {
-            FeatJAR.log().problems(parseResult, Verbosity.ERROR);
-            return FeatJAR.ERROR_COMPUTING_RESULT;
-        }
-        try {
-            writeToOutput(
-                    parseResult.get(),
-                    FeatureModelFormats.getInstance()
-                            .getFormatByName(optionParser.get(OUTPUT_FORMAT))
-                            .orElseThrow(),
-                    optionParser);
-            return 0;
-        } catch (IOException e) {
-            FeatJAR.log().error(e);
-            return FeatJAR.ERROR_WRITING_RESULT;
-        }
+        return writeResult(
+                optionParser,
+                readFromInput(optionParser, optionParser.getResult(INPUT_FORMAT).get()),
+                optionParser.get(OUTPUT_FORMAT));
     }
 }

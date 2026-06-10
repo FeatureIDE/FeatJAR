@@ -21,8 +21,8 @@
 package de.featjar.evaluation.util;
 
 import de.featjar.base.FeatJAR;
+import de.featjar.base.cli.AOption;
 import de.featjar.base.cli.ListOption;
-import de.featjar.base.cli.Option;
 import de.featjar.base.cli.OptionList;
 import java.util.List;
 import java.util.Objects;
@@ -38,7 +38,7 @@ import java.util.function.Function;
 public class OptionCombiner {
 
     private OptionList optionParser;
-    private Option<? extends List<?>>[] options;
+    private AOption<? extends List<?>>[] options;
     private ProgressTracker progress;
 
     public OptionCombiner(OptionList parser) {
@@ -53,13 +53,13 @@ public class OptionCombiner {
      *     Otherwise it should return the index of the option at which the problem was detected.
      *     The function may also deliberately return a lower index, if runs with the different values of the current options should be skipped.
      */
-    public final void loopOverOptions(Function<Integer, Integer> forEachOption, Option<? extends List<?>>... options) {
+    public final void loopOverOptions(Function<Integer, Integer> forEachOption, AOption<? extends List<?>>... options) {
         init(options);
         loopOverOptions(forEachOption, l -> {});
     }
 
     @SafeVarargs
-    public final void init(Option<? extends List<?>>... options) {
+    public final void init(AOption<? extends List<?>>... options) {
         this.options = options;
 
         int[] sizes = new int[options.length];
@@ -126,7 +126,7 @@ public class OptionCombiner {
                 : (T) optionParser.getResult(options[index]).orElseThrow().get(optionIndex);
     }
 
-    private String printOptionNames(Option<? extends List<?>>... loptions) {
+    private String printOptionNames(AOption<? extends List<?>>... loptions) {
         StringBuilder optionMessage = new StringBuilder();
         int[] sizes = progress.getSizes();
         for (int i = 0; i < sizes.length; i++) {
