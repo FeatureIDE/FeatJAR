@@ -182,18 +182,18 @@ public abstract class AOption<T> implements IParameter {
     @Override
     public String toString() {
         return String.format(
-                "%s <%s>%s%s%s",
+                "%s %s%s%s%s",
                 getArgumentName(),
                 getArgumentPlaceHolder(),
                 getDescription().map(d -> ": " + d).orElse(""),
                 getPossibleValues()
                         .map(list -> " (possible values: " + list.stream().collect(Collectors.joining(",")) + ")")
                         .orElse(""),
-                getDefaultValue().map(v -> " (default: " + v + ")").orElse(""));
+                getDefaultArgument().map(v -> " (default: " + v + ")").orElse(""));
     }
 
     protected String getArgumentPlaceHolder() {
-        return "value";
+        return "<value>";
     }
 
     /**

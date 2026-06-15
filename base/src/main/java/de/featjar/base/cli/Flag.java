@@ -28,6 +28,8 @@ package de.featjar.base.cli;
  */
 public class Flag extends SingleOption<Boolean> {
 
+    private static final String DEFAULT_ARGUMENT = "false";
+
     /**
      * Creates a flag option.
      *
@@ -35,11 +37,11 @@ public class Flag extends SingleOption<Boolean> {
      */
     protected Flag(String name) {
         super(name, Options.BooleanParser);
-        defaultArgument = "false";
+        this.defaultArgument = DEFAULT_ARGUMENT;
     }
 
     @Override
     protected String getArgumentPlaceHolder() {
-        return "";
+        return "[false|true]";
     }
 }

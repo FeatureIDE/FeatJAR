@@ -46,6 +46,6 @@ public class RangeOption extends SingleOption<List<Integer>> {
 
     @Override
     protected String getArgumentPlaceHolder() {
-        return "maxValue";
+        return "<maxValue>";
     }
 }

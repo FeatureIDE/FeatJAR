@@ -54,7 +54,7 @@ public class YASACommand extends ATWiseCommand {
     public static final AOption<Integer> INTERNAL_SOLUTION_LIMIT = Options.newOption(
                     "internal-limit", Options.IntegerParser) //
             .setDescription("Number of internally cached configurations.")
-            .setDefaultValue("65_536");
+            .setDefaultValue("65536");
 
     public static final AOption<Boolean> COMPACT = Options.newFlag("c") //
             .setDescription("Use a more memory efficient version of YASA.");

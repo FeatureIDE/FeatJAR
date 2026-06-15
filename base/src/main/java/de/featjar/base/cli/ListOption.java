@@ -186,6 +186,6 @@ public class ListOption<T> extends AOption<List<T>> {
 
     @Override
     protected String getArgumentPlaceHolder() {
-        return "value1,value2,...";
+        return "<value1,value2,...>";
     }
 }

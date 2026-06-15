@@ -34,7 +34,6 @@ import java.nio.file.OpenOption;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.List;
-import java.util.function.Function;
 
 /**
  * The abstract class for any command.
@@ -56,32 +55,9 @@ public abstract class ACommand implements ICommand {
     public static final AOption<Path> OUTPUT_OPTION =
             Options.newOption("output", Options.PathParser).setDescription("Path to output file(s)");
 
-    @SuppressWarnings("unchecked")
-    public static final <T> Function<String, IFormatSupplier<T>> formatSupplierParser() {
-        return name -> FeatJAR.getInstance()
-                .getExtensionManager()
-                .getExtension(name)
-                .filter(e -> e instanceof IFormat)
-                .map(e -> IFormatSupplier.of((IFormat<T>) e))
-                .orElse(null);
-    }
-
-    public static final Function<String, IFormat<?>> formatParser = name -> FeatJAR.getInstance()
-            .getExtensionManager()
-            .getExtension(name)
-            .filter(e -> e instanceof IFormat)
-            .map(e -> (IFormat<?>) e)
-            .orElse(null);
-
-    //    public static final AOption<IFormatSupplier<?>> INPUT_FORMAT = Options.newOption("input-format",
-    // formatSupplierParser)
-    //    		.setDefaultValue(IFormatSupplier.of(List.of()))
-    //    		.setDescription("Format of the input. If not specified, tries to auto detect.");
-    //
-    //	public static final AOption<IFormat<?>> OUTPUT_FORMAT = Options.newOption("output-format", formatParser)
-    //    		.setDefaultValue(new GenericTextFormat<>())
-    //			.setDescription("Format of the output.");
-
+    /**
+     * Flag to allow for overwriting existing files.
+     */
     public static final AOption<Boolean> OUTPUT_OVERWRITE_OPTION =
             Options.newFlag("overwrite").setDescription("Overwrite existing file at output path.");
 
