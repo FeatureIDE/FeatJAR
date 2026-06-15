@@ -84,32 +84,20 @@ public class SampleBitIndexMIG {
 
         for (int l : config) {
             if (l != 0) {
-                bitSetReference[numberOfVariables + l].set(id);
+                bitSetReference[index(l)].set(id);
                 literalCount.set(id, literalCount.get(id) + 1);
             }
         }
         return id;
     }
 
-    public void reset(int id, int[] literals) {
-        for (int j = 0; j < bitSetReference.length; j++) {
-            bitSetReference[j].clear(id);
-        }
-        int numLiterals = 0;
-        literalCount.set(id, 0);
-        for (int l : literals) {
-            if (!bitSetReference[numberOfVariables + l].get(id)) {
-                bitSetReference[numberOfVariables + l].set(id);
-                numLiterals++;
-                for (int strongL : mig.getStrongEdges()[ModalImplicationGraph.getVertexIndex(l)]) {
-                    if (!bitSetReference[numberOfVariables + strongL].get(id)) {
-                        bitSetReference[numberOfVariables + strongL].set(id);
-                        numLiterals++;
-                    }
-                }
-            }
-        }
-        literalCount.set(id, numLiterals);
+    private int index(int l) {
+        return numberOfVariables + l;
+    }
+
+    public void remove(int id) {
+        clear(id);
+        sampleSize--;
     }
 
     public void clear(int id) {
@@ -117,18 +105,22 @@ public class SampleBitIndexMIG {
             bitSetReference[j].clear(id);
         }
         literalCount.set(id, 0);
-        sampleSize--;
+    }
+
+    public void reset(int id, int[] literals) {
+        clear(id);
+        set(id, literals);
     }
 
     public void set(int id, int... literals) {
         int numLiterals = literalCount.get(id);
         for (int l : literals) {
-            if (!bitSetReference[numberOfVariables + l].get(id)) {
-                bitSetReference[numberOfVariables + l].set(id);
+            if (!bitSetReference[index(l)].get(id)) {
+                bitSetReference[index(l)].set(id);
                 numLiterals++;
                 for (int strongL : mig.getStrongEdges()[ModalImplicationGraph.getVertexIndex(l)]) {
-                    if (!bitSetReference[numberOfVariables + strongL].get(id)) {
-                        bitSetReference[numberOfVariables + strongL].set(id);
+                    if (!bitSetReference[index(strongL)].get(id)) {
+                        bitSetReference[index(strongL)].set(id);
                         numLiterals++;
                     }
                 }
@@ -145,9 +137,9 @@ public class SampleBitIndexMIG {
         int[] literals = new int[literalCount.get(id)];
         int index = 0;
         for (int i = 1; i <= numberOfVariables; i++) {
-            if (bitSetReference[numberOfVariables + i].get(id)) {
+            if (bitSetReference[index(i)].get(id)) {
                 literals[index++] = i;
-            } else if (bitSetReference[numberOfVariables - i].get(id)) {
+            } else if (bitSetReference[index(-i)].get(id)) {
                 literals[index++] = -i;
             }
         }
@@ -157,9 +149,9 @@ public class SampleBitIndexMIG {
     public int[] getConfiguration(int id) {
         int[] literals = new int[numberOfVariables];
         for (int i = 1; i <= numberOfVariables; i++) {
-            if (bitSetReference[numberOfVariables + i].get(id)) {
+            if (bitSetReference[index(i)].get(id)) {
                 literals[i - 1] = i;
-            } else if (bitSetReference[numberOfVariables - i].get(id)) {
+            } else if (bitSetReference[index(-i)].get(id)) {
                 literals[i - 1] = -i;
             }
         }
@@ -175,26 +167,26 @@ public class SampleBitIndexMIG {
     }
 
     public BitSet getInternalBitSet(int literal) {
-        return bitSetReference[numberOfVariables + literal];
+        return bitSetReference[index(literal)];
     }
 
     public BitSet getNegatedBitSet(int... literals) {
-        BitSet first = bitSetReference[numberOfVariables - literals[0]];
+        BitSet first = bitSetReference[index(-literals[0])];
         BitSet bitSet = (BitSet) first.clone();
         for (int k = 1; k < literals.length; k++) {
-            bitSet.or(bitSetReference[numberOfVariables - literals[k]]);
+            bitSet.or(bitSetReference[index(-literals[k])]);
         }
         return bitSet;
     }
 
     public BitSet getBitSet(int... literals) {
-        BitSet first = bitSetReference[numberOfVariables + literals[0]];
+        BitSet first = bitSetReference[index(literals[0])];
         BitSet bitSet = (BitSet) first.clone();
         for (int k = 1; k < literals.length; k++) {
             if (bitSet.isEmpty()) {
                 return bitSet;
             }
-            bitSet.and(bitSetReference[numberOfVariables + literals[k]]);
+            bitSet.and(bitSetReference[index(literals[k])]);
         }
         return bitSet;
     }
@@ -206,8 +198,7 @@ public class SampleBitIndexMIG {
             case 1:
                 return getInternalBitSet(literals[0]).cardinality() > 0;
             case 2:
-                return bitSetReference[numberOfVariables + literals[0]].intersects(
-                        bitSetReference[numberOfVariables + literals[1]]);
+                return bitSetReference[index(literals[0])].intersects(bitSetReference[index(literals[1])]);
             default:
                 return !getBitSet(literals).isEmpty();
         }
@@ -217,28 +208,28 @@ public class SampleBitIndexMIG {
         BitSet literalSet = new BitSet(2 * numberOfVariables + 1);
         int literalCount = 0;
         for (int l = 1; l <= numberOfVariables; l++) {
-            if (bitSetReference[numberOfVariables + l].get(id)) {
-                literalSet.set(numberOfVariables + l);
+            if (bitSetReference[index(l)].get(id)) {
+                literalSet.set(index(l));
                 literalCount++;
-            } else if (bitSetReference[numberOfVariables - l].get(id)) {
-                literalSet.set(numberOfVariables - l);
+            } else if (bitSetReference[index(-l)].get(id)) {
+                literalSet.set(index(-l));
                 literalCount++;
             }
         }
         for (int l : literals) {
             if (l != 0) {
-                if (literalSet.get(numberOfVariables - l)) {
+                if (literalSet.get(index(-l))) {
                     return null;
                 }
-                if (!literalSet.get(numberOfVariables + l)) {
-                    literalSet.set(numberOfVariables + l);
+                if (!literalSet.get(index(l))) {
+                    literalSet.set(index(l));
                     literalCount++;
                     for (int strongL : mig.getStrongEdges()[ModalImplicationGraph.getVertexIndex(l)]) {
-                        if (literalSet.get(numberOfVariables - strongL)) {
+                        if (literalSet.get(index(-strongL))) {
                             return null;
                         }
-                        if (!literalSet.get(numberOfVariables + strongL)) {
-                            literalSet.set(numberOfVariables + strongL);
+                        if (!literalSet.get(index(strongL))) {
+                            literalSet.set(index(strongL));
                             literalCount++;
                         }
                     }
@@ -247,19 +238,18 @@ public class SampleBitIndexMIG {
         }
         int[] literalArray = new int[literalCount];
         int i = 0;
-        int size = literalSet.size();
-        int literalIndex = literalSet.nextSetBit(0);
-        while (literalIndex < size) {
+        for (int literalIndex = literalSet.nextSetBit(0);
+                literalIndex >= 0;
+                literalIndex = literalSet.nextSetBit(literalIndex + 1)) {
             literalArray[i++] = literalIndex - numberOfVariables;
-            literalIndex = literalSet.nextSetBit(literalIndex + 1);
         }
         return literalArray;
     }
 
     public boolean isUndefined(int id, int literal) {
-        if (bitSetReference[numberOfVariables + literal].get(id)) {
+        if (bitSetReference[index(literal)].get(id)) {
             return false;
-        } else if (bitSetReference[numberOfVariables - literal].get(id)) {
+        } else if (bitSetReference[index(-literal)].get(id)) {
             return false;
         }
         return true;

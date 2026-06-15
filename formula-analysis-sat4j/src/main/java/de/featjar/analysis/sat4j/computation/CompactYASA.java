@@ -268,7 +268,7 @@ public class CompactYASA extends ATWiseSampleComputation {
                         .sorted(Comparator.comparingInt(id -> currentSampleIndex.getLiteralsCount(id)))
                         .skip(n)
                         .collect(Collectors.toList());
-                ids.forEach(id -> currentSampleIndex.clear(id));
+                ids.forEach(id -> currentSampleIndex.remove(id));
             }
 
             combinationSets.shuffleElements(random);
@@ -317,32 +317,37 @@ public class CompactYASA extends ATWiseSampleComputation {
                 Comparator.comparing(id -> currentSampleIndex.countUndefined((int) id, literals))
                         .thenComparing(id -> -currentSampleIndex.getLiteralsCount((int) id)));
 
-        ArrayList<int[]> candidateLiterals = new ArrayList<>(selectionCandidates.size());
-        for (Integer id : selectionCandidates) {
-            candidateLiterals.add(currentSampleIndex.propagate(id, literals));
-        }
+        int size = selectionCandidates.size();
+        ArrayList<int[]> candidateLiterals = new ArrayList<>(size);
 
         BitSet literalBitSet = randomSampleIndex.getBitSet(literals);
-        if (!literalBitSet.isEmpty()) {
-            for (int i = 0; i < candidateLiterals.size(); i++) {
-                int[] literalSet = candidateLiterals.get(i);
-                if (literalSet != null) {
-                    candidateLiterals.add(literalSet);
-                    BitSet configurationBitSet = randomSampleIndex.getBitSet(literalSet);
+        if (literalBitSet.isEmpty()) {
+            for (Integer id : selectionCandidates) {
+                candidateLiterals.add(currentSampleIndex.propagate(id, literals));
+            }
+        } else {
+            for (Integer id : selectionCandidates) {
+                int[] propagatedLiterals = currentSampleIndex.propagate(id, literals);
+                if (propagatedLiterals != null) {
+                    BitSet configurationBitSet = randomSampleIndex.getBitSet(propagatedLiterals);
                     configurationBitSet.and(literalBitSet);
-                    if (!configurationBitSet.isEmpty()) {
-                        currentSampleIndex.set(selectionCandidates.get(i), literals);
+                    if (configurationBitSet.isEmpty()) {
+                        candidateLiterals.add(propagatedLiterals);
+                    } else {
+                        currentSampleIndex.set(id, literals);
                         return true;
                     }
+                } else {
+                    candidateLiterals.add(null);
                 }
             }
         }
 
-        for (int i = 0; i < candidateLiterals.size(); i++) {
+        for (int i = 0; i < size; i++) {
             int[] literalSet = candidateLiterals.get(i);
             if (literalSet != null) {
-                if (trySelectSat(literals)) {
-                    currentSampleIndex.set(selectionCandidates.get(i), literals);
+                if (trySelectSat(literalSet)) {
+                    currentSampleIndex.set(selectionCandidates.get(i), literalSet);
                     return true;
                 }
             }
