@@ -48,7 +48,7 @@ public class SolutionsCommand extends ASAT4JAnalysisCommand<BooleanAssignmentGro
             .setDefaultValue(1);
 
     /**
-     * Strategy to use for generating each configuration (%s).
+     * Strategy to use for generating each configuration.
      */
     public static final Option<ISelectionStrategy.NonParameterStrategy> SELECTION_STRATEGY_OPTION =
             Option.newEnumOption("strategy", ISelectionStrategy.NonParameterStrategy.class) //

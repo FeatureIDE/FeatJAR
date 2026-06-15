@@ -21,6 +21,8 @@
 package de.featjar.analysis.sat4j.cli;
 
 import de.featjar.analysis.sat4j.computation.ATWiseSampleComputation;
+import de.featjar.analysis.sat4j.computation.ComputeCompleteSample;
+import de.featjar.analysis.sat4j.solver.ISelectionStrategy;
 import de.featjar.base.cli.Option;
 import de.featjar.base.cli.OptionList;
 import de.featjar.base.computation.IComputation;
@@ -42,6 +44,14 @@ import java.nio.file.Path;
  * @author Sebastian Krieter
  */
 public abstract class ATWiseCommand extends ASAT4JAnalysisCommand<BooleanAssignmentList> {
+
+    private static enum CompletionStrategy {
+        NONE,
+        FAST,
+        NEGATIVE,
+        POSITIVE,
+        RANDOM,
+    }
 
     /**
      * Value of t.
@@ -71,6 +81,14 @@ public abstract class ATWiseCommand extends ASAT4JAnalysisCommand<BooleanAssignm
                     "initial-variable-sample", Option.PathParser)
             .setDescription("Path to initial variable sample file. Configurations in this sample can be modified.")
             .setValidator(Option.PathValidator);
+
+    /**
+     * Strategy for completing partial configurations.
+     */
+    public static final Option<CompletionStrategy> COMPLETION_STRATEGY_OPTION = Option.newEnumOption(
+                    "completion", CompletionStrategy.class) //
+            .setDescription("Strategy for completing partial configurations.") //
+            .setDefaultValue(CompletionStrategy.NONE);
 
     public static final Option<String> FORMAT = Option.newStringEnumOption(
                     "format", BooleanAssignmentListFormats.getInstance().getNames())
@@ -102,6 +120,21 @@ public abstract class ATWiseCommand extends ASAT4JAnalysisCommand<BooleanAssignm
             if (initialSample != null) {
                 analysis.set(ATWiseSampleComputation.INITIAL_VARIABLE_SAMPLE, initialSample.getFirstGroup());
             }
+        }
+        CompletionStrategy completionStrategy = optionParser.get(COMPLETION_STRATEGY_OPTION);
+        if (completionStrategy != CompletionStrategy.NONE) {
+            analysis = analysis.map(ComputeCompleteSample::new)
+                    .setDependencyComputation(ComputeCompleteSample.BOOLEAN_CLAUSE_LIST, formula)
+                    .set(ComputeCompleteSample.RANDOM_SEED, optionParser.get(RANDOM_SEED_OPTION))
+                    .set(
+                            ComputeCompleteSample.SELECTION_STRATEGY,
+                            switch (completionStrategy) {
+                                case FAST -> ISelectionStrategy.NonParameterStrategy.ORIGINAL;
+                                case NEGATIVE -> ISelectionStrategy.NonParameterStrategy.NEGATIVE;
+                                case POSITIVE -> ISelectionStrategy.NonParameterStrategy.POSITIVE;
+                                case RANDOM -> ISelectionStrategy.NonParameterStrategy.FAST_RANDOM;
+                                default -> throw new IllegalStateException("Unexpected value: " + completionStrategy);
+                            });
         }
         return analysis;
     }
