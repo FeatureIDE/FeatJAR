@@ -41,7 +41,7 @@ public class Flag extends SingleOption<Boolean> {
     }
 
     @Override
-    protected String getArgumentPlaceHolder() {
+    public String getArgumentPlaceHolder() {
         return "[false|true]";
     }
 }

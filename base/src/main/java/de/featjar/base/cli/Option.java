@@ -24,7 +24,6 @@ import de.featjar.base.data.Result;
 import de.featjar.base.env.IParameter;
 import java.util.Collection;
 import java.util.Optional;
-import java.util.Set;
 import java.util.function.Supplier;
 
 /**
@@ -47,6 +46,11 @@ public interface Option<T> extends IParameter {
      * {@return this option's argument name on the command-line interface}
      */
     String getArgumentName();
+
+    /**
+     * {@return an indicator on how to specify the argument(s) for this option}
+     */
+    String getArgumentPlaceHolder();
 
     /**
      * {@return this option's description}
@@ -96,7 +100,7 @@ public interface Option<T> extends IParameter {
      * Returns an empty set if the option accepts any argument.
      * @see #validateArgument(String)
      */
-    Optional<Set<String>> getPossibleArguments();
+    Optional<Collection<String>> getPossibleArguments();
 
     /**
      * Set the collection of allowed arguments for this option.

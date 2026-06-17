@@ -149,12 +149,9 @@ public class MultiOption<T> extends AOption<List<T>> {
 
     @Override
     public boolean validateArgument(String argument) {
-        String[] splitArguments = argument.split("[,\n]");
-        return getPossibleArguments()
-                .map(possibleValues -> Arrays.stream(splitArguments)
-                        .map(s -> s.toUpperCase(Locale.ENGLISH))
-                        .allMatch(possibleValues::contains))
-                .orElse(Boolean.TRUE);
+        return possibleValues == null
+                || Arrays.stream(argument.toLowerCase(Locale.ENGLISH).split("[,\n]"))
+                        .allMatch(possibleValues::containsKey);
     }
 
     public MultiOption<T> setValidator(Predicate<T> validator) {
@@ -183,7 +180,7 @@ public class MultiOption<T> extends AOption<List<T>> {
     }
 
     @Override
-    protected String getArgumentPlaceHolder() {
+    public String getArgumentPlaceHolder() {
         return "<value1,value2,...>";
     }
 }

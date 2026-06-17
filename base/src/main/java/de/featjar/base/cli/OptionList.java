@@ -516,11 +516,11 @@ public class OptionList {
                         "Usage: java -jar %s [<command> | --command <classpath>] [--<flag> | --<option> <value>]...",
                         FeatJAR.LIBRARY_NAME))
                 .appendLine()
-                .appendLine("General options:")
-                .addIndent()
-                .appendLine(Options.getAllOptions(FeatJAROptions.class))
-                .appendLine(Options.getAllOptions(LogOptions.class))
-                .removeIndent();
+                .appendLine("General options:");
+        sb.addIndent();
+        printOptions(sb, Options.getAllOptions(FeatJAROptions.class));
+        printOptions(sb, Options.getAllOptions(LogOptions.class));
+        sb.removeIndent();
     }
 
     private static void printCommandHelp(IndentStringBuilder sb, ICommand command) {
@@ -533,7 +533,23 @@ public class OptionList {
             sb.appendLine();
             sb.appendLine(String.format("Options of command %s:", command.getIdentifier()));
             sb.addIndent();
-            sb.appendLine(options);
+            printOptions(sb, options);
+            sb.removeIndent();
+        }
+    }
+
+    private static void printOptions(IndentStringBuilder sb, List<Option<?>> options) {
+        for (Option<?> option : options) {
+            sb.appendLine(String.format(
+                    "%s %s", //
+                    option.getArgumentName(), //
+                    option.getArgumentPlaceHolder()));
+            sb.addIndent();
+            option.getDescription().ifPresent(description -> sb.appendLine(description));
+            option.getPossibleArguments()
+                    .ifPresent(possibleArguments -> sb.appendLine(
+                            "possible: " + possibleArguments.stream().collect(Collectors.joining("|"))));
+            option.getDefaultArgument().ifPresent(defaultValue -> sb.appendLine("default:  " + defaultValue));
             sb.removeIndent();
         }
     }

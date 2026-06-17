@@ -23,10 +23,9 @@ package de.featjar.base.cli;
 import de.featjar.base.data.Result;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.LinkedHashSet;
+import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.Optional;
-import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -60,7 +59,7 @@ public abstract class AOption<T> implements Option<T> {
      */
     protected String defaultArgument;
 
-    protected LinkedHashSet<String> possibleValues;
+    protected LinkedHashMap<String, String> possibleValues;
 
     /**
      * Creates an option.
@@ -155,25 +154,24 @@ public abstract class AOption<T> implements Option<T> {
     }
 
     @Override
-    public Optional<Set<String>> getPossibleArguments() {
-        return Optional.ofNullable(possibleValues).map(Collections::unmodifiableSet);
+    public Optional<Collection<String>> getPossibleArguments() {
+        return Optional.ofNullable(possibleValues).map(map -> Collections.unmodifiableCollection(map.values()));
     }
 
     @Override
     public Option<T> setPossibleArguments(Collection<String> possibleValues) {
-        this.possibleValues = possibleValues == null
-                ? null
-                : possibleValues.stream()
-                        .map(s -> s.toUpperCase(Locale.ENGLISH))
-                        .collect(Collectors.toCollection(LinkedHashSet::new));
+        if (possibleValues == null || possibleValues.isEmpty()) {
+            this.possibleValues = null;
+        } else {
+            this.possibleValues = new LinkedHashMap<>();
+            possibleValues.stream().forEach(s -> this.possibleValues.put(s.toLowerCase(Locale.ENGLISH), s));
+        }
         return this;
     }
 
     @Override
     public boolean validateArgument(String argument) {
-        return getPossibleArguments()
-                .map(v -> v.contains(argument.toUpperCase(Locale.ENGLISH)))
-                .orElse(Boolean.TRUE);
+        return possibleValues == null || possibleValues.containsKey(argument.toLowerCase(Locale.ENGLISH));
     }
 
     @Override
@@ -189,7 +187,8 @@ public abstract class AOption<T> implements Option<T> {
                 getDefaultArgument().map(v -> " (default: " + v + ")").orElse(""));
     }
 
-    protected String getArgumentPlaceHolder() {
+    @Override
+    public String getArgumentPlaceHolder() {
         return "<value>";
     }
 }
