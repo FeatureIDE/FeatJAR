@@ -28,7 +28,6 @@ import de.featjar.formula.VariableMap;
 import de.featjar.formula.assignment.BooleanAssignment;
 import de.featjar.formula.assignment.BooleanAssignmentGroups;
 import de.featjar.formula.assignment.BooleanAssignmentList;
-import de.featjar.formula.assignment.BooleanSolution;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
@@ -71,7 +70,7 @@ public class AAssignmentDimacsFormat<T> extends ADimacsFormat<T> {
             List<BooleanAssignmentList> groups = new ArrayList<>();
             for (List<int[]> group : parsingResult.getValue()) {
                 groups.add(new BooleanAssignmentList(
-                        variableMap, group.stream().map(BooleanSolution::new).collect(Collectors.toList())));
+                        variableMap, group.stream().map(BooleanAssignment::new).collect(Collectors.toList())));
             }
             return Result.of(new BooleanAssignmentGroups(variableMap, groups));
         } catch (final ParseException e) {
