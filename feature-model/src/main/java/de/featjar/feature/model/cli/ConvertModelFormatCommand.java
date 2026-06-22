@@ -59,7 +59,7 @@ public class ConvertModelFormatCommand extends ACommand {
     public int run(OptionList optionParser) {
         return writeResult(
                 optionParser,
-                readFromInput(optionParser, optionParser.getResult(INPUT_FORMAT).get()),
+                readFromInput(optionParser, optionParser.get(INPUT_FORMAT)),
                 optionParser.get(OUTPUT_FORMAT));
     }
 }
