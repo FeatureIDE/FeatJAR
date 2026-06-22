@@ -1,8 +1,23 @@
-.gradle
-/build/
-/.project
-/.classpath
-/.idea/
-/.settings/
-/bin/
-.DS_Store
+# Gradle
+**/.gradle/
+
+# Build
+**/bin/
+**/build/
+
+# Intelij
+**/.idea/
+
+# VSCode
+**/.vscode/
+
+# Eclipse
+**/.settings/
+**/.classpath
+**/.project
+
+# Mac
+**/.DS_Store
+
+# Misc
+test/

@@ -1,3 +1,0 @@
-[submodule "sharpSAT"]
-	path = sharpSAT
-	url = git@github.com:skrieter/sharpSAT.git
