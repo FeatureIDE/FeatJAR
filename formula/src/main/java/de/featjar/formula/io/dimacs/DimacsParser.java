@@ -42,7 +42,7 @@ public class DimacsParser {
 
     private static final Pattern commentPattern = Pattern.compile("\\A" + DimacsSerializer.COMMENT + "\\s*(.*)\\Z");
     private static final Pattern variablePattern =
-            Pattern.compile("\\A" + DimacsSerializer.COMMENT + "\\s+(\\d+)\\s+(\\S+)\\s*\\Z");
+            Pattern.compile("\\A" + DimacsSerializer.COMMENT + "\\s+(\\d+)\\s+(.+)\\Z");
     private static final Pattern groupPattern =
             Pattern.compile("\\A" + DimacsSerializer.COMMENT + "\\s+" + DimacsSerializer.GROUP + "\\s+(\\d+)\\s*\\Z");
     private static final Pattern clauseLinePattern =
