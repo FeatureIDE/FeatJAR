@@ -111,12 +111,16 @@ public class DimacsSerializer {
 
     public static void writeVariables(final StringBuilder sb, VariableMap variableMap) {
         variableMap.stream().forEach(e -> {
-            if (e.getValue() != null) {
+            final String value = e.getValue();
+            if (value != null) {
                 sb.append(COMMENT);
                 sb.append(' ');
                 sb.append(e.getKey());
                 sb.append(' ');
-                sb.append(e.getValue());
+                sb.append(
+                        value.startsWith(" ") || value.endsWith(" ")
+                                ? "\"" + value + "\""
+                                : value.startsWith("\"") && value.endsWith("\"") ? "\"\"" + value + "\"\"" : value);
                 sb.append(System.lineSeparator());
             }
         });

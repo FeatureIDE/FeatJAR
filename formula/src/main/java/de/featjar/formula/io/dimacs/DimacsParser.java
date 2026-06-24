@@ -42,7 +42,9 @@ public class DimacsParser {
 
     private static final Pattern commentPattern = Pattern.compile("\\A" + DimacsSerializer.COMMENT + "\\s*(.*)\\Z");
     private static final Pattern variablePattern =
-            Pattern.compile("\\A" + DimacsSerializer.COMMENT + "\\s+(\\d+)\\s+(.+)\\Z");
+            Pattern.compile("\\A" + DimacsSerializer.COMMENT + "\\s+(\\d+)\\s(\\s*)(\"(.+)\"|(\\S+)|(.*\\S))(\\s*)\\Z");
+    private static final Pattern unparsableVariablePattern =
+            Pattern.compile("\\A" + DimacsSerializer.COMMENT + "\\s+(\\d+)\\s(.+)\\Z");
     private static final Pattern groupPattern =
             Pattern.compile("\\A" + DimacsSerializer.COMMENT + "\\s+" + DimacsSerializer.GROUP + "\\s+(\\d+)\\s*\\Z");
     private static final Pattern clauseLinePattern =
@@ -249,19 +251,50 @@ public class DimacsParser {
         final Matcher matcher = variablePattern.matcher(line);
         if (matcher.matches()) {
             String indexString = matcher.group(1);
+            final int index;
             try {
-                final int index = Integer.parseInt(indexString);
-                final String variable = matcher.group(2);
-                if (readVariableDirectory && !indexVariables.has(index)) {
-                    indexVariables.add(index, variable);
-                }
+                index = Integer.parseInt(indexString);
             } catch (final NumberFormatException e) {
                 FeatJAR.log()
                         .warning("Line " + nonEmptyLineIterator.getLineCount()
                                 + ": Unable to parse number in variable comment: " + indexString);
+                return false;
+            }
+            if (!matcher.group(2).isEmpty()) {
+                FeatJAR.log()
+                        .warning(
+                                "Line " + nonEmptyLineIterator.getLineCount()
+                                        + ": Leading white space in variable name. If you want to include leading or trailing whitespaces use \" around the name.");
+            }
+            if (!matcher.group(7).isEmpty()) {
+                FeatJAR.log()
+                        .warning(
+                                "Line " + nonEmptyLineIterator.getLineCount()
+                                        + ": Trailing white space in variable name. If you want to include leading or trailing whitespaces use \" around the name.");
+            }
+            String variable = matcher.group(4);
+            if (variable == null) {
+                variable = matcher.group(5);
+            }
+            if (variable == null) {
+                variable = matcher.group(6);
+            }
+            if (variable == null || variable.isEmpty()) {
+                FeatJAR.log()
+                        .warning("Line " + nonEmptyLineIterator.getLineCount()
+                                + ": Seems to be a variable declaration, but is unparsable.");
+                return false;
+            }
+            if (readVariableDirectory && !indexVariables.has(index)) {
+                indexVariables.add(index, variable);
             }
             return true;
         } else {
+            if (unparsableVariablePattern.matcher(line).matches()) {
+                FeatJAR.log()
+                        .warning("Line " + nonEmptyLineIterator.getLineCount()
+                                + ": Seems to be a variable declaration, but is unparsable.");
+            }
             return false;
         }
     }
