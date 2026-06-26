@@ -40,7 +40,8 @@ import java.util.Map;
  * @author Andreas Gerasimow
  */
 public class LiteralReplacer implements ITreeVisitor<IFormula, Void> {
-    Map<IPolarPredicate, IExpression> literalMap;
+
+    private final Map<IPolarPredicate, IExpression> literalMap;
 
     public LiteralReplacer(Map<IPolarPredicate, IExpression> literalMap) {
         this.literalMap = literalMap;

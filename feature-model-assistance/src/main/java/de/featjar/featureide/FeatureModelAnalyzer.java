@@ -38,6 +38,7 @@ import de.featjar.base.data.Result;
 import de.featjar.base.data.Void;
 import de.featjar.base.io.text.DataTreeTextFormat;
 import de.featjar.base.tree.DataTree;
+import de.featjar.base.tree.Trees;
 import de.featjar.feature.configuration.Configuration;
 import de.featjar.feature.configuration.computation.ComputeConfigurationFromAssignment;
 import de.featjar.feature.model.IConstraint;
@@ -60,8 +61,12 @@ import de.featjar.formula.assignment.conversion.ComputeBooleanClauseList;
 import de.featjar.formula.combination.VariableCombinationSpecification;
 import de.featjar.formula.computation.ComputeCNFFormula;
 import de.featjar.formula.computation.ComputeNNFFormula;
+import de.featjar.formula.structure.Expressions;
+import de.featjar.formula.structure.IExpression;
 import de.featjar.formula.structure.IFormula;
+import de.featjar.formula.visitor.ExpressionReplacer;
 import java.math.BigInteger;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -153,6 +158,44 @@ public class FeatureModelAnalyzer {
                 .computeResult();
     }
 
+    public Result<IExpression> simplify() {
+        ComputeFormula formulaComputation = fmComputation.map(ComputeFormula::new);
+        ComputeBooleanClauseList cnfComputation = formulaComputation
+                .map(ComputeNNFFormula::new)
+                .map(ComputeCNFFormula::new)
+                .map(ComputeBooleanClauseList::new);
+
+        IFormula formula = formulaComputation.compute();
+        BooleanAssignmentList core = cnfComputation.map(ComputeCoreSAT4J::new).compute();
+        BooleanAssignmentList atomicSets = cnfComputation
+                .map(ComputeAtomicSetsSAT4J::new)
+                .set(ComputeAtomicSetsSAT4J.OMIT_CORE, true)
+                .set(ComputeAtomicSetsSAT4J.OMIT_SINGLE_SETS, true)
+                .compute();
+
+        FeatJAR.log().message(core());
+        FeatJAR.log().message(atomicSets());
+
+        final IExpression simplifiedFormula = formula.cloneTree();
+        Trees.traverse(simplifiedFormula, new ExpressionReplacer(ExpressionReplacer.createCoreReplacementMap(core)));
+        Trees.traverse(
+                simplifiedFormula,
+                new ExpressionReplacer(ExpressionReplacer.createAtomicSetsReplacementMap(atomicSets)));
+
+        FeatJAR.log().message(Expressions.print(formula));
+        FeatJAR.log().message(Expressions.print(simplifiedFormula));
+
+        return Result.of(simplifiedFormula);
+    }
+
+    public static void main(String[] args) {
+        final FeatJARWrapper featJARWrapper = new FeatJARWrapper();
+        final IFeatureModel featureModel = featJARWrapper
+                .loadFeatureModel(Path.of("../test/sandwich.dimacs"))
+                .get();
+        final FeatureModelAnalyzer analyzer = featJARWrapper.featureModelAnalyzer(featureModel);
+        analyzer.simplify();
+    }
     /**
      * {@return an equivalent propositional formula from the feature model}
      */
@@ -206,6 +249,8 @@ public class FeatureModelAnalyzer {
                 .map(ComputeCNFFormula::new)
                 .map(ComputeBooleanClauseList::new)
                 .map(ComputeAtomicSetsSAT4J::new)
+                .set(ComputeAtomicSetsSAT4J.OMIT_CORE, true)
+                .set(ComputeAtomicSetsSAT4J.OMIT_SINGLE_SETS, true)
                 .map(ComputeConfigurationFromAssignment::new)
                 .computeResult()
                 .map(a -> a.stream()
