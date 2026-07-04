@@ -62,7 +62,7 @@ public class ComputeNNFFormula extends AComputation<IFormula> {
     }
 
     private List<Variable> getVariables(IFormula formula) {
-        ExpressionKind.BOOLEAN.assertFor(formula);
+        ExpressionKind.BOOLEAN.requireKind(formula);
         return formula.getVariables();
     }
 }

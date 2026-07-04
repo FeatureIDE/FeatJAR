@@ -131,7 +131,7 @@ public class DistributiveTransformer implements Function<IFormula, Result<IFormu
 
     @Override
     public Result<IFormula> apply(IFormula formula) {
-        ExpressionKind.NNF.assertFor(formula);
+        ExpressionKind.NNF.requireKind(formula);
         formula = (IFormula) formula.cloneTree();
         if (isCNF) formula = (formula instanceof And) ? (And) formula : new And(formula);
         else formula = (formula instanceof Or) ? (Or) formula : new Or(formula);

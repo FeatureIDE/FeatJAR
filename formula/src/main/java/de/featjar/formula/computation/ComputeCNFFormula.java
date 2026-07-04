@@ -135,8 +135,8 @@ public class ComputeCNFFormula extends AComputation<IFormula> {
             transformer.accept(nnfFormula);
         }
 
-        TseitinTransformer.unify(substitutions);
-        clauseFormulas.addAll(TseitinTransformer.getClauseFormulas(substitutions));
+        clauseFormulas.addAll(
+                TseitinTransformer.getClauseFormulas(TseitinTransformer.unify(substitutions, null, null)));
 
         IFormula cnf = new And(clauseFormulas);
         if (isStrict) {

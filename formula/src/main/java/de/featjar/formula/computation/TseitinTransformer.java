@@ -21,17 +21,24 @@
 package de.featjar.formula.computation;
 
 import de.featjar.base.data.Maps;
+import de.featjar.base.data.Result;
 import de.featjar.base.tree.visitor.ITreeVisitor;
 import de.featjar.formula.structure.IExpression;
 import de.featjar.formula.structure.IFormula;
 import de.featjar.formula.structure.connective.And;
 import de.featjar.formula.structure.connective.IConnective;
 import de.featjar.formula.structure.connective.Or;
+import de.featjar.formula.structure.connective.Reference;
 import de.featjar.formula.structure.predicate.ExpressionKind;
 import de.featjar.formula.structure.predicate.IPredicate;
 import de.featjar.formula.structure.predicate.Literal;
 import de.featjar.formula.structure.term.value.Variable;
-import java.util.*;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -49,7 +56,10 @@ public class TseitinTransformer
     /**
      * Prefix for naming auxiliary variables.
      */
-    public static final String AUXILIARY_VARIABLE_NAME_PREFIX = "_aux_";
+    public static final String AUXILIARY_VARIABLE_DEFAULT_PREFIX = "_aux_";
+
+    public static final String AUXILIARY_VARIABLE_DEFAULT_SUFFIX = "";
+    public static final String AUXILIARY_VARIABLE_NAME_PATTERN = "%s_%s-%d";
 
     /**
      * A substitution of a formula with an auxiliary variable.
@@ -57,27 +67,13 @@ public class TseitinTransformer
      */
     public static class Substitution {
         protected final IFormula originalFormula;
-        protected final Variable auxiliaryVariable;
         protected final List<IFormula> clauseFormulas;
+        protected Variable auxiliaryVariable;
 
         protected Substitution(IFormula originalFormula, Variable auxiliaryVariable, int numberOfClauses) {
             this.originalFormula = originalFormula;
             this.auxiliaryVariable = auxiliaryVariable;
             this.clauseFormulas = new ArrayList<>(numberOfClauses);
-        }
-
-        protected Substitution(IFormula originalFormula, Variable auxiliaryVariable, IFormula clause) {
-            this.originalFormula = originalFormula;
-            this.auxiliaryVariable = auxiliaryVariable;
-            this.clauseFormulas = new ArrayList<>(1);
-            clauseFormulas.add(clause);
-        }
-
-        protected Substitution(
-                IFormula originalFormula, Variable auxiliaryVariable, List<? extends IFormula> clauseFormulas) {
-            this.originalFormula = originalFormula;
-            this.auxiliaryVariable = auxiliaryVariable;
-            this.clauseFormulas = new ArrayList<>(clauseFormulas);
         }
 
         /**
@@ -117,26 +113,25 @@ public class TseitinTransformer
      * That is, removes all duplicate substitutions.
      * @param substitutions the list of substitutions
      */
-    public static void unify(List<Substitution> substitutions) {
-        int currentAuxiliaryVariableIndex = 0;
+    public static List<Substitution> unify(List<Substitution> substitutions, String prefix, String suffix) {
+        int auxiliaryVariableIndex = 0;
         LinkedHashMap<Substitution, Substitution> unifiedSubstitutions = Maps.empty();
         for (Substitution substitution : substitutions) {
             Substitution storedSubstitution = unifiedSubstitutions.get(substitution);
+            final Variable auxiliaryVariable = substitution.getAuxiliaryVariable();
             if (storedSubstitution == null) {
                 unifiedSubstitutions.put(substitution, substitution);
-                Variable variable = substitution.getAuxiliaryVariable();
-                if (variable != null) {
-                    variable.setName(AUXILIARY_VARIABLE_NAME_PREFIX + (++currentAuxiliaryVariableIndex));
+                if (auxiliaryVariable != null) {
+                    auxiliaryVariable.setName(variableName(prefix, suffix, ++auxiliaryVariableIndex));
                 }
             } else {
-                Variable variable = storedSubstitution.getAuxiliaryVariable();
-                if (variable != null) {
-                    substitution.getAuxiliaryVariable().setName(variable.getName());
+                if (auxiliaryVariable != null) {
+                    auxiliaryVariable.setName(
+                            storedSubstitution.getAuxiliaryVariable().getName());
                 }
             }
         }
-        substitutions.clear();
-        substitutions.addAll(unifiedSubstitutions.keySet());
+        return new ArrayList<>(unifiedSubstitutions.keySet());
     }
 
     /**
@@ -157,6 +152,9 @@ public class TseitinTransformer
     protected final boolean isPlaistedGreenbaum;
     protected int currentAuxiliaryVariableIndex = 0;
 
+    protected String prefix;
+    protected String suffix;
+
     /**
      * Creates a new Tseitin transformer.
      */
@@ -173,13 +171,39 @@ public class TseitinTransformer
         this.isPlaistedGreenbaum = isPlaistedGreenbaum;
     }
 
+    public String getPrefix() {
+        return prefix;
+    }
+
+    public void setPrefix(String prefix) {
+        this.prefix = prefix;
+    }
+
+    public String getSuffix() {
+        return suffix;
+    }
+
+    public void setSuffix(String suffix) {
+        this.suffix = suffix;
+    }
+
     @Override
     public List<Substitution> apply(IFormula formula) {
-        ExpressionKind.NNF.assertFor(formula);
-        substitutions.clear();
-        stack.clear();
+        ExpressionKind.NNF.requireKind(formula);
+        reset();
         formula.traverse(this);
         return substitutions;
+    }
+
+    @Override
+    public void reset() {
+        substitutions.clear();
+        stack.clear();
+    }
+
+    @Override
+    public Result<IExpression> getResult() {
+        return Result.of(new And(getClauseFormulas(unify(substitutions, prefix, suffix))));
     }
 
     @Override
@@ -187,7 +211,9 @@ public class TseitinTransformer
         IExpression expression = ITreeVisitor.getCurrentNode(path);
         if (expression instanceof IPredicate) {
             return TraversalAction.SKIP_CHILDREN;
-        } else if ((expression instanceof IConnective)) {
+        } else if (expression instanceof Reference) {
+            return TraversalAction.CONTINUE;
+        } else if (expression instanceof IConnective) {
             stack.push((IFormula) expression);
             return TraversalAction.CONTINUE;
         } else {
@@ -200,30 +226,26 @@ public class TseitinTransformer
         IFormula formula = (IFormula) ITreeVisitor.getCurrentNode(path);
         if (formula instanceof IPredicate) {
             stack.push(formula);
-        } else {
+        } else if (!(formula instanceof Reference)) {
             List<Literal> newChildren = new ArrayList<>();
-            IFormula lastFormula = stack.pop();
-            while (lastFormula != formula) {
+            for (IFormula lastFormula = stack.pop(); lastFormula != formula; lastFormula = stack.pop()) {
                 newChildren.add((Literal) lastFormula);
-                lastFormula = stack.pop();
             }
-
+            final Literal literal = new Literal(newAuxiliaryVariable(newChildren, formula));
             if (stack.isEmpty()) {
-                if (lastFormula instanceof And) {
-                    substitutions.add(new Substitution(lastFormula, null, newChildren));
-                } else {
-                    substitutions.add(new Substitution(lastFormula, null, new Or(newChildren)));
-                }
+                substitutions.getLast().addClauseFormula(new Or(literal));
             } else {
-                stack.push(new Literal(newAuxiliaryVariable(newChildren, lastFormula)));
+                stack.push(literal);
             }
         }
         return TraversalAction.CONTINUE;
     }
 
     protected Variable newAuxiliaryVariable(List<Literal> newChildren, IFormula originalFormula) {
-        Variable variable = new Variable(AUXILIARY_VARIABLE_NAME_PREFIX + (++currentAuxiliaryVariableIndex));
-        Substitution substitution = new Substitution(originalFormula, variable, newChildren.size() + 1);
+        Substitution substitution = new Substitution(
+                originalFormula,
+                new Variable(variableName(prefix, suffix, ++currentAuxiliaryVariableIndex)),
+                newChildren.size() + 1);
         substitutions.add(substitution);
 
         Literal auxiliaryLiteral = new Literal(substitution.auxiliaryVariable);
@@ -247,5 +269,13 @@ public class TseitinTransformer
             substitution.addClauseFormula(new Or(flippedChildren));
         }
         return substitution.auxiliaryVariable;
+    }
+
+    static String variableName(String prefix, String suffix, int index) {
+        return String.format(
+                AUXILIARY_VARIABLE_NAME_PATTERN,
+                prefix != null ? prefix : AUXILIARY_VARIABLE_DEFAULT_PREFIX,
+                suffix != null ? suffix : AUXILIARY_VARIABLE_DEFAULT_SUFFIX,
+                index);
     }
 }

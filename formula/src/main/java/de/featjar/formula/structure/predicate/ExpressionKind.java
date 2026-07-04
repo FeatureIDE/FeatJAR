@@ -110,7 +110,13 @@ public interface ExpressionKind extends Predicate<IExpression> {
                 .anyMatch(c -> c.isAssignableFrom(e.getClass())));
     }
 
-    default void assertFor(IExpression expression) {
+    /**
+     * Throws an {@link ExpressionKindNotSupportedException}
+     * if the given expression does not conform to this expression kind.
+     *
+     * @param the expression to check
+     */
+    default void requireKind(IExpression expression) {
         if (!test(expression)) throw new ExpressionKindNotSupportedException(this);
     }
 
