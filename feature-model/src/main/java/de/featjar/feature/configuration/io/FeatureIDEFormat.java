@@ -23,7 +23,6 @@ package de.featjar.feature.configuration.io;
 import de.featjar.base.data.Problem;
 import de.featjar.base.data.Problem.Severity;
 import de.featjar.base.data.Result;
-import de.featjar.base.io.format.IFormat;
 import de.featjar.base.io.format.ParseProblem;
 import de.featjar.base.io.input.AInputMapper;
 import de.featjar.feature.configuration.Configuration;
@@ -39,7 +38,7 @@ import java.util.List;
  *
  * @author Sebastian Krieter
  */
-public class FeatureIDEFormat implements IFormat<Configuration> {
+public class FeatureIDEFormat implements IConfigurationFormat {
 
     private static final String NEWLINE = System.lineSeparator();
 

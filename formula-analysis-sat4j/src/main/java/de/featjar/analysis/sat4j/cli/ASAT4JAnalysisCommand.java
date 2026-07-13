@@ -24,15 +24,9 @@ import de.featjar.analysis.AAnalysisCommand;
 import de.featjar.base.cli.Option;
 import de.featjar.base.cli.OptionList;
 import de.featjar.base.cli.Options;
-import de.featjar.base.computation.Computations;
-import de.featjar.base.computation.IComputation;
-import de.featjar.base.io.IO;
-import de.featjar.formula.VariableMap;
-import de.featjar.formula.assignment.BooleanAssignmentList;
 import de.featjar.formula.assignment.conversion.ComputeBooleanClauseList;
 import de.featjar.formula.computation.ComputeCNFFormula;
 import de.featjar.formula.computation.ComputeNNFFormula;
-import de.featjar.formula.io.BooleanAssignmentGroupsFormats;
 import de.featjar.formula.io.FormulaFormats;
 import java.nio.file.Path;
 import java.time.Duration;
@@ -47,6 +41,12 @@ public abstract class ASAT4JAnalysisCommand<T> extends AAnalysisCommand<T> {
             .setDefaultArgument("1");
 
     /**
+     * Option for providing a file listing variables to ignore.
+     */
+    public static final Option<Path> IGNORE_VARIABLES = Options.newOption("ignore-variables", Options.PathParser) //
+            .setDescription("A file listing variables to ignore.");
+
+    /**
      * Timeout option for canceling running computations.
      */
     public static final Option<Duration> SAT_TIMEOUT_OPTION = Options.newOption(
@@ -55,24 +55,11 @@ public abstract class ASAT4JAnalysisCommand<T> extends AAnalysisCommand<T> {
             .setValidator(timeout -> !timeout.isNegative())
             .setDefaultArgument("0");
 
-    protected VariableMap variableMap;
-
-    @Override
-    protected IComputation<T> newComputation(OptionList optionParser) {
-        Path inputPath = optionParser.getResult(INPUT_OPTION).orElseThrow();
-        IComputation<BooleanAssignmentList> computation = IO.load(
-                        inputPath, BooleanAssignmentGroupsFormats.getInstance())
-                .map(cnf -> (IComputation<BooleanAssignmentList>)
-                        Computations.of(cnf.getFirstGroup().toClauseList()))
-                .orElseGet(() -> IO.load(inputPath, FormulaFormats.getInstance())
-                        .toComputation()
-                        .map(ComputeNNFFormula::new)
-                        .map(ComputeCNFFormula::new)
-                        .map(ComputeBooleanClauseList::new))
-                .peekResult(getClass(), "variableMap", clauseList -> variableMap = clauseList.getVariableMap());
-        return newAnalysis(optionParser, computation);
+    protected ComputeBooleanClauseList createCNFComputation(OptionList optionParser) {
+        return loadComputation(optionParser, FormulaFormats.getInstance())
+                .map(ComputeNNFFormula::new)
+                .map(ComputeCNFFormula::new)
+                .map(ComputeBooleanClauseList::new);
     }
 
-    protected abstract IComputation<T> newAnalysis(
-            OptionList optionParser, IComputation<BooleanAssignmentList> formula);
 }

@@ -34,6 +34,7 @@ import de.featjar.formula.CoverageStatistic;
 import de.featjar.formula.VariableMap;
 import de.featjar.formula.assignment.BooleanAssignment;
 import de.featjar.formula.assignment.BooleanAssignmentList;
+import de.featjar.formula.assignment.Variables;
 import de.featjar.formula.combination.ICombinationSpecification;
 import de.featjar.formula.computation.AComputeTWiseCoverage;
 import de.featjar.formula.index.SampleBitIndex;
@@ -57,6 +58,7 @@ public class ComputeConstraintedTWiseCoverage extends AComputeTWiseCoverage {
             Dependency.newDependency(BooleanAssignment.class);
     public static final Dependency<BooleanAssignmentList> ASSUMED_CLAUSE_LIST =
             Dependency.newDependency(BooleanAssignmentList.class);
+    public static final Dependency<Variables> AUXILLIARY_VARIABLES = Dependency.newDependency(Variables.class);
     public static final Dependency<Duration> SAT_TIMEOUT = Dependency.newDependency(Duration.class);
     public static final Dependency<Long> RANDOM_SEED = Dependency.newDependency(Long.class);
 
@@ -66,6 +68,7 @@ public class ComputeConstraintedTWiseCoverage extends AComputeTWiseCoverage {
                 Computations.of(new BooleanAssignmentList(null, 0)),
                 Computations.of(new BooleanAssignment()),
                 Computations.of(new BooleanAssignmentList(null, 0)),
+                Computations.of(new Variables()),
                 Computations.of(Duration.ZERO),
                 Computations.of(1L));
     }
@@ -77,6 +80,7 @@ public class ComputeConstraintedTWiseCoverage extends AComputeTWiseCoverage {
     private BooleanAssignmentList clauseList;
     private BooleanAssignment assumedAssignment;
     private BooleanAssignmentList assumedClauseList;
+    private Variables auxilliarxVariables;
 
     private SampleBitIndex randomSampleIndex;
     private Random random;
@@ -90,6 +94,7 @@ public class ComputeConstraintedTWiseCoverage extends AComputeTWiseCoverage {
         random = new Random(RANDOM_SEED.get(dependencyList));
         assumedAssignment = ASSUMED_ASSIGNMENT.get(dependencyList);
         assumedClauseList = ASSUMED_CLAUSE_LIST.get(dependencyList);
+        auxilliarxVariables = AUXILLIARY_VARIABLES.get(dependencyList);
     }
 
     @Override
@@ -102,6 +107,7 @@ public class ComputeConstraintedTWiseCoverage extends AComputeTWiseCoverage {
         super.adaptToMergedVariableMap(mergedVariableMap);
         assumedAssignment = assumedAssignment.remap(clauseList.getVariableMap(), mergedVariableMap);
         assumedClauseList = assumedClauseList.remap(mergedVariableMap);
+        auxilliarxVariables = auxilliarxVariables.remap(clauseList.getVariableMap(), mergedVariableMap);
         clauseList = clauseList.remap(mergedVariableMap);
     }
 
@@ -111,7 +117,8 @@ public class ComputeConstraintedTWiseCoverage extends AComputeTWiseCoverage {
         Duration timeout = SAT_TIMEOUT.get(dependencyList);
 
         solver = new SAT4JSolutionSolver(clauseList);
-        SAT4JSolver.initializeSolver(solver, clauseList, assumedAssignment, assumedClauseList, timeout);
+        SAT4JSolver.initializeSolver(
+                solver, clauseList, assumedAssignment, assumedClauseList, auxilliarxVariables, timeout);
         solver.setSelectionStrategy(ISelectionStrategy.random(random));
         visitor = new MIGVisitorByte(new MIGBuilder(Computations.of(clauseList)).compute());
 

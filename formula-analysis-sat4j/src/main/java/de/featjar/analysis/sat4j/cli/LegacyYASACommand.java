@@ -26,6 +26,7 @@ import de.featjar.base.cli.OptionList;
 import de.featjar.base.cli.Options;
 import de.featjar.base.computation.IComputation;
 import de.featjar.formula.assignment.BooleanAssignmentList;
+import de.featjar.formula.assignment.conversion.ComputeBooleanClauseList;
 import java.util.Optional;
 
 /**
@@ -55,7 +56,7 @@ public class LegacyYASACommand extends ATWiseCommand {
 
     @Override
     public IComputation<BooleanAssignmentList> newTWiseAnalysis(
-            OptionList optionParser, IComputation<BooleanAssignmentList> formula) {
+            OptionList optionParser, ComputeBooleanClauseList formula) {
         return formula.map(YASALegacy::new)
                 .set(YASALegacy.T, optionParser.get(T_OPTION))
                 .set(YASALegacy.ITERATIONS, optionParser.get(ITERATIONS_OPTION))

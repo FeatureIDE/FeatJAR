@@ -32,7 +32,7 @@ import de.featjar.formula.structure.IFormula;
  * @author Sebastian Krieter
  * @author Elias Kuiter
  */
-public class XMLFeatureModelFormulaFormat implements IFormulaFormat {
+public class FormulaXMLFeatureModelFormat implements IFormulaFormat {
 
     @Override
     public String getName() {

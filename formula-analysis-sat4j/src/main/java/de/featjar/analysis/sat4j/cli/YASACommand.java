@@ -21,6 +21,8 @@
 package de.featjar.analysis.sat4j.cli;
 
 import de.featjar.analysis.sat4j.computation.CompactYASA;
+import de.featjar.analysis.sat4j.computation.ComputeCoreSAT4J;
+import de.featjar.analysis.sat4j.computation.MIGBuilder;
 import de.featjar.analysis.sat4j.computation.YASA;
 import de.featjar.base.cli.Option;
 import de.featjar.base.cli.OptionList;
@@ -29,11 +31,18 @@ import de.featjar.base.computation.IComputation;
 import de.featjar.base.data.Result;
 import de.featjar.base.io.IO;
 import de.featjar.base.log.Log.Verbosity;
+import de.featjar.formula.VariableMap;
 import de.featjar.formula.assignment.BooleanAssignmentGroups;
 import de.featjar.formula.assignment.BooleanAssignmentList;
+import de.featjar.formula.assignment.Variables;
+import de.featjar.formula.assignment.conversion.BooleanAssignmentListToVariableMap;
+import de.featjar.formula.assignment.conversion.ComputeBooleanClauseList;
+import de.featjar.formula.assignment.conversion.IVariableNameFilter;
+import de.featjar.formula.assignment.conversion.VariableMapToVariables;
 import de.featjar.formula.combination.VariableCombinationSpecification.VariableCombinationSpecificationComputation;
 import de.featjar.formula.index.SampleBitIndex;
 import de.featjar.formula.io.BooleanAssignmentGroupsFormats;
+import de.featjar.formula.io.VariableMapFormats;
 import java.nio.file.Path;
 import java.util.Optional;
 
@@ -79,7 +88,7 @@ public class YASACommand extends ATWiseCommand {
 
     @Override
     public IComputation<BooleanAssignmentList> newTWiseAnalysis(
-            OptionList optionParser, IComputation<BooleanAssignmentList> formula) {
+            OptionList optionParser, ComputeBooleanClauseList formula) {
         IComputation<BooleanAssignmentList> analysis;
         if (optionParser.get(COMPACT)) {
             analysis = formula.map(CompactYASA::new)
@@ -93,14 +102,39 @@ public class YASACommand extends ATWiseCommand {
                     .set(CompactYASA.INCREMENTAL_T, optionParser.get(INCREMENTAL));
         } else {
             analysis = formula.map(YASA::new)
-                    .set(
-                            YASA.COMBINATION_SET,
-                            formula.map(VariableCombinationSpecificationComputation::new)
-                                    .set(VariableCombinationSpecificationComputation.T, optionParser.get(T_OPTION)))
                     .set(YASA.SAT_TIMEOUT, optionParser.get(SAT_TIMEOUT_OPTION))
                     .set(YASA.ITERATIONS, optionParser.get(ITERATIONS_OPTION))
                     .set(YASA.INTERNAL_SOLUTION_LIMIT, optionParser.get(INTERNAL_SOLUTION_LIMIT))
                     .set(YASA.INCREMENTAL_T, optionParser.get(INCREMENTAL));
+
+            VariableMap ignoreFile = optionParser
+                    .getResult(IGNORE_VARIABLES)
+                    .mapResult(p -> IO.load(p, VariableMapFormats.getInstance()))
+                    .orElseLog(Verbosity.WARNING);
+            if (ignoreFile != null) {
+                final BooleanAssignmentListToVariableMap variables =
+                        formula.map(BooleanAssignmentListToVariableMap::new);
+                final IComputation<Variables> auxVariables = variables
+                        .map(VariableMapToVariables::new)
+                        .set(VariableMapToVariables.INCLUDE, IVariableNameFilter.list(ignoreFile.getVariableNames()));
+                final IComputation<Variables> realVariables = variables
+                        .map(VariableMapToVariables::new)
+                        .set(VariableMapToVariables.EXCLUDE, IVariableNameFilter.list(ignoreFile.getVariableNames()));
+                final ComputeCoreSAT4J coreComputation = formula.map(ComputeCoreSAT4J::new);
+                coreComputation.set(ComputeCoreSAT4J.AUXILLIARY_VARIABLES, auxVariables);
+                analysis.set(YASA.AUXILLIARY_VARIABLES, auxVariables)
+                        .set(YASA.MIG, new MIGBuilder(formula).set(MIGBuilder.CORE, coreComputation))
+                        .set(
+                                YASA.COMBINATION_SET,
+                                new VariableCombinationSpecificationComputation(formula)
+                                        .set(VariableCombinationSpecificationComputation.T, optionParser.get(T_OPTION))
+                                        .set(VariableCombinationSpecificationComputation.VARIABLES, realVariables));
+            } else {
+                analysis.set(
+                        YASA.COMBINATION_SET,
+                        formula.map(VariableCombinationSpecificationComputation::new)
+                                .set(VariableCombinationSpecificationComputation.T, optionParser.get(T_OPTION)));
+            }
         }
 
         Result<Path> consideredInteractionsPath = optionParser.getResult(INCLUDE_INTERACTIONS);

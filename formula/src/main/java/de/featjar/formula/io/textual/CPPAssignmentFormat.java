@@ -22,9 +22,9 @@ package de.featjar.formula.io.textual;
 
 import de.featjar.base.data.Maps;
 import de.featjar.base.data.Result;
-import de.featjar.base.io.format.IFormat;
 import de.featjar.base.io.input.AInputMapper;
 import de.featjar.formula.assignment.Assignment;
+import de.featjar.formula.io.IAssignmentFormat;
 import java.util.LinkedHashMap;
 import java.util.Objects;
 import java.util.regex.Pattern;
@@ -35,7 +35,7 @@ import java.util.stream.Collectors;
  *
  * @author Sebastian Krieter
  */
-public class CPPAssignmentFormat implements IFormat<Assignment> {
+public class CPPAssignmentFormat implements IAssignmentFormat {
 
     private static final Pattern cs = Pattern.compile("#define\\s+(\\S+)(\\s+(.*))?");
 

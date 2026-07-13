@@ -29,6 +29,7 @@ import de.featjar.base.computation.Dependency;
 import de.featjar.base.computation.IComputation;
 import de.featjar.formula.assignment.BooleanAssignment;
 import de.featjar.formula.assignment.BooleanAssignmentList;
+import de.featjar.formula.assignment.Variables;
 import java.time.Duration;
 import java.util.List;
 
@@ -39,6 +40,7 @@ public abstract class ASAT4JAnalysis<T> extends AComputation<T> {
             Dependency.newDependency(BooleanAssignment.class);
     public static final Dependency<BooleanAssignmentList> ASSUMED_CLAUSE_LIST =
             Dependency.newDependency(BooleanAssignmentList.class);
+    public static final Dependency<Variables> AUXILLIARY_VARIABLES = Dependency.newDependency(Variables.class);
     public static final Dependency<Duration> SAT_TIMEOUT = Dependency.newDependency(Duration.class);
     public static final Dependency<Long> RANDOM_SEED = Dependency.newDependency(Long.class);
 
@@ -47,6 +49,7 @@ public abstract class ASAT4JAnalysis<T> extends AComputation<T> {
                 booleanClauseList,
                 Computations.of(new BooleanAssignment()),
                 Computations.of(new BooleanAssignmentList(null, 0)),
+                Computations.of(new Variables()),
                 Computations.of(Duration.ZERO),
                 Computations.of(1L),
                 computations);
@@ -66,11 +69,13 @@ public abstract class ASAT4JAnalysis<T> extends AComputation<T> {
         BooleanAssignmentList clauseList = BOOLEAN_CLAUSE_LIST.get(dependencyList);
         BooleanAssignment assumedAssignment = ASSUMED_ASSIGNMENT.get(dependencyList);
         BooleanAssignmentList assumedClauseList = ASSUMED_CLAUSE_LIST.get(dependencyList);
+        Variables auxilliaryVariables = AUXILLIARY_VARIABLES.get(dependencyList);
         Duration timeout = SAT_TIMEOUT.get(dependencyList);
 
         @SuppressWarnings("unchecked")
         U solver = (U) newSolver(empty ? new BooleanAssignmentList(clauseList.getVariableMap()) : clauseList);
-        SAT4JSolver.initializeSolver(solver, clauseList, assumedAssignment, assumedClauseList, timeout);
+        SAT4JSolver.initializeSolver(
+                solver, clauseList, assumedAssignment, assumedClauseList, auxilliaryVariables, timeout);
         return solver;
     }
 

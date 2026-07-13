@@ -46,14 +46,14 @@ import java.util.List;
  * @author Sebastian Krieter
  * @author Andreas Gerasimow
  */
-public class UVLFormulaFormat extends AUVLFormat<IFormula> implements IFormulaFormat {
+public class FormulaUVLFormat extends AUVLFormat<IFormula> implements IFormulaFormat {
 
     /**
      * Name of the root element.
      */
     public static final String ROOT_FEATURE_NAME = "Formula";
 
-    public static final String ID = UVLFormulaFormat.class.getCanonicalName();
+    public static final String ID = FormulaUVLFormat.class.getCanonicalName();
 
     @Override
     public String getIdentifier() {
@@ -61,7 +61,7 @@ public class UVLFormulaFormat extends AUVLFormat<IFormula> implements IFormulaFo
     }
 
     @Override
-    public UVLFormulaFormat getInstance() {
+    public FormulaUVLFormat getInstance() {
         return this;
     }
 

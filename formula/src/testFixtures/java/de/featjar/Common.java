@@ -38,6 +38,10 @@ public class Common {
 
     public static <T> void compare(T expected, T actual, Function<T, String> toString) {
         Assertions.assertEquals(
+                toString.apply(expected),
+                toString.apply(actual),
+                () -> toString.apply(expected) + "\n==========\n" + toString.apply(actual));
+        Assertions.assertEquals(
                 expected, actual, () -> toString.apply(expected) + "\n==========\n" + toString.apply(actual));
     }
 

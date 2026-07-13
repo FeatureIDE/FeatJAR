@@ -21,6 +21,8 @@
 package de.featjar.base.cli;
 
 import de.featjar.base.FeatJAR;
+import de.featjar.base.computation.Computations;
+import de.featjar.base.computation.IComputation;
 import de.featjar.base.data.Result;
 import de.featjar.base.io.IO;
 import de.featjar.base.io.IOMapperOptions;
@@ -87,6 +89,21 @@ public abstract class ACommand implements ICommand {
                 optionParser.getResult(INTPUT_COMPRESSION_OPTION).get()
                         ? new IOMapperOptions[] {IOMapperOptions.ZIP_COMPRESSION}
                         : new IOMapperOptions[0]);
+    }
+
+    protected final <T> IComputation<T> loadComputation(OptionList optionParser, IFormatSupplier<T> formatSupplier) {
+        return Computations.of(optionParser.getResult(INPUT_OPTION).orElseThrow())
+                .map(
+                        getClass(),
+                        "load",
+                        p -> IO.load(
+                                p,
+                                formatSupplier,
+                                optionParser
+                                                .getResult(INTPUT_COMPRESSION_OPTION)
+                                                .get()
+                                        ? new IOMapperOptions[] {IOMapperOptions.ZIP_COMPRESSION}
+                                        : new IOMapperOptions[0]));
     }
 
     protected final <T> int writeResult(OptionList optionParser, Result<T> result, IFormat<T> ouputFormat) {

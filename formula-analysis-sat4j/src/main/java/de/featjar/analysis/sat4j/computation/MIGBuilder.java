@@ -31,7 +31,6 @@ import de.featjar.base.data.Result;
 import de.featjar.formula.assignment.BooleanAssignment;
 import de.featjar.formula.assignment.BooleanAssignmentList;
 import de.featjar.formula.assignment.BooleanClause;
-import de.featjar.formula.assignment.conversion.BooleanAssignmentListToBooleanAssignment;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -48,10 +47,10 @@ public class MIGBuilder extends AComputation<ModalImplicationGraph> {
 
     public static final Dependency<BooleanAssignmentList> CNF_CLAUSES =
             Dependency.newDependency(BooleanAssignmentList.class);
-    public static final Dependency<BooleanAssignment> CORE = Dependency.newDependency(BooleanAssignment.class);
+    public static final Dependency<BooleanAssignmentList> CORE = Dependency.newDependency(BooleanAssignmentList.class);
 
     public MIGBuilder(IComputation<BooleanAssignmentList> cnfFormula) {
-        super(cnfFormula, new ComputeCoreSAT4J(cnfFormula).map(BooleanAssignmentListToBooleanAssignment::new));
+        super(cnfFormula, new ComputeCoreSAT4J(cnfFormula));
     }
 
     protected MIGBuilder(MIGBuilder other) {
@@ -61,13 +60,14 @@ public class MIGBuilder extends AComputation<ModalImplicationGraph> {
     @Override
     public Result<ModalImplicationGraph> compute(List<Object> dependencyList, Progress progress) {
         BooleanAssignmentList cnfFormula = CNF_CLAUSES.get(dependencyList);
-        BooleanAssignment coreLiterals = CORE.get(dependencyList);
+        BooleanAssignmentList coreLiteralsList = CORE.get(dependencyList);
 
         progress.setTotalSteps(8);
 
-        if (coreLiterals == null) {
+        if (coreLiteralsList == null) {
             throw new RuntimeContradictionException("CNF is not satisfiable!");
         }
+        BooleanAssignment coreLiterals = coreLiteralsList.getFirst();
 
         final int size = cnfFormula.getVariableMap().size();
 

@@ -25,6 +25,7 @@ import de.featjar.base.data.Result;
 import de.featjar.formula.assignment.BooleanAssignment;
 import de.featjar.formula.assignment.BooleanAssignmentList;
 import de.featjar.formula.assignment.BooleanSolution;
+import de.featjar.formula.assignment.Variables;
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.Objects;
@@ -42,8 +43,10 @@ public abstract class SAT4JSolver implements de.featjar.analysis.ISolver {
     protected final ISolver internalSolver = newInternalSolver();
     protected final SAT4JClauseList clauseList;
     protected final SAT4JAssignment assignment = new SAT4JAssignment();
+
     protected Duration timeout = Duration.ZERO;
     protected boolean globalTimeout;
+    protected Variables auxilliaryVariables;
 
     protected boolean isTimeoutOccurred;
     protected boolean trivialContradictionFound;
@@ -53,6 +56,7 @@ public abstract class SAT4JSolver implements de.featjar.analysis.ISolver {
             BooleanAssignmentList clauseList,
             BooleanAssignment assumedAssignment,
             BooleanAssignmentList assumedClauseList,
+            Variables auxilliaryVariables,
             Duration timeout) {
         FeatJAR.log().debug("initializing SAT4J");
         FeatJAR.log().debug("variables %s", clauseList.getVariableMap());
@@ -63,6 +67,7 @@ public abstract class SAT4JSolver implements de.featjar.analysis.ISolver {
         solver.getAssignment().addAll(assumedAssignment);
         solver.setTimeout(timeout);
         solver.setGlobalTimeout(true);
+        solver.setAuxilliaryVariables(auxilliaryVariables);
     }
 
     /**
@@ -123,6 +128,14 @@ public abstract class SAT4JSolver implements de.featjar.analysis.ISolver {
         this.timeout = timeout;
         if (!timeout.isZero()) internalSolver.setTimeoutMs(timeout.toMillis());
         else internalSolver.expireTimeout();
+    }
+
+    public Variables getAuxilliaryVariables() {
+        return auxilliaryVariables;
+    }
+
+    public void setAuxilliaryVariables(Variables auxilliaryVariables) {
+        this.auxilliaryVariables = auxilliaryVariables;
     }
 
     public boolean isGlobalTimeout() {

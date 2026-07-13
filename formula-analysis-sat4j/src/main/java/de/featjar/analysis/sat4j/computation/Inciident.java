@@ -49,7 +49,7 @@ import java.util.stream.Stream;
  *
  * @author Sebastian Krieter
  */
-public class Inciident extends ASAT4JAnalysis.Solution<BooleanAssignment> {
+public class Inciident extends ASAT4JAnalysis.Solution<BooleanAssignmentList> {
 
     private static final class DefaultTester implements IConfigurationTester {
         @Override
@@ -104,7 +104,7 @@ public class Inciident extends ASAT4JAnalysis.Solution<BooleanAssignment> {
     private int[] lastMerge;
 
     @Override
-    public Result<BooleanAssignment> compute(List<Object> dependencyList, Progress progress) {
+    public Result<BooleanAssignmentList> compute(List<Object> dependencyList, Progress progress) {
         testLimit = TESTING_LIMIT.get(dependencyList);
         testingCounter = 0;
 
@@ -189,8 +189,7 @@ public class Inciident extends ASAT4JAnalysis.Solution<BooleanAssignment> {
 
         final List<int[]> result = lastI == -1 ? null : results[lastI];
         return isPotentialInteraction(result)
-                ? Result.of(new BooleanAssignment(
-                        IntegerList.mergeInt(result.stream().collect(Collectors.toList()))))
+                ? Result.of(new BooleanAssignmentList(variableMap, new BooleanAssignment(IntegerList.mergeInt(result))))
                 : Result.empty();
     }
 

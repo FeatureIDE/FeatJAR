@@ -38,6 +38,7 @@ import de.featjar.base.data.Result;
 import de.featjar.formula.assignment.BooleanAssignment;
 import de.featjar.formula.assignment.BooleanAssignmentList;
 import de.featjar.formula.assignment.BooleanSolution;
+import de.featjar.formula.assignment.Variables;
 import de.featjar.formula.combination.VariableCombinationSpecification.VariableCombinationSpecificationComputation;
 import de.featjar.formula.index.SampleBitIndex;
 import java.time.Duration;
@@ -103,6 +104,12 @@ public class YASA extends ATWiseSampleComputation {
      */
     public static final Dependency<BooleanAssignmentList> ASSUMED_CLAUSE_LIST =
             Dependency.newDependency(BooleanAssignmentList.class);
+
+    /**
+     * A list of auxiliary variables (e.g. introduced by the tseitin transformation).
+     */
+    public static final Dependency<Variables> AUXILLIARY_VARIABLES = Dependency.newDependency(Variables.class);
+
     /**
      * The internal SAT timeout. No timeout per default.
      */
@@ -135,6 +142,7 @@ public class YASA extends ATWiseSampleComputation {
                 clauseList,
                 Computations.of(new BooleanAssignment()),
                 Computations.of(new BooleanAssignmentList(null, 0)),
+                Computations.of(new Variables()),
                 Computations.of(Duration.ZERO),
                 new MIGBuilder(clauseList),
                 Computations.of(1),
@@ -171,12 +179,14 @@ public class YASA extends ATWiseSampleComputation {
         BooleanAssignmentList clauseList = BOOLEAN_CLAUSE_LIST.get(dependencyList);
         BooleanAssignment assumedAssignment = ASSUMED_ASSIGNMENT.get(dependencyList);
         BooleanAssignmentList assumedClauseList = ASSUMED_CLAUSE_LIST.get(dependencyList);
+        Variables auxilliaryVariables = AUXILLIARY_VARIABLES.get(dependencyList);
         assumedClauseList = assumedClauseList.remap(clauseList.getVariableMap());
 
         Duration timeout = SAT_TIMEOUT.get(dependencyList);
 
         solver = new SAT4JSolutionSolver(clauseList);
-        SAT4JSolver.initializeSolver(solver, clauseList, assumedAssignment, assumedClauseList, timeout);
+        SAT4JSolver.initializeSolver(
+                solver, clauseList, assumedAssignment, assumedClauseList, auxilliaryVariables, timeout);
 
         solver.setSelectionStrategy(ISelectionStrategy.original());
 

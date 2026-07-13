@@ -30,9 +30,9 @@ import de.featjar.base.data.Result;
 import de.featjar.base.io.IO;
 import de.featjar.base.io.format.IFormat;
 import de.featjar.base.log.Log.Verbosity;
-import de.featjar.formula.assignment.BooleanAssignment;
 import de.featjar.formula.assignment.BooleanAssignmentGroups;
 import de.featjar.formula.assignment.BooleanAssignmentList;
+import de.featjar.formula.assignment.conversion.ComputeBooleanClauseList;
 import de.featjar.formula.io.BooleanAssignmentGroupsFormats;
 import de.featjar.formula.io.BooleanAssignmentListFormats;
 import de.featjar.formula.io.dimacs.BooleanAssignmentListDimacsFormat;
@@ -78,9 +78,9 @@ public class InciidentCommand extends ASAT4JAnalysisCommand<BooleanAssignmentLis
             BooleanAssignmentListFormats.class, new BooleanAssignmentListDimacsFormat().getName());
 
     @Override
-    public IComputation<BooleanAssignmentList> newAnalysis(
-            OptionList optionParser, IComputation<BooleanAssignmentList> formula) {
-        IComputation<BooleanAssignment> analysis = formula.map(Inciident::new)
+    public IComputation<BooleanAssignmentList> newComputation(OptionList optionParser) {
+        ComputeBooleanClauseList formula = createCNFComputation(optionParser);
+        IComputation<BooleanAssignmentList> analysis = formula.map(Inciident::new)
                 .set(Inciident.T, optionParser.get(T_OPTION))
                 .set(Inciident.TESTING_LIMIT, optionParser.get(LIMIT_OPTION))
                 .set(Inciident.RANDOM_SEED, optionParser.get(RANDOM_SEED_OPTION))
@@ -96,7 +96,7 @@ public class InciidentCommand extends ASAT4JAnalysisCommand<BooleanAssignmentLis
                 analysis.set(Inciident.INITIAL_SAMPLE, initialSample.getFirstGroup());
             }
         }
-        return analysis.mapResult(Inciident.class, "list", a -> new BooleanAssignmentList(variableMap, a));
+        return analysis;
     }
 
     @Override

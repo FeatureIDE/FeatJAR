@@ -56,9 +56,9 @@ public class AtomicSetsCommand extends ASAT4JAnalysisCommand<BooleanAssignmentLi
     }
 
     @Override
-    public IComputation<BooleanAssignmentList> newAnalysis(
-            OptionList optionParser, IComputation<BooleanAssignmentList> formula) {
-        return formula.map(ComputeAtomicSetsSAT4J::new)
+    public IComputation<BooleanAssignmentList> newComputation(OptionList optionParser) {
+        return createCNFComputation(optionParser)
+                .map(ComputeAtomicSetsSAT4J::new)
                 .set(ComputeAtomicSetsSAT4J.OMIT_CORE, optionParser.get(OMIT_CORE))
                 .set(ComputeAtomicSetsSAT4J.OMIT_SINGLE_SETS, optionParser.get(OMIT_SINGLE_SETS))
                 .set(ComputeAtomicSetsSAT4J.OMIT_COMPLEMENTS, optionParser.get(OMIT_COMPLEMENTS));

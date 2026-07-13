@@ -26,7 +26,7 @@ import de.featjar.base.FeatJAR;
 import de.featjar.base.data.Result;
 import de.featjar.base.io.format.IFormat;
 import de.featjar.base.io.input.FileInputMapper;
-import de.featjar.feature.model.io.uvl.UVLFormulaFormat;
+import de.featjar.feature.model.io.uvl.FormulaUVLFormat;
 import de.featjar.formula.structure.IFormula;
 import de.featjar.formula.structure.connective.*;
 import de.featjar.formula.structure.predicate.Literal;
@@ -53,9 +53,9 @@ public class UVLFormulaFormatTest extends Common {
 
     @Test
     void testFixtures() {
-        FormatTest.testParse(getFormula("ABC-nAnBnC"), "uvl/ABC-nAnBnC", 1, new UVLFormulaFormat());
-        FormatTest.testParse(getFormula("nA"), "uvl/nA", 3, new UVLFormulaFormat());
-        FormatTest.testParse(getFormula("nAB"), "uvl/nAB", 1, new UVLFormulaFormat());
+        FormatTest.testParse(getFormula("ABC-nAnBnC"), "uvl/ABC-nAnBnC", 1, new FormulaUVLFormat());
+        FormatTest.testParse(getFormula("nA"), "uvl/nA", 3, new FormulaUVLFormat());
+        FormatTest.testParse(getFormula("nAB"), "uvl/nAB", 1, new FormulaUVLFormat());
         // TODO: testSerializeAndParse
     }
 
@@ -67,7 +67,7 @@ public class UVLFormulaFormatTest extends Common {
                 new Implies(new Literal("Test5"), new Literal("Test6")),
                 new Not(new Literal("Test7")));
 
-        IFormat<IFormula> format = new UVLFormulaFormat();
+        IFormat<IFormula> format = new FormulaUVLFormat();
 
         Result<String> result = format.serialize(formula);
 
@@ -81,7 +81,7 @@ public class UVLFormulaFormatTest extends Common {
 
     @Test
     void testUVLFormulaFormatParse() throws IOException {
-        IFormat<IFormula> format = new UVLFormulaFormat();
+        IFormat<IFormula> format = new FormulaUVLFormat();
         Result<IFormula> result = format.parse(new FileInputMapper(
                 Path.of("src", "test", "resources", "uvl", "formulaSerializeResult.uvl"), Charset.defaultCharset()));
 

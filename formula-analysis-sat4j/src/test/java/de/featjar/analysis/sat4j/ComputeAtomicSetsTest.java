@@ -30,6 +30,7 @@ import de.featjar.formula.assignment.BooleanAssignmentList;
 import de.featjar.formula.assignment.conversion.ComputeBooleanClauseList;
 import de.featjar.formula.computation.ComputeCNFFormula;
 import de.featjar.formula.computation.ComputeNNFFormula;
+import de.featjar.formula.io.kconfig.KConfigReaderFormat;
 import de.featjar.formula.structure.IFormula;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -58,5 +59,19 @@ public class ComputeAtomicSetsTest extends Common {
                 .compute();
 
         assertEquals(22, atomicSets.size());
+    }
+
+    @Test
+    public void testDistributiveBug() {
+        BooleanAssignmentList atomicSets = Computations.of(
+                        load("kconfigreader/distrib-bug.model", new KConfigReaderFormat()))
+                .cast(IFormula.class)
+                .map(ComputeNNFFormula::new)
+                .map(ComputeCNFFormula::new)
+                .map(ComputeBooleanClauseList::new)
+                .map(ComputeAtomicSetsSAT4J::new)
+                .compute();
+
+        assertEquals(5, atomicSets.size());
     }
 }

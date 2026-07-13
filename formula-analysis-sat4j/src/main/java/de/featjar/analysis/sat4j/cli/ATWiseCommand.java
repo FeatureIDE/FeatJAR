@@ -22,6 +22,7 @@ package de.featjar.analysis.sat4j.cli;
 
 import de.featjar.analysis.sat4j.computation.ATWiseSampleComputation;
 import de.featjar.analysis.sat4j.computation.ComputeCompleteSample;
+import de.featjar.analysis.sat4j.computation.ComputeCoreSAT4J;
 import de.featjar.analysis.sat4j.solver.ISelectionStrategy;
 import de.featjar.base.cli.Option;
 import de.featjar.base.cli.OptionList;
@@ -31,10 +32,16 @@ import de.featjar.base.data.Result;
 import de.featjar.base.io.IO;
 import de.featjar.base.io.format.IFormat;
 import de.featjar.base.log.Log.Verbosity;
+import de.featjar.formula.VariableMap;
 import de.featjar.formula.assignment.BooleanAssignmentGroups;
 import de.featjar.formula.assignment.BooleanAssignmentList;
+import de.featjar.formula.assignment.conversion.BooleanAssignmentListToVariableMap;
+import de.featjar.formula.assignment.conversion.ComputeBooleanClauseList;
+import de.featjar.formula.assignment.conversion.IVariableNameFilter;
+import de.featjar.formula.assignment.conversion.VariableMapToVariables;
 import de.featjar.formula.io.BooleanAssignmentGroupsFormats;
 import de.featjar.formula.io.BooleanAssignmentListFormats;
+import de.featjar.formula.io.VariableMapFormats;
 import de.featjar.formula.io.csv.BooleanAssignmentListCSVFormat;
 import java.nio.file.Path;
 
@@ -95,8 +102,8 @@ public abstract class ATWiseCommand extends ASAT4JAnalysisCommand<BooleanAssignm
             BooleanAssignmentListFormats.class, new BooleanAssignmentListCSVFormat().getName());
 
     @Override
-    public IComputation<BooleanAssignmentList> newAnalysis(
-            OptionList optionParser, IComputation<BooleanAssignmentList> formula) {
+    public IComputation<BooleanAssignmentList> newComputation(OptionList optionParser) {
+        ComputeBooleanClauseList formula = createCNFComputation(optionParser);
         IComputation<BooleanAssignmentList> analysis = newTWiseAnalysis(optionParser, formula)
                 .set(ATWiseSampleComputation.CONFIGURATION_LIMIT, optionParser.get(LIMIT_OPTION))
                 .set(ATWiseSampleComputation.RANDOM_SEED, optionParser.get(RANDOM_SEED_OPTION));
@@ -134,12 +141,25 @@ public abstract class ATWiseCommand extends ASAT4JAnalysisCommand<BooleanAssignm
                                 case RANDOM -> ISelectionStrategy.NonParameterStrategy.FAST_RANDOM;
                                 default -> throw new IllegalStateException("Unexpected value: " + completionStrategy);
                             });
+            VariableMap ignoreFile = optionParser
+                    .getResult(IGNORE_VARIABLES)
+                    .mapResult(p -> IO.load(p, VariableMapFormats.getInstance()))
+                    .orElseLog(Verbosity.WARNING);
+            if (ignoreFile != null) {
+                analysis.set(
+                        ComputeCoreSAT4J.AUXILLIARY_VARIABLES,
+                        formula.map(BooleanAssignmentListToVariableMap::new)
+                                .map(VariableMapToVariables::new)
+                                .set(
+                                        VariableMapToVariables.INCLUDE,
+                                        IVariableNameFilter.list(ignoreFile.getVariableNames())));
+            }
         }
         return analysis;
     }
 
     protected abstract IComputation<BooleanAssignmentList> newTWiseAnalysis(
-            OptionList optionParser, IComputation<BooleanAssignmentList> formula);
+            OptionList optionParser, ComputeBooleanClauseList formula);
 
     @Override
     protected IFormat<BooleanAssignmentList> getOuputFormat(OptionList optionParser) {

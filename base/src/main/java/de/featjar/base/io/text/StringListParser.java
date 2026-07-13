@@ -18,7 +18,7 @@
  *
  * See <https://github.com/FeatureIDE/FeatJAR-base> for further information.
  */
-package de.featjar.base.io.list;
+package de.featjar.base.io.text;
 
 import de.featjar.base.data.Result;
 import de.featjar.base.data.Sets;

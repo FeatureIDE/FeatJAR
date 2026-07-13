@@ -18,37 +18,15 @@
  *
  * See <https://github.com/FeatureIDE/FeatJAR-formula> for further information.
  */
-package de.featjar.formula.io.textual;
+package de.featjar.formula.io;
 
-import de.featjar.base.data.Result;
-import de.featjar.base.io.text.ATextFormat;
-import de.featjar.base.tree.structure.ITree;
-import de.featjar.formula.io.IExpressionListFormat;
+import de.featjar.base.io.format.IFormat;
 import de.featjar.formula.structure.IExpression;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
- * Writes a list of expressions to a string representation using {@link ITree#print()}.
+ * Format for a list of expressions.
  *
- * @author Niclas Kleinert
- * @author Klara Surmeier
  * @author Sebastian Krieter
  */
-public class ExpressionListStringFormat extends ATextFormat<List<IExpression>> implements IExpressionListFormat {
-
-    @Override
-    public ExpressionListStringFormat getInstance() {
-        return this;
-    }
-
-    @Override
-    public boolean supportsWrite() {
-        return true;
-    }
-
-    @Override
-    public Result<String> serialize(List<IExpression> formula) {
-        return Result.of(formula.stream().map(IExpression::print).collect(Collectors.joining("\n")));
-    }
-}
+public interface IExpressionListFormat extends IFormat<List<IExpression>> {}

@@ -22,19 +22,19 @@ package de.featjar.formula.io;
 
 import de.featjar.Common;
 import de.featjar.FormatTest;
-import de.featjar.formula.io.xml.XMLFeatureModelFormulaFormat;
+import de.featjar.formula.io.xml.FormulaXMLFeatureModelFormat;
 import org.junit.jupiter.api.Test;
 
 public class XMLFeatureModelFormatTest {
 
     @Test
     void testFixtures() {
-        FormatTest.testParse(Common.getFormula("A"), "FeatureIDE/A", 2, new XMLFeatureModelFormulaFormat());
+        FormatTest.testParse(Common.getFormula("A"), "FeatureIDE/A", 2, new FormulaXMLFeatureModelFormat());
         FormatTest.testParse(
                 Common.getFormula("Root-ABC-nAnBnC"),
                 "FeatureIDE/Root-ABC-nAnBnC",
                 2,
-                new XMLFeatureModelFormulaFormat());
+                new FormulaXMLFeatureModelFormat());
     }
 
     //    @Test

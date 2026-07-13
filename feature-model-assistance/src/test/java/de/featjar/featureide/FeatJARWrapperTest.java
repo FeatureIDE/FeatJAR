@@ -30,7 +30,7 @@ import de.featjar.base.io.text.StringTextFormat;
 import de.featjar.base.tree.DataTree;
 import de.featjar.feature.model.IConstraint;
 import de.featjar.feature.model.IFeature;
-import de.featjar.feature.model.io.uvl.UVLFeatureModelFormat;
+import de.featjar.feature.model.io.uvl.FeatureModelUVLFormat;
 import de.featjar.formula.structure.connective.And;
 import de.featjar.formula.structure.connective.Implies;
 import de.featjar.formula.structure.connective.Not;
@@ -99,7 +99,7 @@ public class FeatJARWrapperTest {
 
         assertEquals(
                 Common.load("test_model.uvl", new StringTextFormat()),
-                new UVLFeatureModelFormat()
+                new FeatureModelUVLFormat()
                         .serialize(featureModelBuilder.getFeatureModel())
                         .get());
 

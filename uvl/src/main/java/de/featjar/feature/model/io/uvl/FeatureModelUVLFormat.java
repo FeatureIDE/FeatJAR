@@ -42,9 +42,9 @@ import java.util.List;
  * @author Sebastian Krieter
  * @author Andreas Gerasimow
  */
-public class UVLFeatureModelFormat extends AUVLFormat<IFeatureModel> implements IFeatureModelFormat {
+public class FeatureModelUVLFormat extends AUVLFormat<IFeatureModel> implements IFeatureModelFormat {
 
-    public static final String ID = UVLFeatureModelFormat.class.getCanonicalName();
+    public static final String ID = FeatureModelUVLFormat.class.getCanonicalName();
 
     @Override
     public String getIdentifier() {
@@ -52,7 +52,7 @@ public class UVLFeatureModelFormat extends AUVLFormat<IFeatureModel> implements 
     }
 
     @Override
-    public UVLFeatureModelFormat getInstance() {
+    public FeatureModelUVLFormat getInstance() {
         return this;
     }
 

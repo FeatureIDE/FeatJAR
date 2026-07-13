@@ -307,6 +307,18 @@ public interface IComputation<T> extends Supplier<Result<T>>, ITree<IComputation
     }
 
     /**
+     * {@return a new anonymous computation, based on the given function, composed with this computation.}
+     *
+     * @param <R> the return type of the function
+     * @param klass    the calling class
+     * @param scope    the calling scope
+     * @param function the function
+     */
+    default <R> ComputeFunction<T, R> map(Class<?> klass, String scope, Function<T, Result<R>> function) {
+        return map(c -> new ComputeFunction<>(c, klass, scope, function));
+    }
+
+    /**
      * {@return peeks at this computation with a given function}
      *
      * @param fn this computation

@@ -28,7 +28,6 @@ import de.featjar.base.cli.Options;
 import de.featjar.base.computation.IComputation;
 import de.featjar.base.io.format.IFormat;
 import de.featjar.formula.assignment.BooleanAssignmentGroups;
-import de.featjar.formula.assignment.BooleanAssignmentList;
 import de.featjar.formula.io.BooleanAssignmentGroupsFormats;
 import de.featjar.formula.io.csv.BooleanAssignmentGroupsCSVFormat;
 import java.util.Optional;
@@ -73,9 +72,9 @@ public class SolutionsCommand extends ASAT4JAnalysisCommand<BooleanAssignmentGro
     }
 
     @Override
-    public IComputation<BooleanAssignmentGroups> newAnalysis(
-            OptionList optionParser, IComputation<BooleanAssignmentList> formula) {
-        return formula.map(ComputeSolutionsSAT4J::new)
+    public IComputation<BooleanAssignmentGroups> newComputation(OptionList optionParser) {
+        return createCNFComputation(optionParser)
+                .map(ComputeSolutionsSAT4J::new)
                 .set(
                         ComputeSolutionsSAT4J.FORBID_DUPLICATES,
                         optionParser.getResult(FORBID_DUPLICATES_OPTION).get())

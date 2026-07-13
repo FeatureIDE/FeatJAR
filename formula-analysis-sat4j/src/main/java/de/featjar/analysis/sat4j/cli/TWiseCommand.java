@@ -24,6 +24,7 @@ import de.featjar.analysis.sat4j.computation.YASA;
 import de.featjar.base.cli.OptionList;
 import de.featjar.base.computation.IComputation;
 import de.featjar.formula.assignment.BooleanAssignmentList;
+import de.featjar.formula.assignment.conversion.ComputeBooleanClauseList;
 import de.featjar.formula.combination.VariableCombinationSpecification.VariableCombinationSpecificationComputation;
 import java.util.Optional;
 
@@ -41,7 +42,7 @@ public class TWiseCommand extends ATWiseCommand {
 
     @Override
     public IComputation<BooleanAssignmentList> newTWiseAnalysis(
-            OptionList optionParser, IComputation<BooleanAssignmentList> formula) {
+            OptionList optionParser, ComputeBooleanClauseList formula) {
         return formula.map(YASA::new)
                 .set(YASA.SAT_TIMEOUT, optionParser.get(SAT_TIMEOUT_OPTION))
                 .set(

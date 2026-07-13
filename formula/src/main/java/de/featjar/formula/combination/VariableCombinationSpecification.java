@@ -33,6 +33,7 @@ import de.featjar.base.data.combination.CombinationStream;
 import de.featjar.formula.VariableMap;
 import de.featjar.formula.assignment.BooleanAssignmentList;
 import de.featjar.formula.assignment.Variables;
+import de.featjar.formula.assignment.conversion.BooleanAssignmentListToVariables;
 import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -46,26 +47,28 @@ public class VariableCombinationSpecification extends ACombinationSpecification 
 
         public static final Dependency<BooleanAssignmentList> BOOLEAN_CLAUSE_LIST =
                 Dependency.newDependency(BooleanAssignmentList.class);
+        public static final Dependency<Variables> VARIABLES = Dependency.newDependency(Variables.class);
         public static final Dependency<Integer> T = Dependency.newDependency(Integer.class);
 
         public VariableCombinationSpecificationComputation(IComputation<BooleanAssignmentList> clauseList) {
-            super(clauseList, Computations.of(1));
+            super(clauseList, new BooleanAssignmentListToVariables(clauseList), Computations.of(1));
         }
 
         public VariableCombinationSpecificationComputation(
                 IComputation<BooleanAssignmentList> clauseList, IComputation<Integer> t) {
-            super(clauseList, t);
+            super(clauseList, new BooleanAssignmentListToVariables(clauseList), t);
         }
 
         public VariableCombinationSpecificationComputation(IComputation<BooleanAssignmentList> clauseList, int t) {
-            super(clauseList, Computations.of(t));
+            super(clauseList, new BooleanAssignmentListToVariables(clauseList), Computations.of(t));
         }
 
         @Override
         public Result<ICombinationSpecification> compute(List<Object> dependencyList, Progress progress) {
-            VariableMap variableMap = BOOLEAN_CLAUSE_LIST.get(dependencyList).getVariableMap();
             return Result.of(new VariableCombinationSpecification(
-                    T.get(dependencyList), variableMap.getVariables(), variableMap));
+                    T.get(dependencyList),
+                    VARIABLES.get(dependencyList),
+                    BOOLEAN_CLAUSE_LIST.get(dependencyList).getVariableMap()));
         }
     }
 

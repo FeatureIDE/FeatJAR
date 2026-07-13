@@ -31,7 +31,7 @@ import de.featjar.feature.model.FeatureModel;
 import de.featjar.feature.model.IFeature;
 import de.featjar.feature.model.IFeatureModel;
 import de.featjar.feature.model.IFeatureTree;
-import de.featjar.feature.model.io.uvl.UVLFeatureModelFormat;
+import de.featjar.feature.model.io.uvl.FeatureModelUVLFormat;
 import de.featjar.formula.assignment.conversion.ComputeBooleanClauseList;
 import de.featjar.formula.computation.ComputeCNFFormula;
 import de.featjar.formula.computation.ComputeNNFFormula;
@@ -102,14 +102,14 @@ public class UVLFeatureModelFormatTest {
 
     @Test
     void testFixtures() {
-        FormatTest.testParseAndSerialize("uvl/ABC-nAnBnC", new UVLFeatureModelFormat());
-        FormatTest.testParseAndSerialize("uvl/nA", new UVLFeatureModelFormat());
-        FormatTest.testParseAndSerialize("uvl/nAB", new UVLFeatureModelFormat());
+        FormatTest.testParseAndSerialize("uvl/ABC-nAnBnC", new FeatureModelUVLFormat());
+        FormatTest.testParseAndSerialize("uvl/nA", new FeatureModelUVLFormat());
+        FormatTest.testParseAndSerialize("uvl/nAB", new FeatureModelUVLFormat());
     }
 
     @Test
     void testUVLFeatureModelFormatSerialize() throws IOException {
-        UVLFeatureModelFormat format = new UVLFeatureModelFormat();
+        FeatureModelUVLFormat format = new FeatureModelUVLFormat();
         Result<String> featureModelString = format.serialize(featureModel);
 
         if (featureModelString.isEmpty()) {
@@ -123,7 +123,7 @@ public class UVLFeatureModelFormatTest {
 
     @Test
     void testUVLFeatureModelFormatParse() throws IOException {
-        IFormat<IFeatureModel> format = new UVLFeatureModelFormat();
+        IFormat<IFeatureModel> format = new FeatureModelUVLFormat();
         Result<IFeatureModel> result = format.parse(new FileInputMapper(
                 Path.of("src", "test", "resources", "uvl", "featureModelSerializeResult.uvl"),
                 Charset.defaultCharset()));

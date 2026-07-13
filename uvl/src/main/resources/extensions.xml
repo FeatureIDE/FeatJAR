@@ -1,9 +1,9 @@
 <?xml version="1.0"?>
 <extensions>
     <point id="de.featjar.feature.model.io.FeatureModelFormats">
-        <extension id="de.featjar.feature.model.io.uvl.UVLFeatureModelFormat" />
+        <extension id="de.featjar.feature.model.io.uvl.FeatureModelUVLFormat" />
     </point>
     <point id="de.featjar.formula.io.FormulaFormats">
-        <extension id="de.featjar.feature.model.io.uvl.UVLFormulaFormat" />
+        <extension id="de.featjar.feature.model.io.uvl.FormulaUVLFormat" />
     </point>
 </extensions>

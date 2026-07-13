@@ -21,6 +21,7 @@
 package de.featjar.formula.assignment.conversion;
 
 import de.featjar.base.computation.AComputation;
+import de.featjar.base.computation.Computations;
 import de.featjar.base.computation.Dependency;
 import de.featjar.base.computation.IComputation;
 import de.featjar.base.computation.Progress;
@@ -35,21 +36,32 @@ import java.util.List;
  *
  * @author Sebastian Krieter
  */
-public class BooleanAssignmentListToVariables extends AComputation<Variables> {
+public class VariableMapToVariables extends AComputation<Variables> {
 
-    protected static final Dependency<BooleanAssignmentList> ASSIGNMENTS =
-            Dependency.newDependency(BooleanAssignmentList.class);
+    public static final Dependency<VariableMap> VARIABLE_MAP = Dependency.newDependency(VariableMap.class);
 
-    public BooleanAssignmentListToVariables(IComputation<BooleanAssignmentList> assignments) {
-        super(assignments);
+    public static final Dependency<IVariableNameFilter> INCLUDE = Dependency.newDependency(IVariableNameFilter.class);
+    public static final Dependency<IVariableNameFilter> EXCLUDE = Dependency.newDependency(IVariableNameFilter.class);
+
+    public VariableMapToVariables(IComputation<VariableMap> variableMap) {
+        super(
+                variableMap,
+                Computations.of(IVariableNameFilter.of(true)),
+                Computations.of(IVariableNameFilter.of(false)));
     }
 
-    protected BooleanAssignmentListToVariables(BooleanAssignmentListToVariables other) {
+    protected VariableMapToVariables(VariableMapToVariables other) {
         super(other);
     }
 
     @Override
     public Result<Variables> compute(List<Object> dependencyList, Progress progress) {
-        return Result.of(ASSIGNMENTS.get(dependencyList).getVariableMap().getVariables());
+        final IVariableNameFilter include = INCLUDE.get(dependencyList);
+        final IVariableNameFilter exclude = EXCLUDE.get(dependencyList);
+        return Result.of(new Variables(VARIABLE_MAP.get(dependencyList).stream()
+                .filter(p -> include.test(p.getValue()))
+                .filter(p -> !exclude.test(p.getValue()))
+                .mapToInt(p -> p.getKey())
+                .toArray()));
     }
 }

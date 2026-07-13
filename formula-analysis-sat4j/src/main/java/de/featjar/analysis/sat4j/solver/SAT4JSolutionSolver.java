@@ -20,19 +20,17 @@
  */
 package de.featjar.analysis.sat4j.solver;
 
-import de.featjar.analysis.sat4j.solver.ISelectionStrategy.FixedStrategy;
 import de.featjar.analysis.sat4j.solver.ISelectionStrategy.InverseFixedStrategy;
 import de.featjar.analysis.sat4j.solver.ISelectionStrategy.UniformRandomStrategy;
-import de.featjar.analysis.sat4j.solver.strategy.FixedLiteralSelectionStrategy;
 import de.featjar.analysis.sat4j.solver.strategy.FixedOrderHeap;
+import de.featjar.analysis.sat4j.solver.strategy.FixedOrderHeap.GeneralSelectionStrategy;
 import de.featjar.analysis.sat4j.solver.strategy.FixedOrderHeap2;
-import de.featjar.analysis.sat4j.solver.strategy.InverseFixedLiteralSelectionStrategy;
-import de.featjar.analysis.sat4j.solver.strategy.RandomSelectionStrategy;
 import de.featjar.analysis.sat4j.solver.strategy.UniformRandomSelectionStrategy;
 import de.featjar.base.computation.ResourcePool;
 import de.featjar.base.data.Result;
 import de.featjar.formula.assignment.BooleanAssignmentList;
 import de.featjar.formula.assignment.BooleanClause;
+import de.featjar.formula.assignment.Variables;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -45,10 +43,6 @@ import java.util.stream.Collectors;
 import org.sat4j.minisat.SolverFactory;
 import org.sat4j.minisat.core.IOrder;
 import org.sat4j.minisat.core.Solver;
-import org.sat4j.minisat.orders.NegativeLiteralSelectionStrategy;
-import org.sat4j.minisat.orders.PositiveLiteralSelectionStrategy;
-import org.sat4j.minisat.orders.RSATPhaseSelectionStrategy;
-import org.sat4j.minisat.orders.VarOrderHeap;
 
 /**
  * ...
@@ -101,6 +95,12 @@ public class SAT4JSolutionSolver extends SAT4JSolver {
         return (Solver<?>) SolverFactory.newDefault();
     }
 
+    @Override
+    public void setAuxilliaryVariables(Variables auxilliaryVariables) {
+        super.setAuxilliaryVariables(auxilliaryVariables);
+        setSelectionStrategy(strategy);
+    }
+
     public int[] getOrder() {
         return order;
     }
@@ -133,38 +133,56 @@ public class SAT4JSolutionSolver extends SAT4JSolver {
         }
     }
 
-    private void setSelectionStrategy(IOrder strategy) {
+    void setSelectionStrategy(IOrder strategy) {
         ((Solver<?>) internalSolver).setOrder(strategy);
         ((Solver<?>) internalSolver).getOrder().init();
     }
 
     public void setSelectionStrategy(ISelectionStrategy strategy) {
-        this.strategy = strategy;
+        boolean[] orderMask = new boolean[order.length];
+        for (int v : auxilliaryVariables.get()) {
+            orderMask[v - 1] = true;
+        }
         switch (strategy.strategy()) {
             case FAST_RANDOM:
-                setSelectionStrategy(new FixedOrderHeap(new RandomSelectionStrategy(), order));
+                setSelectionStrategy(new FixedOrderHeap(order, orderMask, i -> GeneralSelectionStrategy.SELECT_RANDOM));
                 break;
             case FIXED:
-                setSelectionStrategy(
-                        new FixedOrderHeap( //
-                                new FixedLiteralSelectionStrategy(((FixedStrategy) strategy).getModel()), //
-                                order));
+                {
+                    final int[] model = ((InverseFixedStrategy) strategy).getModel();
+                    setSelectionStrategy(new FixedOrderHeap(
+                            order,
+                            orderMask,
+                            i -> model[i] == 0
+                                    ? GeneralSelectionStrategy.SELECT_ORG
+                                    : model[i] < 0
+                                            ? GeneralSelectionStrategy.SELECT_NEGATIVE
+                                            : GeneralSelectionStrategy.SELECT_POSITIVE));
+                }
                 break;
             case INVERSE_FIXED:
-                setSelectionStrategy(
-                        new FixedOrderHeap( //
-                                new InverseFixedLiteralSelectionStrategy(
-                                        ((InverseFixedStrategy) strategy).getModel()), //
-                                order));
+                {
+                    final int[] model = ((InverseFixedStrategy) strategy).getModel();
+                    setSelectionStrategy(new FixedOrderHeap(
+                            order,
+                            orderMask,
+                            i -> model[i] == 0
+                                    ? GeneralSelectionStrategy.SELECT_ORG
+                                    : model[i] > 0
+                                            ? GeneralSelectionStrategy.SELECT_NEGATIVE
+                                            : GeneralSelectionStrategy.SELECT_POSITIVE));
+                }
                 break;
             case NEGATIVE:
-                setSelectionStrategy(new FixedOrderHeap(new NegativeLiteralSelectionStrategy(), order));
+                setSelectionStrategy(
+                        new FixedOrderHeap(order, orderMask, i -> GeneralSelectionStrategy.SELECT_NEGATIVE));
                 break;
             case ORIGINAL:
-                setSelectionStrategy(new VarOrderHeap(new RSATPhaseSelectionStrategy()));
+                setSelectionStrategy(new FixedOrderHeap(order, orderMask, i -> GeneralSelectionStrategy.SELECT_ORG));
                 break;
             case POSITIVE:
-                setSelectionStrategy(new FixedOrderHeap(new PositiveLiteralSelectionStrategy(), order));
+                setSelectionStrategy(
+                        new FixedOrderHeap(order, orderMask, i -> GeneralSelectionStrategy.SELECT_POSITIVE));
                 break;
             case UNIFORM_RANDOM:
                 setSelectionStrategy(new FixedOrderHeap2(
@@ -173,5 +191,6 @@ public class SAT4JSolutionSolver extends SAT4JSolver {
             default:
                 throw new IllegalStateException(String.valueOf(strategy.strategy()));
         }
+        this.strategy = strategy;
     }
 }
