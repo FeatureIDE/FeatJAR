@@ -21,6 +21,7 @@
 package de.featjar.feature.configuration;
 
 import de.featjar.base.FeatJAR;
+import de.featjar.base.data.Pair;
 import de.featjar.base.data.Result;
 import de.featjar.feature.model.IFeature;
 import de.featjar.feature.model.IFeatureModel;
@@ -538,5 +539,19 @@ public class Configuration implements Cloneable {
     @Override
     public String toString() {
         return getSelectionStream().map(Selection::toString).collect(Collectors.joining("\n"));
+    }
+
+    /**
+     * {@return the selection values of all variables as a list of strings}
+     */
+    public String print() {
+        return "\n" + variableMap.stream().map(this::printEntry).collect(Collectors.joining("\n"));
+    }
+
+    private String printEntry(Pair<Integer, String> e) {
+        final Selection<?> selection = selection(e.getFirst());
+        return String.format(
+                "%-20s= %s%s",
+                e.getSecond(), selection.getSelection(), (selection.isAutomatic() ? " (automatic)" : ""));
     }
 }
