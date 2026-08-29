@@ -114,27 +114,28 @@ public class OptionList {
 
         LinkedList<String> arguments = new LinkedList<>(originalCommandLineArguments);
 
-        parseBareCommand(arguments, problemList);
-        if (Problem.containsError(problemList)) {
-            return problemList;
+        try {
+            parseBareCommand(arguments, problemList);
+            if (Problem.containsError(problemList)) {
+                return problemList;
+            }
+
+            arguments.addAll(parseConfigurationFiles(arguments, problemList));
+            if (Problem.containsError(problemList)) {
+                return problemList;
+            }
+
+            parseCommand(arguments, problemList);
+            if (Problem.containsError(problemList)) {
+                return problemList;
+            }
+
+            getCommand().ifPresent(c -> addOptions(c.getOptions()));
+            parseRemainingArguments(arguments, problemList);
+
+        } finally {
+            addDefaultValues();
         }
-
-        arguments.addAll(parseConfigurationFiles(arguments, problemList));
-        if (Problem.containsError(problemList)) {
-            return problemList;
-        }
-
-        parseCommand(arguments, problemList);
-        if (Problem.containsError(problemList)) {
-            return problemList;
-        }
-
-        getCommand().ifPresent(c -> addOptions(c.getOptions()));
-
-        parseRemainingArguments(arguments, problemList);
-
-        addDefaultValues();
-
         return problemList;
     }
 
