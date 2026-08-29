@@ -72,6 +72,6 @@ public class LatexFeatureModelFormat implements IFeatureModelFormat {
 
     @Override
     public String getName() {
-        return "LaTeX-Document with TikZ";
+        return "LaTeX";
     }
 }
