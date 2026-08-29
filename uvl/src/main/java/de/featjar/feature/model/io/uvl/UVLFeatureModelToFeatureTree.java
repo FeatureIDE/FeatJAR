@@ -172,6 +172,7 @@ public class UVLFeatureModelToFeatureTree {
                 }
             }
         }
+        featureTree.mutate().makeMandatory();
     }
 
     /**
