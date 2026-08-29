@@ -202,13 +202,13 @@ The output will be printed in the console because no `--output` option was set:
 
 FeatJAR development team:
 
-* [Sebastian Krieter](https://www.uni-ulm.de/in/sp/team/sebastian-krieter/) (Paderborn University, Germany)
+* [Sebastian Krieter](https://www.tu-braunschweig.de/isf/team/krieter) (TU Braunschweig, Germany)
 * [Elias Kuiter](https://www.dbse.ovgu.de/Mitarbeiter/Elias+Kuiter.html) (University of Magdeburg, Germany)
-* [Andreas Gerasimow](https://www.andreasgera.de) (Ulm University, Germany)
-* [Thomas Thüm](https://www.uni-ulm.de/in/sp/team/thuem/) (Paderborn University, Germany)
+* [Thomas Thüm](https://www.tu-braunschweig.de/isf/team/thuem) (TU Braunschweig, Germany)
 
 Further contributors and former project members:
 
+* Andreas Gerasimow (Ulm University, Germany)
 * Katjana Herbst (Ulm University, Germany)
 * Daniel Hohmann (University of Magdeburg, Germany)
-* Timo Zuccarello (Ulm University, Germany)
+* Franziska Zuccarello (Ulm University, Germany)
