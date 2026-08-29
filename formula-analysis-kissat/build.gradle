@@ -10,6 +10,6 @@ dependencies {
 
 license {
     ext {
-        licence_url = 'https://github.com/FeatureIDE/FeatJAR-formula-analysis-cadical'
+        licence_url = 'https://github.com/FeatureIDE/FeatJAR-formula-analysis-kissat'
     }
 }
