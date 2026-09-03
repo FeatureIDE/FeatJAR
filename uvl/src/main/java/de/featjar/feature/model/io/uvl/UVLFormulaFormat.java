@@ -20,23 +20,20 @@
  */
 package de.featjar.feature.model.io.uvl;
 
+import de.featjar.base.data.Attribute;
+import de.featjar.base.data.Attributes;
 import de.featjar.base.data.Problem;
 import de.featjar.base.data.Result;
 import de.featjar.base.io.input.AInputMapper;
 import de.featjar.base.tree.Trees;
-import de.featjar.feature.model.IFeatureModel;
-import de.featjar.feature.model.IFeatureTree;
-import de.featjar.feature.model.io.uvl.visitor.FeatureTreeToFormulaVisitor;
+import de.featjar.feature.model.io.uvl.visitor.FeatureTreeToUVLFeatureModelVisitor;
 import de.featjar.feature.model.io.uvl.visitor.FormulaToUVLConstraintVisitor;
+import de.featjar.feature.model.transformer.ComputeFormula;
 import de.featjar.formula.io.IFormulaFormat;
 import de.featjar.formula.structure.IFormula;
-import de.featjar.formula.structure.connective.And;
-import de.featjar.formula.structure.connective.Reference;
-import de.featjar.formula.structure.predicate.True;
-import de.vill.model.Attribute;
 import de.vill.model.Feature;
-import de.vill.model.FeatureType;
 import de.vill.model.Group;
+import de.vill.model.constraint.Constraint;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -49,9 +46,14 @@ import java.util.List;
 public class UVLFormulaFormat extends AUVLFormat<IFormula> implements IFormulaFormat {
 
     /**
-     * Name of the root element.
+     * Name of the artificial root element.
      */
-    public static final String ROOT_FEATURE_NAME = "Formula";
+    public static final String PSEUDO_ROOT_NAME = "__formula__";
+
+    /**
+     * Attribute for marking an artificial root.
+     */
+    public static final Attribute<Boolean> PSEUDO_ROOT_ATTRIBUTE = Attributes.get("pseudo_root", Boolean.class);
 
     public static final String ID = UVLFormulaFormat.class.getCanonicalName();
 
@@ -77,42 +79,11 @@ public class UVLFormulaFormat extends AUVLFormat<IFormula> implements IFormulaFo
 
     @Override
     public Result<IFormula> parse(AInputMapper inputMapper) {
-        List<Problem> problems = new ArrayList<>();
-        de.vill.model.FeatureModel uvlModel = parseUVLModel(inputMapper);
         try {
-            IFeatureModel featureModel = UVLFeatureModelToFeatureTree.createFeatureModel(uvlModel);
-
-            List<? extends IFeatureTree> roots = featureModel.getRoots();
-            if (roots.isEmpty()) {
-                problems.add(new Problem("No root features exist.", Problem.Severity.ERROR));
-                return Result.empty(problems);
-            }
-
-            List<IFormula> formulas = new ArrayList<>();
-            boolean fail = false;
-            for (IFeatureTree rootFeature : roots) {
-                Result<IFormula> result = Trees.traverse(rootFeature, new FeatureTreeToFormulaVisitor());
-                if (result.isEmpty()) {
-                    problems.addAll(result.getProblems());
-                    fail = true;
-                } else {
-                    IFormula treeFormula = result.get();
-                    if (!(treeFormula instanceof True)) {
-                        formulas.add(treeFormula);
-                    }
-                }
-            }
-            if (fail) {
-                return Result.empty(problems);
-            }
-
-            List<IFormula> constraintFormulas =
-                    UVLFeatureModelToFeatureTree.uvlConstraintToFormula(uvlModel.getConstraints());
-            formulas.addAll(constraintFormulas);
-
-            IFormula formula = new Reference(formulas.size() == 1 ? formulas.get(0) : new And(formulas));
-
-            return Result.of(formula, problems);
+            return UVLFeatureModelToFeatureTree.toFeatureModel(parseUVLModel(inputMapper))
+                    .toComputation()
+                    .map(ComputeFormula::new)
+                    .computeResult();
         } catch (Exception e) {
             return Result.empty(e);
         }
@@ -121,33 +92,24 @@ public class UVLFormulaFormat extends AUVLFormat<IFormula> implements IFormulaFo
     @Override
     public Result<String> serialize(IFormula formula) {
         de.vill.model.FeatureModel uvlModel = new de.vill.model.FeatureModel();
-        de.vill.model.Feature uvlRootFeature = new Feature(ROOT_FEATURE_NAME);
-        uvlRootFeature.setFeatureType(FeatureType.BOOL);
-        uvlRootFeature.getAttributes().put("name", new Attribute<>("name", ROOT_FEATURE_NAME));
-        uvlRootFeature.getAttributes().put("abstract", new Attribute<>("abstract", true));
+        Feature uvlRootFeature = FeatureTreeToUVLFeatureModelVisitor.newFeature(uvlModel, PSEUDO_ROOT_NAME);
         uvlModel.setRootFeature(uvlRootFeature);
-        uvlModel.getFeatureMap().put(ROOT_FEATURE_NAME, uvlRootFeature);
+        FeatureTreeToUVLFeatureModelVisitor.setAttribute(uvlRootFeature, PSEUDO_ROOT_ATTRIBUTE.getName(), Boolean.TRUE);
 
-        de.vill.model.Group uvlRootGroup = new Group(Group.GroupType.OPTIONAL);
+        Group uvlRootGroup = new Group(Group.GroupType.OPTIONAL);
         uvlRootFeature.addChildren(uvlRootGroup);
 
-        formula.getVariableNames().forEach((variableName) -> {
-            de.vill.model.Feature uvlFeature = new Feature(variableName);
-            uvlFeature.setFeatureType(FeatureType.BOOL);
-            uvlFeature.getAttributes().put("name", new Attribute<>("name", variableName));
-            uvlFeature.getAttributes().put("abstract", new Attribute<>("abstract", false));
-            uvlModel.getFeatureMap().put(variableName, uvlFeature);
-            uvlRootGroup.getFeatures().add(uvlFeature);
-        });
+        for (String variableName : formula.getVariableNames()) {
+            uvlRootGroup.getFeatures().add(FeatureTreeToUVLFeatureModelVisitor.newFeature(uvlModel, variableName));
+        }
 
-        Result<de.vill.model.constraint.Constraint> uvlConstraint =
-                Trees.traverse(formula, new FormulaToUVLConstraintVisitor());
+        Result<Constraint> uvlConstraint = Trees.traverse(formula, new FormulaToUVLConstraintVisitor());
         List<Problem> problems = new ArrayList<>(uvlConstraint.getProblems());
         if (uvlConstraint.isEmpty()) {
             return Result.empty(problems);
         }
-
         uvlModel.getOwnConstraints().add(uvlConstraint.get());
+
         return Result.of(uvlModel.toString(), problems);
     }
 }

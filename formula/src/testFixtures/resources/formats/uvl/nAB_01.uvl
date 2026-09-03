@@ -1,8 +1,8 @@
 features
-        Boolean Root {name 'Root', abstract true}
+        Root {abstract true}
                 optional
-                        Boolean A {name 'A', abstract false}
-                        Boolean B {name 'B', abstract false}
+                        A
+                        B
 
 constraints
-        !A | B
+        !(A) | B

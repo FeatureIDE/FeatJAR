@@ -38,6 +38,7 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
 import org.junit.jupiter.api.Assertions;
 
 /**
@@ -66,12 +67,12 @@ public class FormatTest {
         assertArrayEquals(serializeOutput, parseInput);
     }
 
-    public static <T> void testSerializeAndParse(T expression1, IFormat<T> format) {
+    public static <T> void testSerializeAndParse(T expression1, IFormat<T> format, Function<T, String> printFunction) {
         assertEquals(format.getClass().getCanonicalName(), format.getIdentifier());
         assertTrue(format.supportsParse());
         assertTrue(format.supportsWrite());
         final T expression2 = saveAndLoad(expression1, format);
-        assertEquals(expression1, expression2);
+        Common.compare(expression1, expression2, printFunction);
     }
 
     public static <T> void testParseAndSerialize(String name, IFormat<T> format) {
@@ -90,7 +91,10 @@ public class FormatTest {
         // serialize
         final byte[] serializeOutput = serialize(obj, format);
 
-        assertArrayEquals(parseInput, serializeOutput);
+        assertArrayEquals(
+                parseInput,
+                serializeOutput,
+                () -> new String(parseInput) + "\n==========\n" + new String(serializeOutput));
     }
 
     private static <T> byte[] serialize(T object, IFormat<T> format) {
@@ -106,8 +110,8 @@ public class FormatTest {
     private static <T> byte[][] getByteArrays(String name, int count, IFormat<T> format) {
         byte[][] result = new byte[count][];
         for (int i = 1; i <= count; i++) {
-            URL systemResource = ClassLoader.getSystemResource(
-                    String.format("formats/%s_%02d.%s", name, i, format.getFileExtension()));
+            final String resourceName = String.format("formats/%s_%02d.%s", name, i, format.getFileExtension());
+            URL systemResource = ClassLoader.getSystemResource(resourceName);
 
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             try (InputStream stream = systemResource.openStream()) {
@@ -131,7 +135,7 @@ public class FormatTest {
             URL systemResource = ClassLoader.getSystemResource(
                     String.format("formats/%s_%02d.%s", name, i, format.getFileExtension()));
             Result<T> result = IO.load(systemResource, format);
-            assertTrue(result.isPresent(), result.printProblems());
+            assertTrue(result.isPresent(), result::printProblems);
             list.add(result.get());
         }
         assertFalse(list.isEmpty());
@@ -154,7 +158,7 @@ public class FormatTest {
         assertTrue(memory.length > 0, "Saved object is empty");
 
         final Result<T> result = IO.load(new ByteArrayInputStream(memory), format);
-        assertTrue(result.isPresent(), "Failed loading saved object");
+        assertTrue(result.isPresent(), result::printProblems);
         return result.get();
     }
 }

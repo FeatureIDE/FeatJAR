@@ -10,3 +10,4 @@ includeBuild '../formula'
 includeBuild '../feature-model'
 
 includeBuild '../formula-analysis-sat4j'
+includeBuild '../formula-analysis-javasmt'

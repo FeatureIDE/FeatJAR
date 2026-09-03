@@ -1,8 +1,11 @@
 features
         root
-                mandatory
-                        Test7
                 optional
+                        Test7
+                            [0..2]
+                                Test8
+                                Test9
+                                Test10
                         Test1
                                 alternative
                                         Test3
@@ -11,6 +14,5 @@ features
                                 or
                                         Test5
                                         Test6
-
-constraints
-        Test1 & Test2 | ((Test3 <=> Test4) | ((Test5 => Test6) | !(Test7)))
+                 mandatory
+                 		Test11

@@ -20,6 +20,7 @@
  */
 package de.featjar.feature.model.io.uvl.visitor;
 
+import de.featjar.base.FeatJAR;
 import de.featjar.base.data.Result;
 import de.featjar.base.tree.visitor.ITreeVisitor;
 import de.featjar.formula.structure.IExpression;
@@ -35,6 +36,7 @@ import de.featjar.formula.structure.connective.Or;
 import de.featjar.formula.structure.connective.Reference;
 import de.featjar.formula.structure.predicate.Literal;
 import de.featjar.formula.structure.term.value.Variable;
+import de.vill.model.Feature;
 import de.vill.model.constraint.AndConstraint;
 import de.vill.model.constraint.Constraint;
 import de.vill.model.constraint.EquivalenceConstraint;
@@ -46,12 +48,12 @@ import de.vill.model.constraint.ParenthesisConstraint;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * Converts an {@link IExpression} to a {@link de.vill.model.constraint.Constraint}.
  *
  * @author Andreas Gerasimow
+ * @author Sebastian Krieter
  */
 public class FormulaToUVLConstraintVisitor implements ITreeVisitor<IExpression, Constraint> {
 
@@ -88,30 +90,32 @@ public class FormulaToUVLConstraintVisitor implements ITreeVisitor<IExpression, 
 
         Constraint constraint = null;
 
-        if (node instanceof And) {
-            constraint = new ParenthesisConstraint(createAndConstraint(node));
-        } else if (node instanceof AtLeast) {
-            return TraversalAction.FAIL;
-        } else if (node instanceof AtMost) {
-            return TraversalAction.FAIL;
-        } else if (node instanceof Between) {
-            return TraversalAction.FAIL;
-        } else if (node instanceof BiImplies) {
-            constraint = new ParenthesisConstraint(createEquivalenceConstraint(node));
-        } else if (node instanceof Choose) {
-            return TraversalAction.FAIL;
-        } else if (node instanceof Implies) {
-            constraint = new ParenthesisConstraint(createImplicationConstraint(node));
-        } else if (node instanceof Not) {
-            constraint = createNotConstraint(node);
-        } else if (node instanceof Or) {
-            constraint = new ParenthesisConstraint(createOrConstraint(node));
-        } else if (node instanceof Reference) {
+        if (node instanceof Variable) {
             return TraversalAction.CONTINUE;
         } else if (node instanceof Literal) {
             constraint = createLiteralConstraint(node);
-        } else if (node instanceof Variable) {
+        } else if (node instanceof Not) {
+            constraint = createNotConstraint(node);
+        } else if (node instanceof Or) {
+            constraint = createOrConstraint(node);
+        } else if (node instanceof And) {
+            constraint = createAndConstraint(node);
+        } else if (node instanceof Implies) {
+            constraint = createImplicationConstraint(node);
+        } else if (node instanceof BiImplies) {
+            constraint = createEquivalenceConstraint(node);
+        } else if (node instanceof Reference) {
             return TraversalAction.CONTINUE;
+        } else if (node instanceof AtLeast) {
+            FeatJAR.log().warning("UVL model does not support operator \"at least\"");
+        } else if (node instanceof AtMost) {
+            FeatJAR.log().warning("UVL model does not support operator \"at most\"");
+        } else if (node instanceof Between) {
+            FeatJAR.log().warning("UVL model does not support operator \"between\"");
+        } else if (node instanceof Choose) {
+            FeatJAR.log().warning("UVL model does not support operator choose");
+        } else {
+            FeatJAR.log().warning("UVL model does not support operator %s", node.getName());
         }
 
         if (constraint == null) {
@@ -124,85 +128,74 @@ public class FormulaToUVLConstraintVisitor implements ITreeVisitor<IExpression, 
 
     private Constraint createLiteralConstraint(IExpression node) {
         Literal literal = (Literal) node;
-        if (!node.getChildren().isEmpty()) {
-            if (literal.isPositive()) {
-                return new LiteralConstraint(literal.getChildren().get(0).getName());
-            } else {
-                return new NotConstraint(
-                        new LiteralConstraint(literal.getChildren().get(0).getName()));
-            }
+
+        if (node.getChildren().isEmpty()) {
+            FeatJAR.log().warning("Malformed literal %s", node);
+            return null;
         }
-        return null;
+
+        LiteralConstraint literalConstraint =
+                new LiteralConstraint(new Feature(literal.getChildren().get(0).getName()));
+        if (literal.isPositive()) {
+            return literalConstraint;
+        } else {
+            return new NotConstraint(literalConstraint);
+        }
     }
 
-    private EquivalenceConstraint createEquivalenceConstraint(IExpression node) {
-        if (node.getChildren().size() > 1) {
-            return new EquivalenceConstraint(
-                    uvlConstraints.get(node.getChildren().get(0)),
-                    uvlConstraints.get(node.getChildren().get(1)));
+    private Constraint createEquivalenceConstraint(IExpression node) {
+        if (node.getChildren().size() != 2) {
+            FeatJAR.log().warning("Malformed expression %s", node);
+            return null;
         }
-        return null;
+        return new EquivalenceConstraint(
+                uvlConstraints.get(node.getChildren().get(0)),
+                uvlConstraints.get(node.getChildren().get(1)));
     }
 
-    private ImplicationConstraint createImplicationConstraint(IExpression node) {
-        if (node.getChildren().size() > 1) {
-            return new ImplicationConstraint(
-                    uvlConstraints.get(node.getChildren().get(0)),
-                    uvlConstraints.get(node.getChildren().get(1)));
+    private Constraint createImplicationConstraint(IExpression node) {
+        if (node.getChildren().size() != 2) {
+            FeatJAR.log().warning("Malformed expression %s", node);
+            return null;
         }
-        return null;
+        return new ImplicationConstraint(
+                uvlConstraints.get(node.getChildren().get(0)),
+                uvlConstraints.get(node.getChildren().get(1)));
     }
 
     private NotConstraint createNotConstraint(IExpression node) {
-        if (!node.getChildren().isEmpty()) {
-            return new NotConstraint(uvlConstraints.get(node.getChildren().get(0)));
+        if (node.getChildren().size() != 1) {
+            FeatJAR.log().warning("Malformed expression %s", node);
+            return null;
         }
-        return null;
+        return new NotConstraint(uvlConstraints.get(node.getChildren().get(0)));
     }
 
     private Constraint createAndConstraint(IExpression node) {
-        List<Constraint> constraints = node.getChildren().stream()
-                .map((child) -> uvlConstraints.get(child))
-                .collect(Collectors.toList());
-        return createAndConstraint(constraints);
-    }
-
-    private Constraint createAndConstraint(List<Constraint> constraints) {
-        if (constraints.size() == 2) {
-            return new AndConstraint(constraints.get(0), constraints.get(1));
-        } else if (constraints.size() > 2) {
-            AndConstraint andConstraint = new AndConstraint(constraints.get(0), constraints.get(1));
-
-            for (int i = 2; i < constraints.size(); i++) {
-                andConstraint = new AndConstraint(andConstraint, constraints.get(i));
-            }
-            return andConstraint;
-        } else if (constraints.size() == 1) {
-            return constraints.get(0);
+        Constraint[] constraints =
+                node.getChildren().stream().map(uvlConstraints::get).toArray(Constraint[]::new);
+        switch (constraints.length) {
+            case 0:
+                FeatJAR.log().warning("Malformed expression %s", node);
+                return null;
+            case 1:
+                return constraints[0];
+            default:
+                return new AndConstraint(constraints);
         }
-        return null;
     }
 
     private Constraint createOrConstraint(IExpression node) {
-        List<Constraint> constraints = node.getChildren().stream()
-                .map((child) -> uvlConstraints.get(child))
-                .collect(Collectors.toList());
-        return createOrConstraint(constraints);
-    }
-
-    private Constraint createOrConstraint(List<Constraint> constraints) {
-        if (constraints.size() == 2) {
-            return new OrConstraint(constraints.get(0), constraints.get(1));
-        } else if (constraints.size() > 2) {
-            OrConstraint orConstraint = new OrConstraint(constraints.get(0), constraints.get(1));
-
-            for (int i = 2; i < constraints.size(); i++) {
-                orConstraint = new OrConstraint(orConstraint, constraints.get(i));
-            }
-            return orConstraint;
-        } else if (constraints.size() == 1) {
-            return constraints.get(0);
+        Constraint[] constraints =
+                node.getChildren().stream().map(uvlConstraints::get).toArray(Constraint[]::new);
+        switch (constraints.length) {
+            case 0:
+                FeatJAR.log().warning("Malformed expression %s", node);
+                return null;
+            case 1:
+                return constraints[0];
+            default:
+                return new OrConstraint(constraints);
         }
-        return null;
     }
 }

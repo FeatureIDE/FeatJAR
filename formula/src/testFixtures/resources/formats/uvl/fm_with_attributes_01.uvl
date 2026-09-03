@@ -1,0 +1,6 @@
+features
+        r
+                optional
+                        A {Toggle true, URL 'test.de'}
+                        B {Number 2, Fraction 3.14}
+

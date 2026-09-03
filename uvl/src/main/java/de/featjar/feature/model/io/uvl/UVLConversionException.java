@@ -20,30 +20,15 @@
  */
 package de.featjar.feature.model.io.uvl;
 
-import de.featjar.base.io.format.IFormat;
-import de.featjar.base.io.input.AInputMapper;
-import de.vill.main.UVLModelFactory;
-import de.vill.model.FeatureModel;
+public class UVLConversionException extends Exception {
 
-/**
- * Abstract format for UVL files.
- *
- * @author Sebastian Krieter
- * @author Andreas Gerasimow
- */
-public abstract class AUVLFormat<T> implements IFormat<T> {
+    private static final long serialVersionUID = -2890840920719163628L;
 
-    @Override
-    public String getFileExtension() {
-        return "uvl";
+    public UVLConversionException(String message) {
+        super(message);
     }
 
-    @Override
-    public String getName() {
-        return "UVL";
-    }
-
-    protected static FeatureModel parseUVLModel(AInputMapper inputMapper) {
-        return new UVLModelFactory().parse(inputMapper.get().text());
+    public UVLConversionException(String message, Throwable cause) {
+        super(message, cause);
     }
 }

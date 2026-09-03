@@ -20,7 +20,6 @@
  */
 package de.featjar.feature.model.io.uvl;
 
-import de.featjar.base.FeatJAR;
 import de.featjar.base.data.Attributes;
 import de.featjar.base.data.Range;
 import de.featjar.base.data.Result;
@@ -30,16 +29,57 @@ import de.featjar.feature.model.FeatureModelAttributes;
 import de.featjar.feature.model.IFeature;
 import de.featjar.feature.model.IFeatureModel;
 import de.featjar.feature.model.IFeatureTree;
-import de.featjar.formula.io.textual.ExpressionParser;
-import de.featjar.formula.io.textual.Symbols;
-import de.featjar.formula.io.textual.UVLSymbols;
-import de.featjar.formula.structure.Expressions;
 import de.featjar.formula.structure.IExpression;
 import de.featjar.formula.structure.IFormula;
+import de.featjar.formula.structure.connective.And;
+import de.featjar.formula.structure.connective.BiImplies;
+import de.featjar.formula.structure.connective.Implies;
+import de.featjar.formula.structure.connective.Not;
+import de.featjar.formula.structure.connective.Or;
+import de.featjar.formula.structure.predicate.DefLiteral;
+import de.featjar.formula.structure.predicate.Equals;
+import de.featjar.formula.structure.predicate.GreaterEqual;
+import de.featjar.formula.structure.predicate.GreaterThan;
+import de.featjar.formula.structure.predicate.LessEqual;
+import de.featjar.formula.structure.predicate.LessThan;
+import de.featjar.formula.structure.predicate.Literal;
+import de.featjar.formula.structure.predicate.NotEquals;
+import de.featjar.formula.structure.term.ITerm;
+import de.featjar.formula.structure.term.function.integer.IntegerAdd;
+import de.featjar.formula.structure.term.function.integer.IntegerDivide;
+import de.featjar.formula.structure.term.function.integer.IntegerMultiply;
+import de.featjar.formula.structure.term.function.string.StringLength;
+import de.featjar.formula.structure.term.value.Constant;
+import de.featjar.formula.structure.term.value.Variable;
 import de.vill.model.Attribute;
+import de.vill.model.Feature;
 import de.vill.model.FeatureType;
 import de.vill.model.Group;
+import de.vill.model.building.VariableReference;
+import de.vill.model.constraint.AndConstraint;
 import de.vill.model.constraint.Constraint;
+import de.vill.model.constraint.EqualEquationConstraint;
+import de.vill.model.constraint.EquivalenceConstraint;
+import de.vill.model.constraint.GreaterEqualsEquationConstraint;
+import de.vill.model.constraint.GreaterEquationConstraint;
+import de.vill.model.constraint.ImplicationConstraint;
+import de.vill.model.constraint.LiteralConstraint;
+import de.vill.model.constraint.LowerEqualsEquationConstraint;
+import de.vill.model.constraint.LowerEquationConstraint;
+import de.vill.model.constraint.NotConstraint;
+import de.vill.model.constraint.NotEqualsEquationConstraint;
+import de.vill.model.constraint.OrConstraint;
+import de.vill.model.constraint.ParenthesisConstraint;
+import de.vill.model.expression.AddExpression;
+import de.vill.model.expression.DivExpression;
+import de.vill.model.expression.Expression;
+import de.vill.model.expression.LengthAggregateFunctionExpression;
+import de.vill.model.expression.LiteralExpression;
+import de.vill.model.expression.MulExpression;
+import de.vill.model.expression.NumberExpression;
+import de.vill.model.expression.ParenthesisExpression;
+import de.vill.model.expression.StringExpression;
+import de.vill.model.expression.SubExpression;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -60,119 +100,68 @@ public class UVLFeatureModelToFeatureTree {
      * Converts UVL feature model to FeatJAR feature model.
      * @param uvlFeatureModel The UVL feature model to convert.
      * @return A FeatJAR feature model.
-     * @throws ParseException if a parsing error occurs
      */
-    public static IFeatureModel createFeatureModel(de.vill.model.FeatureModel uvlFeatureModel) throws ParseException {
-        IFeatureModel featureModel = new FeatureModel();
-        de.vill.model.Feature rootFeature = uvlFeatureModel.getRootFeature();
-        UVLFeatureModelToFeatureTree.createFeatureTree(featureModel, rootFeature);
+    public static Result<IFeatureModel> toFeatureModel(de.vill.model.FeatureModel uvlFeatureModel) {
+        try {
+            IFeatureModel featureModel = new FeatureModel();
 
-        return featureModel;
-    }
-
-    /**
-     * Converts a list of UVL constraints into a list of formulas by parsing each UVL constraint.
-     * @param uvlConstraints the UVL constraints
-     * @return the parsed constraints in the same order
-     * @throws ClassNotFoundException if the class {@link Symbols} cannot be loaded.
-     */
-    public static List<IFormula> uvlConstraintToFormula(List<Constraint> uvlConstraints) throws ClassNotFoundException {
-        List<IFormula> formulas = new ArrayList<>();
-        for (Constraint constraint : uvlConstraints) {
-            // TODO do not use raw constructor, get instance for
-            final ExpressionParser nodeReader = new ExpressionParser();
-            ClassLoader.getSystemClassLoader().loadClass("de.featjar.formula.io.textual.Symbols");
-            nodeReader.setSymbols(UVLSymbols.INSTANCE);
-            nodeReader.setIgnoreMissingFeatures(ExpressionParser.ErrorHandling.KEEP);
-            nodeReader.setIgnoreUnparseableSubExpressions(ExpressionParser.ErrorHandling.KEEP);
-            Result<IExpression> parse = nodeReader.parse(constraint.toString(false, ""));
-            if (parse.isEmpty()) {
-                FeatJAR.log().problems(parse.getProblems());
-            } else {
-                FeatJAR.log().debug(Expressions.print(parse.get()));
+            convertFeatureTree(featureModel, uvlFeatureModel.getRootFeature());
+            for (Constraint uvlConstraint : uvlFeatureModel.getConstraints()) {
+                convertConstraint(featureModel, uvlConstraint);
             }
-            formulas.add((IFormula) parse.get());
-        }
 
-        return formulas;
+            return Result.of(featureModel);
+        } catch (Exception e) {
+            return Result.empty(e);
+        }
     }
 
-    /**
-     * Builds a FeatJAR feature model from a UVL root feature.
-     * @param featureModel FeatJAR feature model to build.
-     * @param rootUVLFeature UVL root feature from a UVL feature model.
-     * @throws ParseException if a parsing error occurs
-     */
-    private static void createFeatureTree(IFeatureModel featureModel, de.vill.model.Feature rootUVLFeature)
-            throws ParseException {
-        LinkedList<de.vill.model.Feature> featureStack = new LinkedList<>();
-        LinkedList<IFeatureTree> featureTreeStack = new LinkedList<>();
+    private static void convertFeatureTree(IFeatureModel featureModel, Feature rootUVLFeature)
+            throws UVLConversionException {
+        IFeature root = createFeature(featureModel, rootUVLFeature);
+        if (root.getAttributeValue(UVLFormulaFormat.PSEUDO_ROOT_ATTRIBUTE).valueEquals(Boolean.TRUE)) {
+            featureModel.mutate().removeFeature(root);
+            for (Group group : rootUVLFeature.getChildren()) {
+                for (Feature childFeature : group.getFeatures()) {
+                    IFeatureTree featureTreeRoot =
+                            featureModel.mutate().addFeatureTreeRoot(createFeature(featureModel, childFeature));
+                    convertFeatureTreeRoot(featureModel, childFeature, featureTreeRoot);
+                }
+            }
+        } else {
+            IFeatureTree featureTreeRoot = featureModel.mutate().addFeatureTreeRoot(root);
+            convertFeatureTreeRoot(featureModel, rootUVLFeature, featureTreeRoot);
+            featureTreeRoot.mutate().makeMandatory();
+        }
+    }
 
-        IFeature rootFeature = createFeature(featureModel, rootUVLFeature);
-        IFeatureTree featureTree = featureModel.mutate().addFeatureTreeRoot(rootFeature);
+    private static void convertFeatureTreeRoot(
+            IFeatureModel featureModel, Feature rootUVLFeature, IFeatureTree featureTree)
+            throws UVLConversionException {
+        LinkedList<Feature> featureStack = new LinkedList<>();
+        LinkedList<IFeatureTree> featureTreeStack = new LinkedList<>();
 
         featureStack.push(rootUVLFeature);
         featureTreeStack.push(featureTree);
 
         while (!featureStack.isEmpty()) {
-            de.vill.model.Feature feature = featureStack.pop();
+            Feature feature = featureStack.pop();
             IFeatureTree tree = featureTreeStack.pop();
 
-            if (feature.getParentGroup() != null && feature.getParentGroup().GROUPTYPE == Group.GroupType.MANDATORY) {
-                tree.mutate().makeMandatory();
-            } else if (feature.getParentGroup() != null
-                    && feature.getParentGroup().GROUPTYPE == Group.GroupType.OPTIONAL) {
-                tree.mutate().makeOptional();
-            } else if (feature.getLowerBound() != null) {
-                if (feature.getUpperBound() != null) {
-                    tree.mutate()
-                            .setFeatureCardinality(Range.of(
-                                    Integer.parseInt(feature.getLowerBound()),
-                                    Integer.parseInt(feature.getUpperBound())));
-                } else {
-                    tree.mutate().setFeatureCardinality(Range.atLeast(Integer.parseInt(feature.getLowerBound())));
-                }
-            } else {
-                if (feature.getUpperBound() != null) {
-                    tree.mutate().setFeatureCardinality(Range.atMost(Integer.parseInt(feature.getUpperBound())));
-                } else {
-                    tree.mutate().setFeatureCardinality(Range.atMost(1));
-                }
-            }
-
-            List<de.vill.model.Group> children = feature.getChildren();
-            for (de.vill.model.Group group : children) {
-                Range groupRange;
-                switch (group.GROUPTYPE) {
-                    case MANDATORY:
-                    case OPTIONAL:
-                        groupRange = Range.atLeast(0);
-                        break;
-                    case ALTERNATIVE:
-                        groupRange = Range.exactly(1);
-                        break;
-                    case OR:
-                        groupRange = Range.atLeast(1);
-                        break;
-                    case GROUP_CARDINALITY:
-                        groupRange = Range.of(
-                                Integer.parseInt(feature.getLowerBound()), Integer.parseInt(feature.getUpperBound()));
-                        break;
-                    default:
-                        throw new ParseException(String.valueOf(group.GROUPTYPE));
-                }
+            for (Group group : feature.getChildren()) {
                 int groupID = tree.getChildrenGroups().size();
-                tree.mutate().addCardinalityGroup(groupRange);
-                for (de.vill.model.Feature childFeature : group.getFeatures()) {
-                    featureStack.push(childFeature);
-                    IFeature child = createFeature(featureModel, childFeature);
-                    IFeatureTree childTree = tree.mutate().addFeatureBelow(child);
+                tree.mutate().addCardinalityGroup(convertGroupCardinality(group));
+
+                for (Feature childFeature : group.getFeatures()) {
+                    IFeatureTree childTree = tree.mutate().addFeatureBelow(createFeature(featureModel, childFeature));
                     childTree.mutate().setParentGroupID(groupID);
+                    childTree.mutate().setFeatureCardinality(convertFeatureCardinality(childFeature));
+
+                    featureStack.push(childFeature);
                     featureTreeStack.push(childTree);
                 }
             }
         }
-        featureTree.mutate().makeMandatory();
     }
 
     /**
@@ -182,12 +171,12 @@ public class UVLFeatureModelToFeatureTree {
      * @return A FeatJAR feature.
      * @throws ParseException if a parsing error occurs
      */
-    private static IFeature createFeature(IFeatureModel featureModel, de.vill.model.Feature uvlFeature)
-            throws ParseException {
+    private static IFeature createFeature(IFeatureModel featureModel, Feature uvlFeature)
+            throws UVLConversionException {
         IFeature feature = featureModel.mutate().addFeature(getName(uvlFeature));
         feature.mutate().setAbstract(getAttributeValue(uvlFeature, "abstract", Boolean.FALSE));
-        Map<String, Attribute> attributes = uvlFeature.getAttributes();
-        for (Entry<String, Attribute> entry : attributes.entrySet()) {
+        Map<String, Attribute<?>> attributes = uvlFeature.getAttributes();
+        for (Entry<String, Attribute<?>> entry : attributes.entrySet()) {
             String uvlAttributeName = entry.getValue().getName();
             Object uvlAttributeValue = Objects.requireNonNull(entry.getValue().getValue());
 
@@ -197,18 +186,16 @@ public class UVLFeatureModelToFeatureTree {
             } else if (FeatureModelAttributes.HIDDEN.getSimpleName().equals(uvlAttributeName)) {
                 attribute = FeatureModelAttributes.HIDDEN;
             } else {
-                String[] nameParts = uvlAttributeName.split("(?<!:):(?!:)");
-                if (nameParts.length > 2) {
-                    throw new ParseException(uvlAttributeName);
-                }
-                attribute = (nameParts.length == 2)
-                        ? Attributes.get(
-                                unescapeSeparator(nameParts[0]),
-                                unescapeSeparator(nameParts[1]),
-                                uvlAttributeValue.getClass())
-                        : Attributes.get(unescapeSeparator(uvlAttributeName), uvlAttributeValue.getClass());
+                uvlAttributeName =
+                        uvlAttributeName.replaceAll("(?<!_)_(?!_)", ".").replaceAll("_(_+)", "$1");
+                int nameSpaceSeparatorIndex = uvlAttributeName.lastIndexOf('.');
+                attribute = (nameSpaceSeparatorIndex < 0)
+                        ? Attributes.get(uvlAttributeName, uvlAttributeValue.getClass())
+                        : Attributes.get(
+                                uvlAttributeName.substring(0, nameSpaceSeparatorIndex),
+                                uvlAttributeName.substring(nameSpaceSeparatorIndex + 1),
+                                uvlAttributeValue.getClass());
             }
-
             setAttribute(feature, attribute, uvlAttributeValue);
         }
         feature.mutate().setType(getFeatureType(uvlFeature));
@@ -220,8 +207,179 @@ public class UVLFeatureModelToFeatureTree {
         feature.mutate().setAttributeValue(attribute, attribute.cast(uvlAttributeValue));
     }
 
-    private static String unescapeSeparator(String name) {
-        return name.replaceAll(":(:+)", "$1");
+    private static Range convertFeatureCardinality(Feature feature) {
+        if (feature.getCardinality() != null) {
+            if (feature.getCardinality().upper < Integer.MAX_VALUE) {
+                return Range.of(feature.getCardinality().lower, feature.getCardinality().upper);
+            } else {
+                return Range.atLeast(feature.getCardinality().lower);
+            }
+        } else {
+            if (feature.getParentGroup() != null && feature.getParentGroup().GROUPTYPE == Group.GroupType.MANDATORY) {
+                return Range.exactly(1);
+            } else {
+                return Range.atMost(1);
+            }
+        }
+    }
+
+    private static Range convertGroupCardinality(Group group) throws UVLConversionException {
+        switch (group.GROUPTYPE) {
+            case MANDATORY:
+            case OPTIONAL:
+                return Range.atLeast(0);
+            case ALTERNATIVE:
+                return Range.exactly(1);
+            case OR:
+                return Range.atLeast(1);
+            case GROUP_CARDINALITY:
+                return Range.of(group.getCardinality().lower, group.getCardinality().upper);
+            default:
+                throw new UVLConversionException(String.valueOf(group.GROUPTYPE));
+        }
+    }
+
+    private static void convertConstraint(IFeatureModel featureModel, Constraint uvlConstraint)
+            throws UVLConversionException {
+        List<DefLiteral> literalList = new ArrayList<>();
+        IFormula convertedUVLConstraint = (IFormula) parseUVLConstraintRecursively(uvlConstraint, literalList);
+        featureModel
+                .mutate()
+                .addConstraint(
+                        literalList.isEmpty()
+                                ? convertedUVLConstraint
+                                : new Implies(new And(literalList), convertedUVLConstraint));
+    }
+
+    private static IExpression parseUVLConstraintRecursively(
+            Constraint uvlConstraint, List<DefLiteral> dependenciesList) throws UVLConversionException {
+        if (uvlConstraint instanceof LiteralConstraint) {
+            LiteralConstraint literalConstraint = (LiteralConstraint) uvlConstraint;
+            VariableReference variableReference = literalConstraint.getReference();
+
+            if (variableReference instanceof Feature) {
+                Feature uvlFeature = (Feature) variableReference;
+                return new Literal(uvlFeature.getFeatureName());
+            }
+        } else if (uvlConstraint instanceof ParenthesisConstraint) {
+            ParenthesisConstraint parenthesisConstraint = (ParenthesisConstraint) uvlConstraint;
+            return parseUVLConstraintRecursively(parenthesisConstraint.getContent(), dependenciesList);
+        } else if (uvlConstraint instanceof ImplicationConstraint) {
+            ImplicationConstraint implicationConstraint = (ImplicationConstraint) uvlConstraint;
+            return new Implies(
+                    (IFormula) parseUVLConstraintRecursively(implicationConstraint.getLeft(), dependenciesList),
+                    (IFormula) parseUVLConstraintRecursively(implicationConstraint.getRight(), dependenciesList));
+        } else if (uvlConstraint instanceof NotConstraint) {
+            NotConstraint notConstraint = (NotConstraint) uvlConstraint;
+            return new Not((IFormula) parseUVLConstraintRecursively(notConstraint.getContent(), dependenciesList));
+        } else if (uvlConstraint instanceof AndConstraint) {
+            AndConstraint andConstraint = (AndConstraint) uvlConstraint;
+            return new And(
+                    (IFormula) parseUVLConstraintRecursively(andConstraint.getLeft(), dependenciesList),
+                    (IFormula) parseUVLConstraintRecursively(andConstraint.getRight(), dependenciesList));
+        } else if (uvlConstraint instanceof OrConstraint) {
+            OrConstraint orConstraint = (OrConstraint) uvlConstraint;
+            return new Or((IFormula) parseUVLConstraintRecursively(orConstraint.getLeft(), dependenciesList), (IFormula)
+                    parseUVLConstraintRecursively(orConstraint.getRight(), dependenciesList));
+        } else if (uvlConstraint instanceof EqualEquationConstraint) {
+            EqualEquationConstraint equalConstraint = (EqualEquationConstraint) uvlConstraint;
+            return new Equals(
+                    parseExpressionConstraint(equalConstraint.getLeft(), dependenciesList),
+                    parseExpressionConstraint(equalConstraint.getRight(), dependenciesList));
+        } else if (uvlConstraint instanceof EquivalenceConstraint) {
+            EquivalenceConstraint equivalenceConstraint = (EquivalenceConstraint) uvlConstraint;
+            return new BiImplies(
+                    (IFormula) parseUVLConstraintRecursively(equivalenceConstraint.getLeft(), dependenciesList),
+                    (IFormula) parseUVLConstraintRecursively(equivalenceConstraint.getRight(), dependenciesList));
+        } else if (uvlConstraint instanceof LowerEqualsEquationConstraint) {
+            LowerEqualsEquationConstraint lowerEqualsConstraint = (LowerEqualsEquationConstraint) uvlConstraint;
+            return new LessEqual(
+                    parseExpressionConstraint(lowerEqualsConstraint.getLeft(), dependenciesList),
+                    parseExpressionConstraint(lowerEqualsConstraint.getRight(), dependenciesList));
+        } else if (uvlConstraint instanceof GreaterEqualsEquationConstraint) {
+            GreaterEqualsEquationConstraint greaterEqualConstraint = (GreaterEqualsEquationConstraint) uvlConstraint;
+            return new GreaterEqual(
+                    parseExpressionConstraint(greaterEqualConstraint.getLeft(), dependenciesList),
+                    parseExpressionConstraint(greaterEqualConstraint.getRight(), dependenciesList));
+        } else if (uvlConstraint instanceof NotEqualsEquationConstraint) {
+            NotEqualsEquationConstraint notEqualsConstraint = (NotEqualsEquationConstraint) uvlConstraint;
+            return new NotEquals(
+                    parseExpressionConstraint(notEqualsConstraint.getLeft(), dependenciesList),
+                    parseExpressionConstraint(notEqualsConstraint.getRight(), dependenciesList));
+        } else if (uvlConstraint instanceof LowerEquationConstraint) {
+            LowerEquationConstraint lowerConstraint = (LowerEquationConstraint) uvlConstraint;
+            return new LessThan(
+                    parseExpressionConstraint(lowerConstraint.getLeft(), dependenciesList),
+                    parseExpressionConstraint(lowerConstraint.getRight(), dependenciesList));
+        } else if (uvlConstraint instanceof GreaterEquationConstraint) {
+            GreaterEquationConstraint greaterConstraint = (GreaterEquationConstraint) uvlConstraint;
+            return new GreaterThan(
+                    parseExpressionConstraint(greaterConstraint.getLeft(), dependenciesList),
+                    parseExpressionConstraint(greaterConstraint.getRight(), dependenciesList));
+        }
+
+        throw new UVLConversionException(uvlConstraint.getClass().getSimpleName() + " is not supported.");
+    }
+
+    private static ITerm parseExpressionConstraint(Expression expression, List<DefLiteral> dependenciesList)
+            throws UVLConversionException {
+        if (expression instanceof LiteralExpression) {
+            LiteralExpression literalExpression = (LiteralExpression) expression;
+            VariableReference content = literalExpression.getContent();
+
+            if (content instanceof Feature) {
+                Feature uvlFeature = (Feature) content;
+                String variableName = uvlFeature.getFeatureName();
+                Class<?> variableType = getFeatureType(uvlFeature);
+                Variable variable = new Variable(variableName, variableType);
+                if (variableType != Boolean.class) {
+                    dependenciesList.add(new DefLiteral(variable));
+                }
+                return variable;
+            } else if (content instanceof Attribute) {
+                Attribute<?> uvlAttribute = (Attribute<?>) content;
+                return new Constant(uvlAttribute.getValue());
+            }
+        } else if (expression instanceof ParenthesisExpression) {
+            ParenthesisExpression parenthesisExpression = (ParenthesisExpression) expression;
+            return parseExpressionConstraint(parenthesisExpression.getContent(), dependenciesList);
+        } else if (expression instanceof NumberExpression) {
+            NumberExpression numberExpression = (NumberExpression) expression;
+            return new Constant(numberExpression.getNumber());
+        } else if (expression instanceof StringExpression) {
+            StringExpression stringExpression = (StringExpression) expression;
+            return new Constant(stringExpression.getString(), String.class);
+        } else if (expression instanceof AddExpression) {
+            AddExpression addExpression = (AddExpression) expression;
+            return new IntegerAdd(
+                    parseExpressionConstraint(addExpression.getLeft(), dependenciesList),
+                    parseExpressionConstraint(addExpression.getRight(), dependenciesList));
+        } else if (expression instanceof SubExpression) {
+            SubExpression subExpression = (SubExpression) expression;
+            return new IntegerAdd(
+                    parseExpressionConstraint(subExpression.getLeft(), dependenciesList),
+                    new IntegerMultiply(
+                            new Constant(-1l), parseExpressionConstraint(subExpression.getRight(), dependenciesList)));
+        } else if (expression instanceof MulExpression) {
+            MulExpression mulExpression = (MulExpression) expression;
+            return new IntegerMultiply(
+                    parseExpressionConstraint(mulExpression.getLeft(), dependenciesList),
+                    parseExpressionConstraint(mulExpression.getRight(), dependenciesList));
+        } else if (expression instanceof DivExpression) {
+            DivExpression divExpression = (DivExpression) expression;
+            return new IntegerDivide(
+                    parseExpressionConstraint(divExpression.getLeft(), dependenciesList),
+                    parseExpressionConstraint(divExpression.getRight(), dependenciesList));
+        } else if (expression instanceof LengthAggregateFunctionExpression) {
+            LengthAggregateFunctionExpression lenghtAggregateExpression =
+                    (LengthAggregateFunctionExpression) expression;
+            String variableName = lenghtAggregateExpression.getReference().getIdentifier();
+            Variable variable = new Variable(variableName, String.class);
+            dependenciesList.add(new DefLiteral(variable));
+            return new StringLength(variable);
+        }
+
+        throw new UVLConversionException(expression.getClass().getSimpleName() + " is not supported.");
     }
 
     /**
@@ -230,7 +388,7 @@ public class UVLFeatureModelToFeatureTree {
      * @return FeatJAR feature type.
      * @throws ParseException if a parsing error occurs
      */
-    private static Class<?> getFeatureType(de.vill.model.Feature uvlFeature) throws ParseException {
+    private static Class<?> getFeatureType(Feature uvlFeature) throws UVLConversionException {
         FeatureType featureType = uvlFeature.getFeatureType();
         if (featureType == null) {
             return Boolean.class;
@@ -245,7 +403,7 @@ public class UVLFeatureModelToFeatureTree {
                 case STRING:
                     return String.class;
                 default:
-                    throw new ParseException(String.valueOf(featureType));
+                    throw new UVLConversionException(String.valueOf(featureType));
             }
         }
     }
@@ -255,7 +413,7 @@ public class UVLFeatureModelToFeatureTree {
      * @param feature UVL feature to retrieve the name and namespace.
      * @return Name of the feature. If the feature has a namespace, the return value will be in the following format: {@literal <namespace>::<feature name>}
      */
-    private static String getName(de.vill.model.Feature feature) {
+    private static String getName(Feature feature) {
         String nameSpace = feature.getNameSpace();
         return (nameSpace != null && !nameSpace.isBlank() ? nameSpace + "::" : "") + feature.getFeatureName();
     }
@@ -269,7 +427,7 @@ public class UVLFeatureModelToFeatureTree {
      * @param <T> the type of the attribute
      */
     @SuppressWarnings("unchecked")
-    private static <T> T getAttributeValue(de.vill.model.Feature feature, String key, T defaultValue) {
+    private static <T> T getAttributeValue(Feature feature, String key, T defaultValue) {
         return Optional.ofNullable(feature.getAttributes().get(key))
                 .map(a -> (T) a.getValue())
                 .orElse(defaultValue);
