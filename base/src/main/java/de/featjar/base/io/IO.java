@@ -753,6 +753,17 @@ public class IO {
     }
 
     /**
+     * Appends a string to a physical file.
+     *
+     * @param string the string
+     * @param path   the path
+     * @throws IOException if an I/O error occurs
+     */
+    public static void append(String string, Path path) throws IOException {
+        Files.write(path, string.getBytes(DEFAULT_CHARSET), StandardOpenOption.APPEND);
+    }
+
+    /**
      * Reads a string from a physical file.
      *
      * @param path   the path
