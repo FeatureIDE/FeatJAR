@@ -52,7 +52,10 @@ public class Process implements Supplier<Result<List<String>>> {
     private final Map<String, String> environmentVariables;
     private final List<String> arguments;
     private final Duration timeout;
+
     private boolean errorOccurred;
+    private boolean terminatedInTime;
+
     /**
      * Constructs a new process object.
      * @param executablePath the path to the executable
@@ -112,6 +115,14 @@ public class Process implements Supplier<Result<List<String>>> {
         this.timeout = timeout;
     }
 
+    public boolean isErrorOccurred() {
+        return errorOccurred;
+    }
+
+    public boolean isTerminatedInTime() {
+        return terminatedInTime;
+    }
+
     /**
      * Starts the process and lets it run in a separate thread.
      *
@@ -144,7 +155,7 @@ public class Process implements Supplier<Result<List<String>>> {
             return result.map(r -> output);
         } else {
             if (error.isEmpty()) {
-                return result.map(r -> null);
+                return result.nullify();
             } else {
                 return Result.empty(new Problem(error.stream().collect(Collectors.joining("\n")), Severity.ERROR));
             }
@@ -162,6 +173,8 @@ public class Process implements Supplier<Result<List<String>>> {
      * @see #run(Consumer, Consumer)
      */
     public Result<Void> run(String input, Consumer<String> outConsumer, Consumer<String> errConsumer) {
+        errorOccurred = false;
+        terminatedInTime = false;
         java.lang.Process process = null;
         try {
             Instant start = Instant.now();
@@ -170,14 +183,18 @@ public class Process implements Supplier<Result<List<String>>> {
                 process.getOutputStream().write(input.getBytes(StandardCharsets.UTF_8));
                 process.getOutputStream().close();
             }
-            consumeInputStream(process.getInputStream(), outConsumer, false);
-            consumeInputStream(process.getErrorStream(), errConsumer, true);
-            boolean terminatedInTime = true;
-            if (timeout != null && !timeout.isZero())
+            final Thread outputReaderThread = consumeInputStream(process.getInputStream(), outConsumer, false);
+            final Thread errorReaderThread = consumeInputStream(process.getErrorStream(), errConsumer, true);
+            if (timeout != null && !timeout.isZero()) {
                 terminatedInTime = process.waitFor(timeout.toMillis(), TimeUnit.MILLISECONDS);
-            else process.waitFor();
+            } else {
+                process.waitFor();
+                terminatedInTime = true;
+            }
             long elapsedTime = Duration.between(start, Instant.now()).toMillis();
             final int exitValue = process.exitValue();
+            outputReaderThread.join();
+            errorReaderThread.join();
             Result<Void> result;
             if (!errorOccurred) {
                 result = Result.ofVoid();
@@ -222,20 +239,22 @@ public class Process implements Supplier<Result<List<String>>> {
         return run(null, null, null);
     }
 
-    private void consumeInputStream(InputStream inputStream, Consumer<String> consumer, boolean isError) {
+    private Thread consumeInputStream(InputStream inputStream, Consumer<String> consumer, boolean isError) {
         if (consumer != null) {
-            new Thread(() -> {
-                        try (BufferedReader reader =
-                                new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
-                            for (String line = reader.readLine(); line != null; line = reader.readLine()) {
-                                consumer.accept(line);
-                                if (isError) errorOccurred = true;
-                            }
-                        } catch (final IOException e) {
-                            FeatJAR.log().error(e);
-                        }
-                    })
-                    .start();
+            final Thread thread = new Thread(() -> {
+                try (BufferedReader reader =
+                        new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
+                    for (String line = reader.readLine(); line != null; line = reader.readLine()) {
+                        consumer.accept(line);
+                        if (isError) errorOccurred = true;
+                    }
+                } catch (final IOException e) {
+                    FeatJAR.log().error(e);
+                }
+            });
+            thread.start();
+            return thread;
         }
+        return null;
     }
 }
