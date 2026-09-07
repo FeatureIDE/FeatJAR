@@ -38,4 +38,5 @@ tasks.named('shadowJar', com.github.jengelman.gradle.plugins.shadow.tasks.Shadow
 	transform(com.github.jengelman.gradle.plugins.shadow.transformers.XmlAppendingTransformer) {
 		resource = 'extensions.xml'
 	}
+	archiveFileName.set("feat.jar")
 }
