@@ -21,6 +21,7 @@
 package de.featjar.analysis.ganak.cli;
 
 import de.featjar.analysis.AAnalysisCommand;
+import de.featjar.analysis.ganak.computation.AGanakAnalysis;
 import de.featjar.base.cli.Option;
 import de.featjar.base.cli.OptionList;
 import de.featjar.base.cli.Options;
@@ -34,6 +35,7 @@ import de.featjar.formula.computation.ComputeCNFFormula;
 import de.featjar.formula.computation.ComputeNNFFormula;
 import de.featjar.formula.io.FormulaFormats;
 import de.featjar.formula.structure.IFormula;
+import java.util.Arrays;
 
 /**
  * A command which computes an analysis result for a formula using Ganak.
@@ -55,6 +57,11 @@ public abstract class AGanakAnalysisCommand<T> extends AAnalysisCommand<T> {
     public static final Option<IFormatSupplier<IFormula>> INPUT_FORMAT =
             Options.newInputFormatOption(FormulaFormats.class);
 
+    /**
+     * Option for providing arbitrary arguments to ganak.
+     */
+    public static final Option<String> GANAK_PARAMETERS = Options.newOption("ganak-args", Options.StringParser);
+
     protected IFormula inputFormula;
     protected VariableMap variableMap;
 
@@ -62,7 +69,7 @@ public abstract class AGanakAnalysisCommand<T> extends AAnalysisCommand<T> {
     protected IComputation<T> newComputation(OptionList optionParser) {
         Result<IFormula> parseResult = readFromInput(optionParser, optionParser.get(INPUT_FORMAT));
 
-        return newAnalysis(
+        final AGanakAnalysis<T> newAnalysis = newAnalysis(
                 optionParser,
                 parseResult
                         .toComputation()
@@ -71,8 +78,12 @@ public abstract class AGanakAnalysisCommand<T> extends AAnalysisCommand<T> {
                         .map(ComputeBooleanClauseList::new)
                         .peekResult(
                                 getClass(), "variableMap", clauseList -> variableMap = clauseList.getVariableMap()));
+        optionParser
+                .getResult(GANAK_PARAMETERS)
+                .ifPresent(args -> newAnalysis.set(AGanakAnalysis.PARAMETERS, Arrays.asList(args.split("\s+"))));
+        return newAnalysis;
     }
 
-    protected abstract IComputation<T> newAnalysis(
+    protected abstract AGanakAnalysis<T> newAnalysis(
             OptionList optionParser, IComputation<BooleanAssignmentList> formula);
 }

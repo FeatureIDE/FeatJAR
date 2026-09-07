@@ -34,6 +34,8 @@ import de.featjar.formula.io.dimacs.BooleanAssignmentListDimacsFormat;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.regex.Matcher;
@@ -44,7 +46,10 @@ import java.util.regex.Pattern;
  */
 public class GanakSolver implements ISolver {
     protected final BooleanAssignmentList formula;
+
     protected Duration timeout = Duration.ZERO;
+    protected List<String> parameters = new ArrayList<>(0);
+
     protected boolean isTimeoutOccurred;
 
     /**
@@ -68,6 +73,17 @@ public class GanakSolver implements ISolver {
         Objects.requireNonNull(timeout);
         FeatJAR.log().debug("setting timeout to " + timeout);
         this.timeout = timeout;
+    }
+
+    public List<String> getParameters() {
+        return Collections.unmodifiableList(parameters);
+    }
+
+    public void setParamters(List<String> parameters) {
+        Objects.requireNonNull(parameters);
+        FeatJAR.log().debug(() -> "setting parameters to " + parameters);
+        this.parameters.clear();
+        this.parameters.addAll(parameters);
     }
 
     public boolean isTimeoutOccurred() {
@@ -102,12 +118,12 @@ public class GanakSolver implements ISolver {
     public Result<BigInteger> countSolution(BooleanAssignment include) {
         isTimeoutOccurred = false;
 
+        final boolean projected = include != null;
+
         // the input format of the Ganak Solver requires a comment which indicates the type of model counting
         // at the beginning of the file, here pmc stands for projected model counting
         StringBuilder fileContent = new StringBuilder();
-        fileContent.append("c t ");
-        fileContent.append(include != null ? "pmc" : "mc");
-        fileContent.append(" \n");
+        fileContent.append("c t ").append(projected ? "pmc" : "mc").append(" \n");
 
         // append the formula in DIMACS-format to the file
         try {
@@ -117,7 +133,7 @@ public class GanakSolver implements ISolver {
             return Result.empty(e);
         }
 
-        if (include != null) {
+        if (projected) {
             // construct a DIMACS comment which indicates which variables are in the projection set
             fileContent.append("c p show ");
             for (int index : include.get()) {
@@ -129,8 +145,11 @@ public class GanakSolver implements ISolver {
         try (TempFile tempFile = new TempFile("ganakInput", ".dimacs")) {
             IO.write(fileContent.toString(), tempFile.getPath());
 
-            final Process process = FeatJAR.extension(GanakBinary.class)
-                    .getProcess(List.of(tempFile.getPath().toString()), timeout);
+            final ArrayList<String> args = new ArrayList<>(1 + parameters.size());
+            args.add(tempFile.getPath().toString());
+            args.addAll(parameters);
+
+            final Process process = FeatJAR.extension(GanakBinary.class).getProcess(args, timeout);
             final Result<List<String>> result = process.get();
             isTimeoutOccurred = !process.isTerminatedInTime();
             return result.mapResult(this::parseCount);

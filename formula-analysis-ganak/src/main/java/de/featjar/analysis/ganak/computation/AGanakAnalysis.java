@@ -40,8 +40,12 @@ public abstract class AGanakAnalysis<T> extends AComputation<T> {
             Dependency.newDependency(BooleanAssignmentList.class);
     public static final Dependency<Duration> TIMEOUT = Dependency.newDependency(Duration.class);
 
+    @SuppressWarnings("unchecked")
+    public static final Dependency<List<String>> PARAMETERS =
+            Dependency.newDependency((Class<List<String>>) (Class<?>) List.class);
+
     public AGanakAnalysis(IComputation<BooleanAssignmentList> formula, Object... dependencies) {
-        super(formula, Computations.of(Duration.ZERO), dependencies);
+        super(formula, Computations.of(Duration.ZERO), Computations.of(List.of()), dependencies);
     }
 
     public AGanakAnalysis(AGanakAnalysis<?> other) {
@@ -50,11 +54,11 @@ public abstract class AGanakAnalysis<T> extends AComputation<T> {
 
     public GanakSolver initializeSolver(List<Object> dependencyList) {
         BooleanAssignmentList formula = FORMULA.get(dependencyList);
-        Duration timeout = TIMEOUT.get(dependencyList);
         FeatJAR.log().debug("initializing ganak solver");
         FeatJAR.log().debug(formula);
         GanakSolver solver = new GanakSolver(formula);
-        solver.setTimeout(timeout);
+        solver.setTimeout(TIMEOUT.get(dependencyList));
+        solver.setParamters(PARAMETERS.get(dependencyList));
         return solver;
     }
 }
