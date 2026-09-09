@@ -2,8 +2,8 @@
 **/.gradle/
 
 # Build
-**/bin/
-**/build/
+/*/bin/
+/*/build/
 
 # Intelij
 **/.idea/
