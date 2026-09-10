@@ -41,6 +41,13 @@ public class LogOptions implements IHasOptions {
             .setDescription("Suppress all unnecessary output. (Overwrites --log-info and --log-error options)");
 
     /**
+     * Option for writing debug output to the console.
+     */
+    public static final Option<Boolean> DEBUG_OPTION = Options.newFlag("debug")
+            .setDescription(
+                    "Add debug information to the console output. (Overwrites --log-info and --log-error options)");
+
+    /**
      * Option for writing progress regularly to the console.
      */
     public static final Option<Boolean> PROGRESS_OPTION =

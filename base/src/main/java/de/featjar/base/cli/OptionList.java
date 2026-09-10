@@ -25,6 +25,7 @@ import de.featjar.base.FeatJAR.Configuration;
 import de.featjar.base.data.Problem;
 import de.featjar.base.data.Problem.Severity;
 import de.featjar.base.data.Result;
+import de.featjar.base.log.CallerFormatter;
 import de.featjar.base.log.IndentStringBuilder;
 import de.featjar.base.log.Log;
 import de.featjar.base.log.Log.Verbosity;
@@ -595,6 +596,22 @@ public class OptionList {
             } else {
                 configuration.logConfig.logToSystemOut(Log.Verbosity.MESSAGE);
             }
+        }
+        if (get(LogOptions.DEBUG_OPTION)) {
+            if (get(LogOptions.PROGRESS_OPTION)) {
+                configuration.useProgressThread = true;
+                configuration.logConfig.logToSystemOut(
+                        Log.Verbosity.MESSAGE, Log.Verbosity.INFO, Log.Verbosity.DEBUG, Log.Verbosity.PROGRESS);
+            } else {
+                configuration.logConfig.logToSystemOut(Log.Verbosity.MESSAGE, Log.Verbosity.INFO, Log.Verbosity.DEBUG);
+            }
+            configuration
+                    .logConfig
+                    .logToSystemErr(Log.Verbosity.WARNING, Log.Verbosity.ERROR)
+                    .setPrintStacktrace(true)
+                    .addFormatter(new TimeStampFormatter())
+                    .addFormatter(new VerbosityFormatter())
+                    .addFormatter(new CallerFormatter());
         } else {
             configuration.useProgressThread = get(LogOptions.PROGRESS_OPTION);
             configuration

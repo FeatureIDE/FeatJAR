@@ -135,8 +135,8 @@ public class Process implements Supplier<Result<List<String>>> {
         command.add(executablePath.toString());
         command.addAll(arguments);
 
-        FeatJAR.log().debug(String.join(" ", command));
-        FeatJAR.log().debug(environmentVariables);
+        FeatJAR.log().debug("process command: %s", String.join(" ", command));
+        FeatJAR.log().debug("process environment: %s", environmentVariables);
 
         final ProcessBuilder processBuilder = new ProcessBuilder(command);
         processBuilder.environment().putAll(environmentVariables);

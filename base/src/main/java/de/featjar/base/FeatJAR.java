@@ -196,6 +196,7 @@ public final class FeatJAR extends IO implements AutoCloseable {
                 .logConfig
                 .logToSystemOut(Log.Verbosity.MESSAGE, Log.Verbosity.INFO, Log.Verbosity.DEBUG, Log.Verbosity.PROGRESS)
                 .logToSystemErr(Log.Verbosity.ERROR, Log.Verbosity.WARNING)
+                .setPrintStacktrace(true)
                 .addFormatter(new TimeStampFormatter())
                 .addFormatter(new VerbosityFormatter());
         configuration.cacheConfig.setCachePolicy(Cache.CachePolicy.CACHE_NONE);
