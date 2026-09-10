@@ -20,31 +20,42 @@
  */
 package de.featjar.analysis.javasmt.bin;
 
-import de.featjar.base.data.Sets;
 import de.featjar.base.env.ABinary;
-import de.featjar.base.env.HostEnvironment;
+import de.featjar.base.env.HostEnvironment.OperatingSystem;
 import java.io.IOException;
 import java.lang.reflect.Field;
-import java.util.LinkedHashSet;
 import org.sosy_lab.common.NativeLibraries;
 
 public class JavaSMTBinary extends ABinary {
+
     public JavaSMTBinary() throws IOException {
+        super();
         Field nativePathField;
         try {
             nativePathField = NativeLibraries.class.getDeclaredField("nativePath");
             nativePathField.setAccessible(true);
-            nativePathField.set(null, ABinary.BINARY_DIRECTORY);
+            nativePathField.set(null, getDirectory());
         } catch (NoSuchFieldException | IllegalAccessException ignored) {
         }
     }
 
     @Override
-    public LinkedHashSet<String> getResourceNames() {
-        return HostEnvironment.isWindows()
-                ? Sets.of("mpir.dll", "mathsat.dll", "mathsat5j.dll", "libz3.dll", "libz3java.dll")
-                : HostEnvironment.isMacOS()
-                        ? Sets.of("libmathsat5j.so", "libz3.dylib", "libz3java.dylib")
-                        : Sets.of("libmathsat5j.so", "libz3.so", "libz3java.so");
+    public String getCategory() {
+        return "solver";
+    }
+
+    @Override
+    protected String getName() {
+        return "javasmt";
+    }
+
+    protected String getOSResourceDirectory(OperatingSystem os) {
+        return switch (os) {
+            case WINDOWS -> "win";
+            case MAC_OS -> "mac";
+            case LINUX -> "unix";
+            case UNKNOWN -> "unkown";
+            default -> throw new IllegalStateException("Unexpected value: " + os);
+        };
     }
 }

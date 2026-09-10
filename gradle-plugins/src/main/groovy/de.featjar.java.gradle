@@ -37,6 +37,10 @@ java {
     withJavadocJar()
 }
 
+jar {
+    preserveFileTimestamps = true
+}
+
 javadoc {
     failOnError = false
     javadoc.options.addStringOption('Xdoclint:none', '-quiet')
@@ -78,21 +82,6 @@ license {
         java = 'SLASHSTAR_STYLE'
     }
 }
-
-task copyBinaries (type: Copy) {
-    from 'src/main/resources/bin/.'
-    into System.getProperty('user.home') + '/.featjar-bin'
-    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-    filePermissions {
-     user {
-         write = true
-         read = true
-         execute = true
-     }
-     other.execute = false
- }
-}
-tasks.matching { it != copyBinaries }.all { it.dependsOn copyBinaries }
 
 spotless {
     enforceCheck = false // TODO: discuss whether to enable always

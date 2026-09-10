@@ -12,18 +12,19 @@ application {
 }
 
 jar {
-  manifest {
-    attributes(
-      'Main-Class': 'de.featjar.base.FeatJAR'
-    )
-  }
+    manifest {
+        attributes(
+            'Main-Class': 'de.featjar.base.FeatJAR'
+        )
+    }
 }
 
 tasks.named('shadowJar', com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar) {
-  duplicatesStrategy = DuplicatesStrategy.INCLUDE
-  transform(com.github.jengelman.gradle.plugins.shadow.transformers.XmlAppendingTransformer) {
-    resource = 'extensions.xml'
-  }
+    duplicatesStrategy = DuplicatesStrategy.INCLUDE
+    transform(com.github.jengelman.gradle.plugins.shadow.transformers.XmlAppendingTransformer) {
+        resource = 'extensions.xml'
+    }
+    preserveFileTimestamps = true
 }
 
 shadow {

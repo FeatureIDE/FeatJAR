@@ -20,22 +20,31 @@
  */
 package de.featjar.analysis.sharpsat.bin;
 
-import de.featjar.base.data.Sets;
 import de.featjar.base.env.ABinary;
 import de.featjar.base.env.HostEnvironment;
-import java.io.IOException;
-import java.util.LinkedHashSet;
+import de.featjar.base.env.HostEnvironment.OperatingSystem;
+import java.util.Optional;
 
 public class SharpSATBinary extends ABinary {
-    public SharpSATBinary() throws IOException {}
 
     @Override
-    public String getExecutableName() {
-        return HostEnvironment.isWindows() ? "sharpSAT.exe" : "sharpSAT";
+    public String getCategory() {
+        return "solver";
     }
 
     @Override
-    public LinkedHashSet<String> getResourceNames() {
-        return HostEnvironment.isWindows() ? Sets.of("sharpSAT.exe", "gmp-10.dll") : Sets.of("sharpSAT");
+    protected String getName() {
+        return "sharpsat";
+    }
+
+    @Override
+    public Optional<String> getExecutableName() {
+        final OperatingSystem os = HostEnvironment.OPERATING_SYSTEM;
+        return switch (os) {
+            case WINDOWS -> Optional.of("sharpsat");
+            case MAC_OS, LINUX -> Optional.of("sharpsat");
+            case UNKNOWN -> Optional.empty();
+            default -> throw new IllegalStateException("Unexpected value" + os);
+        };
     }
 }

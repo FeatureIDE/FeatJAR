@@ -20,22 +20,30 @@
  */
 package de.featjar.analysis.kissat.bin;
 
-import de.featjar.base.data.Sets;
 import de.featjar.base.env.ABinary;
 import de.featjar.base.env.HostEnvironment;
-import java.io.IOException;
-import java.util.LinkedHashSet;
+import de.featjar.base.env.HostEnvironment.OperatingSystem;
+import java.util.Optional;
 
 public class KissatBinary extends ABinary {
-    public KissatBinary() throws IOException {}
 
     @Override
-    public String getExecutableName() {
-        return HostEnvironment.isWindows() ? "" : "kissat";
+    public String getCategory() {
+        return "solver";
     }
 
     @Override
-    public LinkedHashSet<String> getResourceNames() {
-        return HostEnvironment.isWindows() ? Sets.of("") : Sets.of("kissat");
+    protected String getName() {
+        return "kissat";
+    }
+
+    @Override
+    public Optional<String> getExecutableName() {
+        final OperatingSystem os = HostEnvironment.OPERATING_SYSTEM;
+        return switch (os) {
+            case MAC_OS, LINUX -> Optional.of("kissat");
+            case WINDOWS, UNKNOWN -> Optional.empty();
+            default -> throw new IllegalStateException("Unexpected value" + os);
+        };
     }
 }

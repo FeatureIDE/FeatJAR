@@ -20,22 +20,24 @@
  */
 package de.featjar.analysis.cadical.bin;
 
-import de.featjar.base.data.Sets;
 import de.featjar.base.env.ABinary;
 import de.featjar.base.env.HostEnvironment;
-import java.io.IOException;
-import java.util.LinkedHashSet;
+import java.util.Optional;
 
 public class CadiBackBinary extends ABinary {
-    public CadiBackBinary() throws IOException {}
 
     @Override
-    public String getExecutableName() {
-        return HostEnvironment.isWindows() ? "" : "cadiback";
+    public String getCategory() {
+        return "solver";
     }
 
     @Override
-    public LinkedHashSet<String> getResourceNames() {
-        return HostEnvironment.isWindows() ? Sets.of("") : Sets.of("cadiback");
+    protected String getName() {
+        return "cadiback";
+    }
+
+    @Override
+    public Optional<String> getExecutableName() {
+        return HostEnvironment.isWindows() ? Optional.empty() : Optional.of("cadiback");
     }
 }

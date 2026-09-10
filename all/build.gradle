@@ -28,6 +28,10 @@ application {
 	mainClass = 'de.featjar.base.FeatJAR'
 }
 
+jar {
+    preserveFileTimestamps = true
+}
+
 java {
     sourceCompatibility = JavaVersion.VERSION_21
     targetCompatibility = JavaVersion.VERSION_21
@@ -39,4 +43,5 @@ tasks.named('shadowJar', com.github.jengelman.gradle.plugins.shadow.tasks.Shadow
 		resource = 'extensions.xml'
 	}
 	archiveFileName.set("feat.jar")
+    preserveFileTimestamps = true
 }

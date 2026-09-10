@@ -20,16 +20,25 @@
  */
 package de.featjar.base.env;
 
+import de.featjar.base.FeatJAR;
+import de.featjar.base.env.HostEnvironment.OperatingSystem;
 import de.featjar.base.extension.IExtension;
 import java.io.IOException;
+import java.net.URI;
+import java.nio.file.FileSystem;
+import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.nio.file.attribute.FileTime;
 import java.time.Duration;
-import java.util.LinkedHashSet;
+import java.time.Instant;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
+import java.util.Objects;
+import java.util.Optional;
 
 /**
  * A native binary bundled with FeatJAR.
@@ -44,37 +53,60 @@ public abstract class ABinary implements IExtension {
     /**
      * The directory used to store native binaries.
      */
-    public static final Path BINARY_DIRECTORY = Paths.get(HostEnvironment.HOME_DIRECTORY, ".featjar-bin");
+    private static final Path FEATJAR_BINARY_DIRECTORY = Paths.get(HostEnvironment.HOME_DIRECTORY, ".featjar-bin");
 
     /**
      * Initializes a native binary by extracting all its resources into the binary directory.
      *
      * @throws IOException if binary cannot be found or moved
      */
-    public ABinary() throws IOException {
-        extractResources(getResourceNames());
+    public ABinary() {
+        extractResources();
     }
 
     /**
-     * {@return the names of all resources (i.e., executables and libraries) to be extracted for this binary}
-     * All names are relative to the {@code src/main/resources/bin} directory.
+     * {@return the name of the project this binary is located in}
      */
-    protected abstract LinkedHashSet<String> getResourceNames();
+    protected abstract String getCategory();
+
+    /**
+     * {@return the name of this binary}
+     */
+    protected abstract String getName();
+
+    /**
+     * {@return the name of directory where files for the given operating system are located}
+     */
+    protected String getOSResourceDirectory(OperatingSystem os) {
+        return switch (os) {
+            case WINDOWS -> "win";
+            case MAC_OS, LINUX -> "unix";
+            case UNKNOWN -> "unkown";
+            default -> throw new IllegalStateException("Unexpected value: " + os);
+        };
+    }
 
     /**
      * {@return the name of this binary's executable}
-     * Returns {@code null} if this binary has no executable (i.e., it only provides library files).
+     * Returns an empty Optional if this binary has no executable (i.e., it only provides library files).
      */
-    protected String getExecutableName() {
-        return null;
+    protected Optional<String> getExecutableName() {
+        return Optional.empty();
     }
 
     /**
      * {@return the path to this binary's executable, if any}
-     * Returns {@code null} if this binary has no executable (i.e., it only provides library files).
+     * Returns an empty Optional if this binary has no executable (i.e., it only provides library files).
      */
-    public final Path getExecutablePath() {
-        return getExecutableName() != null ? BINARY_DIRECTORY.resolve(getExecutableName()) : null;
+    public final Optional<Path> getExecutablePath() {
+        return getExecutableName().map(name -> getDirectory().resolve(name));
+    }
+
+    /**
+     * {@return the path to this binary's directory}
+     */
+    public final Path getDirectory() {
+        return FEATJAR_BINARY_DIRECTORY.resolve(getCategory()).resolve(getName());
     }
 
     /**
@@ -86,7 +118,12 @@ public abstract class ABinary implements IExtension {
      * @return the output of the process as a line stream, if any
      */
     public Process getProcess(List<String> arguments, Duration timeout) {
-        return new Process(getExecutablePath(), arguments, timeout);
+        final Optional<Path> executablePath = getExecutablePath();
+        if (executablePath.isEmpty()) {
+            throw new UnsupportedOperationException("No executable available");
+        } else {
+            return new Process(executablePath.get(), arguments, timeout);
+        }
     }
 
     /**
@@ -107,27 +144,70 @@ public abstract class ABinary implements IExtension {
      * @param resourceNames the names of the available resources, where the binary can be found
      * @throws IOException if binary cannot be found or moved
      */
-    @SuppressWarnings("ResultOfMethodCallIgnored")
-    protected void extractResources(LinkedHashSet<String> resourceNames) throws IOException {
-        Files.createDirectories(BINARY_DIRECTORY);
-        for (String resourceName : resourceNames) {
-            final Path outputPath = BINARY_DIRECTORY.resolve(resourceName);
-            if (Files.notExists(outputPath)) {
-                JARs.extractResource("bin/" + resourceName, outputPath);
-                outputPath.toFile().setExecutable(true);
-            } else if (isNewer(resourceName, outputPath)) {
-                Files.delete(outputPath);
-                JARs.extractResource("bin/" + resourceName, outputPath);
-                outputPath.toFile().setExecutable(true);
+    protected void extractResources() {
+        final Path outputDir = getDirectory();
+
+        final String resourceDirName = String.format(
+                "de/featjar/binary/%s/%s/%s",
+                getCategory(), getName(), getOSResourceDirectory(HostEnvironment.OPERATING_SYSTEM));
+        final Path resourceDir;
+        FileSystem jarFileSystem = null;
+        try {
+            final URI uri = ClassLoader.getSystemClassLoader()
+                    .getResource(resourceDirName)
+                    .toURI();
+            if ("jar".equals(uri.getScheme())) {
+                jarFileSystem = FileSystems.newFileSystem(uri, Collections.emptyMap(), null);
+                resourceDir = jarFileSystem.getPath(resourceDirName);
+            } else {
+                resourceDir = Path.of(uri);
+            }
+            if (!Files.exists(resourceDir)) {
+                FeatJAR.log()
+                        .warning(
+                                "Binary %s:%s has no files for operating system %s.",
+                                getCategory(), getName(), HostEnvironment.OPERATING_SYSTEM);
+                return;
+            }
+            final Optional<Path> executablePath = getExecutablePath();
+            Files.walk(resourceDir).skip(1).filter(Files::isRegularFile).forEach(resourceFile -> {
+                final Path outputFile =
+                        outputDir.resolve(resourceDir.relativize(resourceFile).toString());
+                // Replace if resourceFile file is newer
+                if (Comparator.comparing(this::lastModified).compare(resourceFile, outputFile) > 0) {
+                    FeatJAR.log().debug("Copying %s to %s", resourceFile.toString(), outputFile.toString());
+                    try {
+                        Files.deleteIfExists(outputFile);
+                        Files.createDirectories(outputDir);
+                        Files.copy(resourceFile, outputFile);
+                    } catch (IOException e) {
+                        FeatJAR.log().error(e);
+                    }
+                    if (executablePath.isPresent()) {
+                        if (Objects.equals(outputFile, executablePath.get())) {
+                            outputFile.toFile().setExecutable(true);
+                        }
+                    }
+                }
+            });
+        } catch (Exception e) {
+            FeatJAR.log().error(e);
+        } finally {
+            if (jarFileSystem != null) {
+                try {
+                    jarFileSystem.close();
+                } catch (IOException e) {
+                    FeatJAR.log().error(e);
+                }
             }
         }
     }
 
-    private boolean isNewer(String resourceName, Path outputPath) throws IOException {
-        final long localFile = Files.readAttributes(outputPath, BasicFileAttributes.class)
-                .lastModifiedTime()
-                .to(TimeUnit.MILLISECONDS);
-        final long jarFile = JARs.getLastModificationDate("bin/" + resourceName);
-        return jarFile > localFile;
+    private FileTime lastModified(Path p) {
+        try {
+            return Files.readAttributes(p, BasicFileAttributes.class).creationTime();
+        } catch (IOException e) {
+            return FileTime.from(Instant.MIN);
+        }
     }
 }

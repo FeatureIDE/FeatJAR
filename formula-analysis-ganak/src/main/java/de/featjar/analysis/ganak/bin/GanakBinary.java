@@ -20,26 +20,34 @@
  */
 package de.featjar.analysis.ganak.bin;
 
-import de.featjar.base.data.Sets;
 import de.featjar.base.env.ABinary;
 import de.featjar.base.env.HostEnvironment;
-import java.io.IOException;
-import java.util.LinkedHashSet;
+import de.featjar.base.env.HostEnvironment.OperatingSystem;
+import java.util.Optional;
 
 /**
  * A native binary for the Ganak Solver bundled with FeatJAR.
  * For more information, see {@link ABinary}.
  */
 public class GanakBinary extends ABinary {
-    public GanakBinary() throws IOException {}
 
     @Override
-    public String getExecutableName() {
-        return HostEnvironment.isWindows() ? "" : "ganak";
+    public String getCategory() {
+        return "solver";
     }
 
     @Override
-    public LinkedHashSet<String> getResourceNames() {
-        return HostEnvironment.isWindows() ? Sets.of("") : Sets.of("ganak");
+    protected String getName() {
+        return "ganak";
+    }
+
+    @Override
+    public Optional<String> getExecutableName() {
+        final OperatingSystem os = HostEnvironment.OPERATING_SYSTEM;
+        return switch (os) {
+            case MAC_OS, LINUX -> Optional.of("ganak");
+            case WINDOWS, UNKNOWN -> Optional.empty();
+            default -> throw new IllegalStateException("Unexpected value" + os);
+        };
     }
 }

@@ -20,22 +20,31 @@
  */
 package de.featjar.analysis.ddnnife.bin;
 
-import de.featjar.base.data.Sets;
 import de.featjar.base.env.ABinary;
 import de.featjar.base.env.HostEnvironment;
-import java.io.IOException;
-import java.util.LinkedHashSet;
+import de.featjar.base.env.HostEnvironment.OperatingSystem;
+import java.util.Optional;
 
 public class DdnnifeBinary extends ABinary {
-    public DdnnifeBinary() throws IOException {}
 
     @Override
-    public String getExecutableName() {
-        return HostEnvironment.isWindows() ? "ddnnife.exe" : "ddnnife";
+    public String getCategory() {
+        return "solver";
     }
 
     @Override
-    public LinkedHashSet<String> getResourceNames() {
-        return HostEnvironment.isWindows() ? Sets.of("ddnnife.exe") : Sets.of("ddnnife");
+    protected String getName() {
+        return "ddnnife";
+    }
+
+    @Override
+    public Optional<String> getExecutableName() {
+        final OperatingSystem os = HostEnvironment.OPERATING_SYSTEM;
+        return switch (os) {
+            case WINDOWS -> Optional.of("ddnnife.exe");
+            case MAC_OS, LINUX -> Optional.of("ddnnife");
+            case UNKNOWN -> Optional.empty();
+            default -> throw new IllegalStateException("Unexpected value" + os);
+        };
     }
 }
