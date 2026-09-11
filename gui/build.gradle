@@ -1,0 +1,31 @@
+plugins {
+    id 'de.featjar.java-library'
+}
+
+dependencies {
+    api 'de.featjar:gui-server'
+    runtimeOnly 'org.apache.logging.log4j:log4j-core:2.24.3'
+}
+
+task copyDependencies(type: Copy) {
+    from (sourceSets.main.runtimeClasspath) {
+        include '*.jar'
+    }
+    into "${buildDir}/resources/main/de/featjar/binary/gui/server"
+    duplicatesStrategy = DuplicatesStrategy.INHERIT
+    eachFile {
+        File inFile = it.file
+        File outFile = it.relativePath.getFile(destinationDir)
+        if (outFile.exists() && outFile.lastModified() >= inFile.lastModified()) {
+            it.exclude()
+        }
+    }
+}
+jar.dependsOn(copyDependencies)
+javadoc.dependsOn(copyDependencies)
+
+license {
+    ext {
+        licence_url = 'https://github.com/FeatureIDE'
+    }
+}
