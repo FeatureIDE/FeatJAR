@@ -53,7 +53,7 @@ public abstract class ABinary implements IExtension {
     /**
      * The directory used to store native binaries.
      */
-    private static final Path FEATJAR_BINARY_DIRECTORY = Paths.get(HostEnvironment.HOME_DIRECTORY, ".featjar-bin");
+    public static final Path FEATJAR_BINARY_DIRECTORY = Paths.get(HostEnvironment.HOME_DIRECTORY, ".featjar-bin");
 
     /**
      * Initializes a native binary by extracting all its resources into the binary directory.
@@ -145,11 +145,12 @@ public abstract class ABinary implements IExtension {
      * @throws IOException if binary cannot be found or moved
      */
     protected void extractResources() {
-        final Path outputDir = getDirectory();
+        final Path outputRootDir = getDirectory();
 
-        final String resourceDirName = String.format(
-                "de/featjar/binary/%s/%s/%s",
-                getCategory(), getName(), getOSResourceDirectory(HostEnvironment.OPERATING_SYSTEM));
+        final String osResourceDirectory = getOSResourceDirectory(HostEnvironment.OPERATING_SYSTEM);
+        final String resourceDirName = osResourceDirectory.isEmpty()
+                ? String.format("de/featjar/binary/%s/%s", getCategory(), getName())
+                : String.format("de/featjar/binary/%s/%s/%s", getCategory(), getName(), osResourceDirectory);
         final Path resourceDir;
         FileSystem jarFileSystem = null;
         try {
@@ -171,8 +172,11 @@ public abstract class ABinary implements IExtension {
             }
             final Optional<Path> executablePath = getExecutablePath();
             Files.walk(resourceDir).skip(1).filter(Files::isRegularFile).forEach(resourceFile -> {
+                final Path outputDir = outputRootDir
+                        .resolve(resourceDir.relativize(resourceFile).toString())
+                        .getParent();
                 final Path outputFile =
-                        outputDir.resolve(resourceDir.relativize(resourceFile).toString());
+                        outputDir.resolve(resourceFile.getFileName().toString());
                 // Replace if resourceFile file is newer
                 if (Comparator.comparing(this::lastModified).compare(resourceFile, outputFile) > 0) {
                     FeatJAR.log().debug("Copying %s to %s", resourceFile.toString(), outputFile.toString());
