@@ -52,6 +52,13 @@ public class FeatJARWrapperTest {
 
         private FeatureModelAnalyzer analyzer;
 
+        private void removeTemporaryConstraintsAndSubtree() {
+                featureModelBuilder.removeConstraint(removeConstraint2);
+                featureModelBuilder.removeConstraint(removeConstraint1);
+
+                assertTrue(featureModelBuilder.removeFeature(removeremoveA));
+                assertTrue(featureModelBuilder.removeFeatureTree(remove));
+        }
         @SuppressWarnings("unused")
         @BeforeEach
         public void initializeFeatureModelToTest(){
@@ -113,7 +120,7 @@ public class FeatJARWrapperTest {
 
         @SuppressWarnings("unused")
         @Test
-        public void doesRemoveFeatureWhenReferencedByConstraint(){
+        public void doesRemoveFeatureAfterRemovingConstraints(){
                 featureModelBuilder.removeConstraint(removeConstraint2);
                 featureModelBuilder.removeConstraint(removeConstraint1);
 
@@ -200,11 +207,4 @@ public class FeatJARWrapperTest {
                 analyzer.twiseConfigurations(2).orElseThrow();
         }
 
-        private void removeTemporaryConstraintsAndSubtree() {
-                featureModelBuilder.removeConstraint(removeConstraint2);
-                featureModelBuilder.removeConstraint(removeConstraint1);
-
-                assertTrue(featureModelBuilder.removeFeature(removeremoveA));
-                assertTrue(featureModelBuilder.removeFeatureTree(remove));
-        }
 }
