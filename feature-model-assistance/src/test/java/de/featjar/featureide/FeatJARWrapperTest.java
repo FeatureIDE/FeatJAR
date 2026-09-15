@@ -148,4 +148,5 @@ public class FeatJARWrapperTest {
         analyzer.randomConfigurations(10, 1L).orElseThrow();
         analyzer.twiseConfigurations(2).orElseThrow();
     }
+
 }
