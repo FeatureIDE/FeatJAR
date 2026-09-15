@@ -148,5 +148,41 @@ public class FeatJARWrapperTest {
         analyzer.randomConfigurations(10, 1L).orElseThrow();
         analyzer.twiseConfigurations(2).orElseThrow();
     }
+@Test
+public void guiCommandIsFound() {
+    OptionList optionInput = new OptionList(
+            "gui",
+            "--input",
+            "test_model.uvl");
 
+    optionInput.parseArguments();
+
+    assertTrue(optionInput.getCommand().isPresent());
+}
+@Test
+public void correctGUICommandIsFound() {
+    OptionList optionInput = new OptionList(
+            "gui",
+            "--input",
+            "test_model.uvl");
+
+    optionInput.parseArguments();
+
+    assertEquals(
+            "gui",
+            optionInput.getCommand().get().getShortName().orElseThrow());
+}
+@Test
+public void inputPathIsCorrect() {
+    Path path = Path.of("test_model.uvl");
+
+    OptionList optionInput = new OptionList(
+            "gui",
+            "--input",
+            path.toString());
+
+    optionInput.parseArguments();
+
+    assertEquals(path, optionInput.get(ACommand.INPUT_OPTION));
+}
 }
