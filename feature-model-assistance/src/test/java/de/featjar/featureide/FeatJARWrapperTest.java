@@ -137,6 +137,7 @@ public class FeatJARWrapperTest {
         assertEquals(Arrays.asList("root"), analyzer.core().orElseThrow());
         assertEquals(
                 Arrays.asList("altC", "andMandatoryAOptionalA"), analyzer.dead().orElseThrow());
+        assertEquals(Arrays.asList("root"), analyzer.core(FeatureModelAnalyzer.CoreSolver.SAT4J).orElseThrow());
         assertEquals(
                 BigInteger.valueOf(54), analyzer.numberOfValidConfigurations().orElseThrow());
         analyzer.atomicSets().orElseThrow();

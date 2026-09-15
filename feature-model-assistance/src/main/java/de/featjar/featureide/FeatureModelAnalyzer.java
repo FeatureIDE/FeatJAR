@@ -20,6 +20,7 @@
  */
 package de.featjar.featureide;
 
+import de.featjar.analysis.cadical.computation.ComputeCoreCadiCal;
 import de.featjar.analysis.sat4j.computation.ComputeAtomicSetsSAT4J;
 import de.featjar.analysis.sat4j.computation.ComputeCompleteSample;
 import de.featjar.analysis.sat4j.computation.ComputeCoreSAT4J;
@@ -75,6 +76,17 @@ import java.util.stream.Collectors;
 public class FeatureModelAnalyzer {
     // TODO Redundant Constraints
     // TODO Explanations
+
+    /**
+     * The SAT solver used to compute core and dead features.
+     *
+     * @see #core(CoreSolver)
+     * @see #dead(CoreSolver)
+     */
+    public enum CoreSolver {
+        SAT4J,
+        CADICAL
+    }
 
     private final IFeatureModel featureModel;
     private final IComputation<IFeatureModel> fmComputation;
@@ -242,14 +254,20 @@ public class FeatureModelAnalyzer {
 
     /**
      * {@return all core features of the feature model}
+     *
+     * Uses {@link CoreSolver#SAT4J} to compute the result. Use {@link #core(CoreSolver)} to select a different solver.
      */
     public Result<List<String>> core() {
-        return fmComputation
-                .map(ComputeFormula::new)
-                .map(ComputeNNFFormula::new)
-                .map(ComputeCNFFormula::new)
-                .map(ComputeBooleanClauseList::new)
-                .map(ComputeCoreSAT4J::new)
+        return core(CoreSolver.SAT4J);
+    }
+
+    /**
+     * {@return all core features of the feature model, computed with the given solver}
+     *
+     * @param solver the SAT solver used to compute the core features
+     */
+    public Result<List<String>> core(CoreSolver solver) {
+        return coreDeadAssignmentList(solver)
                 .map(ComputeConfigurationFromAssignment::new)
                 .computeResult()
                 .map(c -> c.get(0).getSelected());
@@ -257,17 +275,41 @@ public class FeatureModelAnalyzer {
 
     /**
      * {@return all dead features of the feature model}
+     *
+     * Uses {@link CoreSolver#SAT4J} to compute the result. Use {@link #dead(CoreSolver)} to select a different solver.
      */
     public Result<List<String>> dead() {
-        return fmComputation
-                .map(ComputeFormula::new)
-                .map(ComputeNNFFormula::new)
-                .map(ComputeCNFFormula::new)
-                .map(ComputeBooleanClauseList::new)
-                .map(ComputeCoreSAT4J::new)
+        return dead(CoreSolver.SAT4J);
+    }
+
+    /**
+     * {@return all dead features of the feature model, computed with the given solver}
+     *
+     * @param solver the SAT solver used to compute the dead features
+     */
+    public Result<List<String>> dead(CoreSolver solver) {
+        return coreDeadAssignmentList(solver)
                 .map(ComputeConfigurationFromAssignment::new)
                 .computeResult()
                 .map(c -> c.get(0).getDeselected());
+    }
+
+    /**
+     * {@return a computation of the core and dead features of the feature model, using the given solver}
+     */
+    private IComputation<BooleanAssignmentList> coreDeadAssignmentList(CoreSolver solver) {
+        IComputation<BooleanAssignmentList> clauseList = fmComputation
+                .map(ComputeFormula::new)
+                .map(ComputeNNFFormula::new)
+                .map(ComputeCNFFormula::new)
+                .map(ComputeBooleanClauseList::new);
+        switch (solver) {
+            case CADICAL:
+                return clauseList.map(ComputeCoreCadiCal::new);
+            case SAT4J:
+            default:
+                return clauseList.map(ComputeCoreSAT4J::new);
+        }
     }
 
     /**
