@@ -8,5 +8,6 @@ plugins {
 
 includeBuild '../feature-model'
 includeBuild '../uvl'
+includeBuild '../gui-client-web'
 includeBuild '../formula-analysis-sat4j'
 includeBuild '../formula-analysis-sharpsat'
