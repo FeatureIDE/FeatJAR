@@ -22,3 +22,4 @@ build/
 
 # Misc
 test/
+all/server_logs.log

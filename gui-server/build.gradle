@@ -1,0 +1,33 @@
+plugins {
+    id 'de.featjar.java-library'
+}
+
+dependencies {
+    api 'de.featjar:feature-model'
+    api 'de.featjar:uvl'
+    testImplementation testFixtures('de.featjar:formula')
+
+    implementation 'org.eclipse.glsp:org.eclipse.glsp.server:2.6.0'
+    implementation 'org.eclipse.glsp:org.eclipse.glsp.server.websocket:2.6.0'
+    implementation 'org.eclipse.glsp:org.eclipse.glsp.layout:2.6.0'
+    implementation 'org.eclipse.glsp:org.eclipse.glsp.server.emf:2.6.0'
+    implementation 'org.eclipse.emf:org.eclipse.emf.ecore.edit:2.15.0'
+    implementation 'org.eclipse.emf:org.eclipse.emf.edit:2.23.0'
+    implementation('org.eclipse.elk:org.eclipse.elk.alg.layered:0.8.1') {
+        exclude group: 'log4j', module: 'log4j'
+    }
+}
+
+sourceSets {
+    main {
+        java {
+            srcDir 'src-gen'
+        }
+    }
+}
+
+license {
+    ext {
+        licence_url = 'https://github.com/FeatureIDE'
+    }
+}

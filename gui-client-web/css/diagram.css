@@ -1,0 +1,130 @@
+/********************************************************************************
+ * Copyright (c) 2019-2021 EclipseSource and others.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License v. 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ *
+ * This Source Code may also be made available under the following Secondary
+ * Licenses when the conditions for such availability set forth in the Eclipse
+ * Public License v. 2.0 are satisfied: GNU General Public License, version 2
+ * with the GNU Classpath Exception which is available at
+ * https://www.gnu.org/software/classpath/license.html.
+ *
+ * SPDX-License-Identifier: EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0
+ ********************************************************************************/
+
+/*
+ * Defines all important styles for the entire model.
+ */
+
+/* currently unused ! */
+:root {
+     --glsp-info-foreground: blue; /* example can be used like this: color: var(--glsp-info-foreground); */
+}
+
+/* green backround */
+
+.sprotty-graph,
+.grid-background {
+    background: rgb(179, 196, 202);
+}
+
+/* general edges and nodes */
+
+.sprotty-edge {
+    stroke: black;
+}
+
+/* Styling for forms defined in feature-edge-view.tsx
+ * Mandatory gets filled circle */
+.feature-mandatory {
+    fill: #1a1a2e;
+    stroke: #1a1a2e;
+    stroke-width: 1.5;
+}
+/* Styling for forms defined in feature-edge-view.tsx
+ * Optional gets an empty circle */
+.feature-optional {
+    fill: white;
+    stroke: #1a1a2e;
+    stroke-width: 1.5;
+}
+
+/* black labels for all nodes */
+.feature-root text {
+    fill: black !important;
+    stroke: none !important;
+    font-weight: 500;
+}
+
+/* black labels for all nodes */
+.node-cardinality text {
+    fill: black !important;
+    stroke: none !important;
+    font-weight: 500;
+}
+
+
+/* Node cardinality size */
+.sprotty .label-node-cardinality {
+    font-size: 14px;
+    fill: black;
+}
+
+/* Multiple feature cardinality size */
+.sprotty .label-edge-cardinality {
+    font-size: 14px;
+    fill: black;
+}
+
+/* Constraints */
+ .constraint-box rect {
+    stroke: none;
+    fill: transparent;
+}
+
+.constraint-label,
+.constraint-label text {
+    fill: black !important;
+    stroke: none !important;
+    font-weight: 500;
+}
+
+.constraint-node {
+    stroke: rgb(83, 72, 72) !important;
+}
+
+.constraint-title {
+    font-weight: bold;
+}
+
+
+/* Session management panel */
+
+.session-management-panel {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background: white;
+    border: 1px solid #888;
+    border-radius: 4px;
+    padding: 6px;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+.session-management-panel-button {
+    padding: 6px 16px;
+    cursor: pointer;
+    border-radius: 3px;
+    user-select: none;
+    font-size: 14px;
+}
+
+.session-management-panel-button:hover {
+    background: #e8e8e8;
+}
