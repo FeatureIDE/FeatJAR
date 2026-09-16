@@ -26,6 +26,7 @@ import de.featjar.formula.assignment.Assignment;
 import de.featjar.formula.io.textual.Symbols;
 import de.featjar.formula.structure.IExpression;
 import de.featjar.formula.structure.term.value.Variable;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Function;
@@ -185,6 +186,39 @@ public class Preprocessor {
      */
     public Stream<String> preprocess(Stream<String> lines, Assignment assignment) {
         return lines.sequential().filter(new Filter(assignment));
+    }
+
+    /**
+     * Checks matching if/endif annotations
+     */
+    public List<String> checkStructure(Stream<String> lines) {
+        LinkedList<Integer> stack = new LinkedList<>();
+        List<String> problems = new ArrayList<>();
+        int lineNumber = 0;
+
+        for (String line : lines.toList()) {
+            lineNumber++;
+            Matcher matcher = annotationPattern.matcher(line);
+
+            if (matcher.matches()) {
+                if (matcher.group(4) != null) { // this line is an #if (check notes.md file for more)
+                    stack.push(lineNumber);
+                } else if (matcher.group(2) != null) { // this is an #endif
+                    if (stack.isEmpty()) {
+                        problems.add("Line " + lineNumber + ": #endif without #if");
+                    } else {
+                        stack.pop();
+                    }
+                }
+            }
+        }
+
+        // the remaining #if lines have no matching #endif
+        while (!stack.isEmpty()) {
+            int startLine = stack.removeLast();
+            problems.add("Line " + startLine + ": #if has no matching #endif");
+        }
+        return problems;
     }
 
     public List<String> extractVariableNames(Stream<String> lines) {
