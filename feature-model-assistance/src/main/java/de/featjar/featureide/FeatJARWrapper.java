@@ -36,9 +36,6 @@ import de.featjar.formula.io.csv.BooleanAssignmentListCSVFormat;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
-//imports added
-import de.featjar.base.cli.OptionList;
-import de.featjar.base.cli.ICommand;
 
 /**
  * FeatJAR wrapper for conveniently using basic functions for feature models.
@@ -185,18 +182,5 @@ public class FeatJARWrapper {
     // we added this method to open the GUI for feature model from a given path
     public int openFeatureModelGUI(Path path) {
         return FeatJAR.runInternally("gui", "--input", path.toString());
-        /*
-         * Opt0ionList optionInput = new OptionList("gui", "--input", path.toString());
-         * 
-         * optionInput.parseArguments();
-         * 
-         * Result<ICommand> command = optionInput.getCommand();
-         * 
-         * if (command.isEmpty()) {
-         * return FeatJAR.ERROR_COMPUTING_RESULT;
-         * }
-         * 
-         * return command.get().run(optionInput);
-         */
     }
 }
