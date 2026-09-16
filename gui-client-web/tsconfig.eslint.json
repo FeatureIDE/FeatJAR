@@ -1,0 +1,7 @@
+{
+  "extends": "@eclipse-glsp/ts-config",
+  "compilerOptions": {
+    "noEmit": true
+  },
+  "include": ["src"]
+}

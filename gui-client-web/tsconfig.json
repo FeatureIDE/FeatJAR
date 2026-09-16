@@ -1,0 +1,12 @@
+{
+  "extends": "@eclipse-glsp/ts-config/tsconfig.json",
+  "compilerOptions": {
+    "jsx": "react",
+    "jsx": "react",
+    "composite": true,
+    "rootDir": "src",
+    "resolveJsonModule": true,
+    "outDir": "lib"
+  },
+  "include": ["src"]
+}
