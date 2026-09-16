@@ -194,8 +194,8 @@ public class FeatureModelGModelFactory extends EMFNotationGModelFactory {
 
         } else if (identifiable instanceof GroupNode groupNode) {
 
-            int w = isDiamond ? groupNodeWidth + 20 : groupNodeWidth;
-            int h = isDiamond ? groupNodeHeight + 30 : groupNodeHeight;
+           int w = cssType.equals(GroupNodeType.AND_NODE.value()) ? groupNodeWidth : (isDiamond ? groupNodeWidth + 20 : groupNodeWidth);
+           int h = cssType.equals(GroupNodeType.AND_NODE.value()) ? groupNodeHeight : (isDiamond ? groupNodeHeight + 30 : groupNodeHeight);
 
             nodeBuilder.addArgument("lowerBound", groupNode.getCardinality().getLowerBound());
             nodeBuilder.addArgument("upperBound", groupNode.getCardinality().getUpperBound());
