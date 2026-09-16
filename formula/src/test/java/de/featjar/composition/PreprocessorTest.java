@@ -32,7 +32,8 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-/**
+/***
+ * added the unit test
  * Tests {@link Preprocessor#computePresenceConditions(java.util.stream.Stream)}.
  */
 public class PreprocessorTest {
