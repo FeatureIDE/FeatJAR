@@ -25,7 +25,13 @@ import de.featjar.base.data.Result;
 import de.featjar.formula.assignment.Assignment;
 import de.featjar.formula.io.textual.Symbols;
 import de.featjar.formula.structure.IExpression;
+import de.featjar.formula.structure.IFormula;
+import de.featjar.formula.structure.connective.And;
+import de.featjar.formula.structure.connective.Not;
+import de.featjar.formula.structure.predicate.False;
+import de.featjar.formula.structure.predicate.True;
 import de.featjar.formula.structure.term.value.Variable;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Function;
@@ -185,6 +191,37 @@ public class Preprocessor {
      */
     public Stream<String> preprocess(Stream<String> lines, Assignment assignment) {
         return lines.sequential().filter(new Filter(assignment));
+    }
+
+    /**
+     * {@return the presence condition of each line, in order}
+     *
+     * @param lines the line stream
+     */
+    public List<IFormula> computePresenceConditions(Stream<String> lines) {
+        LinkedList<IFormula> stack = new LinkedList<>();
+        return lines.sequential()
+                .map(line -> {
+                    Matcher matcher = annotationPattern.matcher(line);
+                    if (!matcher.matches()) {
+                        if (stack.isEmpty()) {
+                            return (IFormula) True.INSTANCE;
+                        }
+                        List<IFormula> conjuncts = new ArrayList<>();
+                        stack.descendingIterator().forEachRemaining(conjuncts::add);
+                        return conjuncts.size() == 1 ? conjuncts.get(0) : new And(conjuncts);
+                    }
+                    if (matcher.group(4) != null) {
+                        stack.push((IFormula)
+                                annotationParser.parse(matcher.group(5)).orElseThrow());
+                    } else if (matcher.group(3) != null) {
+                        stack.push(new Not(stack.pop()));
+                    } else if (matcher.group(2) != null) {
+                        stack.pop();
+                    }
+                    return (IFormula) False.INSTANCE;
+                })
+                .collect(Collectors.toList());
     }
 
     public List<String> extractVariableNames(Stream<String> lines) {
