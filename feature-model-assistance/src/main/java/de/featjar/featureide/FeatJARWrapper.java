@@ -52,19 +52,22 @@ public class FeatJARWrapper {
 
     /**
      * Stores any object for which a {@link IFormat format} exists to a file.
-     * This is a convenience method, equivalent to calling {@link IO#save(Object, Path, IFormat, de.featjar.base.io.IOMapperOptions...)}.
+     * This is a convenience method, equivalent to calling
+     * {@link IO#save(Object, Path, IFormat, de.featjar.base.io.IOMapperOptions...)}.
      * For more information see the {@link IO} class.
      *
-     * @param <T> the type of the object
+     * @param <T>      the type of the object
      * @param anything the object to store
-     * @param path the path to the file
-     * @param format the format
-     * @throws IOException if there is a problem with writing the file to the file system
+     * @param path     the path to the file
+     * @param format   the format
+     * @throws IOException if there is a problem with writing the file to the file
+     *                     system
      *
      * @see IO#save(Object, java.io.OutputStream, IFormat)
      * @see IO#save(Object, java.io.OutputStream, IFormat, java.nio.charset.Charset)
      * @see IO#save(Object, Path, IFormat, de.featjar.base.io.IOMapperOptions...)
-     * @see IO#save(Object, Path, IFormat, java.nio.charset.Charset, de.featjar.base.io.IOMapperOptions...)
+     * @see IO#save(Object, Path, IFormat, java.nio.charset.Charset,
+     *      de.featjar.base.io.IOMapperOptions...)
      */
     public <T> void storeAnything(T anything, Path path, IFormat<T> format) throws IOException {
         IO.save(anything, path, format);
@@ -72,13 +75,15 @@ public class FeatJARWrapper {
 
     /**
      * Loads any object for which a {@link IFormat format} exists from a file.
-     * This is a convenience method, equivalent to calling {@link IO#load(Path, IFormatSupplier, de.featjar.base.io.IOMapperOptions...)}.
+     * This is a convenience method, equivalent to calling
+     * {@link IO#load(Path, IFormatSupplier, de.featjar.base.io.IOMapperOptions...)}.
      * For more information see the {@link IO} class.
      *
-     * @param <T> the type of the object
-     * @param path the path to the file
+     * @param <T>            the type of the object
+     * @param path           the path to the file
      * @param formatSupplier a supplier for a suitable format
-     * @return the loaded object wrapped in a {@link Result} or an empty Result with further problem information (see {@link Result#getProblems()})
+     * @return the loaded object wrapped in a {@link Result} or an empty Result with
+     *         further problem information (see {@link Result#getProblems()})
      *
      * @see IO#load(java.io.InputStream, IFormat, java.nio.charset.Charset)
      * @see IO#load(Path, IFormat, de.featjar.base.io.IOMapperOptions...)
@@ -91,7 +96,8 @@ public class FeatJARWrapper {
      * Loads a feature model from a file.
      *
      * @param path the path to the feature model file
-     * @return the loaded object wrapped in a {@link Result} or an empty Result with further problem information (see {@link Result#getProblems()})
+     * @return the loaded object wrapped in a {@link Result} or an empty Result with
+     *         further problem information (see {@link Result#getProblems()})
      *
      * @see IO#load(Path, IFormatSupplier, de.featjar.base.io.IOMapperOptions...)
      */
@@ -103,8 +109,9 @@ public class FeatJARWrapper {
      * Stores a feature model to a file.
      *
      * @param featureModel the feature model to store
-     * @param path the path to the file
-     * @throws IOException if there is a problem with writing the file to the file system
+     * @param path         the path to the file
+     * @throws IOException if there is a problem with writing the file to the file
+     *                     system
      *
      * @see IO#save(Object, Path, IFormat, de.featjar.base.io.IOMapperOptions...)
      */
@@ -119,7 +126,8 @@ public class FeatJARWrapper {
      * Loads a list of configurations from a file.
      *
      * @param path the path to the configurations file
-     * @return the loaded object wrapped in a {@link Result} or an empty Result with further problem information (see {@link Result#getProblems()})
+     * @return the loaded object wrapped in a {@link Result} or an empty Result with
+     *         further problem information (see {@link Result#getProblems()})
      *
      * @see IO#load(Path, IFormatSupplier, de.featjar.base.io.IOMapperOptions...)
      */
@@ -134,8 +142,9 @@ public class FeatJARWrapper {
      * Stores a list of configurations to a file.
      *
      * @param configurations the configurations to store
-     * @param path the path to the file
-     * @throws IOException if there is a problem with writing the file to the file system
+     * @param path           the path to the file
+     * @throws IOException if there is a problem with writing the file to the file
+     *                     system
      *
      * @see IO#save(Object, Path, IFormat, de.featjar.base.io.IOMapperOptions...)
      */
@@ -162,5 +171,16 @@ public class FeatJARWrapper {
      */
     public FeatureModelBuilder featureModelBuilder() {
         return new FeatureModelBuilder();
+    }
+
+    public static void main(String[] args) {
+        new FeatJARWrapper()
+                .openFeatureModelGUI(Path.of("../formula/src/testFixtures/resources/formats/uvl/ABC-nAnBnC_01.uvl"));
+
+    }
+
+    // we added this method to open the GUI for feature model from a given path
+    public int openFeatureModelGUI(Path path) {
+        return FeatJAR.runInternally("gui", "--input", path.toString());
     }
 }

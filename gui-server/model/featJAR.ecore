@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ecore:EPackage xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" name="featJAR"
+	nsURI="https://github.com/FeatureIDE/FeatJAR" nsPrefix="featJAR">
+	<eClassifiers xsi:type="ecore:EClass" name="FeatureModel"
+		eSuperTypes="#//Identifiable">
+		<eStructuralFeatures xsi:type="ecore:EReference" name="roots"
+			upperBound="-1"
+			eType="#//Feature" containment="true" />
+		<eStructuralFeatures xsi:type="ecore:EReference" name="constraints"
+			upperBound="-1"
+			eType="#//Constraint" containment="true" />
+	</eClassifiers>
+	<eClassifiers xsi:type="ecore:EClass" name="Identifiable" abstract="true">
+		<eStructuralFeatures xsi:type="ecore:EAttribute" name="id"
+			eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"
+			iD="true" />
+		<eStructuralFeatures xsi:type="ecore:EAttribute" name="name"
+			eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString" />
+		<eStructuralFeatures xsi:type="ecore:EReference" name="attributes"
+			upperBound="-1"
+			eType="#//Attributes" containment="true" />
+	</eClassifiers>
+	<eClassifiers xsi:type="ecore:EClass" name="Feature"
+		eSuperTypes="#//Identifiable">
+		<eStructuralFeatures xsi:type="ecore:EReference" name="parent"
+			eType="#//GroupNode"
+			eOpposite="#//GroupNode/featureList" />
+		<eStructuralFeatures xsi:type="ecore:EReference" name="cardinality"
+			lowerBound="1"
+			eType="#//Cardinality" containment="true" />
+		<eStructuralFeatures xsi:type="ecore:EReference" name="groupNodeList"
+			upperBound="-1"
+			eType="#//GroupNode" containment="true"
+			eOpposite="#//GroupNode/parent" />
+	</eClassifiers>
+	<eClassifiers xsi:type="ecore:EClass" name="Constraint"
+		eSuperTypes="#//Identifiable" />
+	<eClassifiers xsi:type="ecore:EClass" name="GroupNode"
+		eSuperTypes="#//Identifiable">
+		<eStructuralFeatures xsi:type="ecore:EReference" name="parent"
+			eType="#//Feature"
+			eOpposite="#//Feature/groupNodeList" />
+		<eStructuralFeatures xsi:type="ecore:EReference" name="cardinality"
+			lowerBound="1"
+			eType="#//Cardinality" containment="true" />
+		<eStructuralFeatures xsi:type="ecore:EReference" name="featureList"
+			upperBound="-1"
+			eType="#//Feature" containment="true" eOpposite="#//Feature/parent" />
+	</eClassifiers>
+	<eClassifiers xsi:type="ecore:EClass" name="Attributes">
+		<eStructuralFeatures xsi:type="ecore:EAttribute" name="key"
+			eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString" />
+		<eStructuralFeatures xsi:type="ecore:EAttribute" name="value"
+			eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString" />
+	</eClassifiers>
+	<eClassifiers xsi:type="ecore:EClass" name="Cardinality">
+		<eStructuralFeatures xsi:type="ecore:EAttribute" name="lowerBound"
+			lowerBound="1"
+			eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"
+			defaultValueLiteral="0" />
+		<eStructuralFeatures xsi:type="ecore:EAttribute" name="upperBound"
+			lowerBound="1"
+			eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"
+			defaultValueLiteral="-1" />
+	</eClassifiers>
+</ecore:EPackage>

@@ -1,0 +1,94 @@
+[15/09/2026, 16:42] [DEBUG] initializing cache
+[15/09/2026, 16:42] [DEBUG] initializing FeatJAR
+[15/09/2026, 16:42] [DEBUG] initializing extension manager
+[15/09/2026, 16:42] [DEBUG] loading extension definition file extensions.xml
+[15/09/2026, 16:42] [DEBUG] installing extension point de.featjar.base.extension.Initializers
+[15/09/2026, 16:42] [DEBUG] installing extension de.featjar.base.log.ConfigurableLog
+[15/09/2026, 16:42] [DEBUG] installing extension de.featjar.base.computation.Cache
+[15/09/2026, 16:42] [DEBUG] initializing cache
+[15/09/2026, 16:42] [DEBUG] installing extension point de.featjar.base.env.Binaries
+[15/09/2026, 16:42] [DEBUG] installing extension point de.featjar.base.io.DataTreeFormats
+[15/09/2026, 16:42] [DEBUG] installing extension de.featjar.base.io.csv.DataTreeCSVFormat
+[15/09/2026, 16:42] [DEBUG] installing extension de.featjar.base.io.text.DataTreeTextFormat
+[15/09/2026, 16:42] [DEBUG] installing extension point de.featjar.feature.model.io.FeatureModelFormats
+[15/09/2026, 16:42] [DEBUG] installing extension de.featjar.feature.model.io.xml.GraphVizFeatureModelFormat
+[15/09/2026, 16:42] [DEBUG] installing extension de.featjar.feature.model.io.xml.XMLFeatureModelFormat
+[15/09/2026, 16:42] [DEBUG] installing extension de.featjar.feature.model.io.dimacs.DimacsFeatureModelFormat
+[15/09/2026, 16:42] [DEBUG] installing extension de.featjar.feature.model.io.tikz.LatexFeatureModelFormat
+[15/09/2026, 16:42] [DEBUG] installing extension de.featjar.feature.model.io.tikz.TikzFeatureModelFormat
+[15/09/2026, 16:42] [DEBUG] installing extension de.featjar.gui.io.EMFFeatureModelFormat
+[15/09/2026, 16:42] [DEBUG] installing extension de.featjar.feature.model.io.uvl.UVLFeatureModelFormat
+[15/09/2026, 16:42] [DEBUG] installing extension point de.featjar.formula.io.FormulaFormats
+[15/09/2026, 16:42] [DEBUG] installing extension de.featjar.formula.io.binary.CNFFormulaBinaryFormat
+[15/09/2026, 16:42] [DEBUG] installing extension de.featjar.formula.io.binary.FormulaBinaryFormat
+[15/09/2026, 16:42] [DEBUG] installing extension de.featjar.formula.io.dimacs.CNFFormulaDimacsFormat
+[15/09/2026, 16:42] [DEBUG] installing extension de.featjar.formula.io.dimacs.FormulaDimacsFormat
+[15/09/2026, 16:42] [DEBUG] installing extension de.featjar.formula.io.textual.FormulaStringFormat
+[15/09/2026, 16:42] [DEBUG] installing extension de.featjar.formula.io.xml.XMLFeatureModelFormulaFormat
+[15/09/2026, 16:42] [DEBUG] installing extension de.featjar.feature.model.io.uvl.UVLFormulaFormat
+[15/09/2026, 16:42] [DEBUG] installing extension point de.featjar.formula.io.ExpressionFormats
+[15/09/2026, 16:42] [DEBUG] installing extension de.featjar.formula.io.kconfig.KConfigReaderFormat
+[15/09/2026, 16:42] [DEBUG] installing extension de.featjar.formula.io.textual.ExpressionFormat
+[15/09/2026, 16:42] [DEBUG] installing extension de.featjar.formula.io.textual.ExpressionStringFormat
+[15/09/2026, 16:42] [DEBUG] installing extension point de.featjar.formula.io.ExpressionListFormats
+[15/09/2026, 16:42] [DEBUG] installing extension de.featjar.formula.io.textual.ExpressionListStringFormat
+[15/09/2026, 16:42] [DEBUG] installing extension point de.featjar.formula.io.BooleanAssignmentGroupsFormats
+[15/09/2026, 16:42] [DEBUG] installing extension de.featjar.formula.io.binary.BooleanAssignmentGroupsGroupedBinaryFormat
+[15/09/2026, 16:42] [DEBUG] installing extension de.featjar.formula.io.binary.BooleanAssignmentGroupsSimpleBinaryFormat
+[15/09/2026, 16:42] [DEBUG] installing extension de.featjar.formula.io.csv.BooleanAssignmentGroupsCSVFormat
+[15/09/2026, 16:42] [DEBUG] installing extension de.featjar.formula.io.csv.BooleanAssignmentGroupsGroupedCSVFormat
+[15/09/2026, 16:42] [DEBUG] installing extension de.featjar.formula.io.dimacs.BooleanAssignmentGroupsDimacsFormat
+[15/09/2026, 16:42] [DEBUG] installing extension point de.featjar.formula.io.BooleanAssignmentListFormats
+[15/09/2026, 16:42] [DEBUG] installing extension de.featjar.formula.io.binary.BooleanAssignmentListGroupedBinaryFormat
+[15/09/2026, 16:42] [DEBUG] installing extension de.featjar.formula.io.binary.BooleanAssignmentListSimpleBinaryFormat
+[15/09/2026, 16:42] [DEBUG] installing extension de.featjar.formula.io.csv.BooleanAssignmentListCSVFormat
+[15/09/2026, 16:42] [DEBUG] installing extension de.featjar.formula.io.csv.BooleanAssignmentListGroupedCSVFormat
+[15/09/2026, 16:42] [DEBUG] installing extension de.featjar.formula.io.dimacs.BooleanAssignmentListDimacsFormat
+[15/09/2026, 16:42] [DEBUG] installing extension de.featjar.formula.io.textual.BooleanAssignmentListSimpleTextFormat
+[15/09/2026, 16:42] [DEBUG] installing extension de.featjar.formula.io.textual.BooleanAssignmentListTextFormat
+[15/09/2026, 16:42] [DEBUG] installing extension point de.featjar.formula.io.BooleanAssignmentFormats
+[15/09/2026, 16:42] [DEBUG] installing extension point de.featjar.base.cli.Commands
+[15/09/2026, 16:42] [DEBUG] installing extension de.featjar.feature.model.cli.PrintModelStatistics
+[15/09/2026, 16:42] [DEBUG] installing extension de.featjar.feature.model.cli.PrintConfigurationStatistics
+[15/09/2026, 16:42] [DEBUG] installing extension de.featjar.feature.model.cli.ConvertModelFormatCommand
+[15/09/2026, 16:42] [DEBUG] installing extension de.featjar.composition.cli.PreprocessorCommand
+[15/09/2026, 16:42] [DEBUG] installing extension de.featjar.formula.cli.ConvertAssignmentFormatCommand
+[15/09/2026, 16:42] [DEBUG] installing extension de.featjar.formula.cli.ConvertFormulaFormatCommand
+[15/09/2026, 16:42] [DEBUG] installing extension de.featjar.formula.cli.PrintCommand
+[15/09/2026, 16:42] [DEBUG] installing extension de.featjar.analysis.sat4j.cli.AtomicSetsCommand
+[15/09/2026, 16:42] [DEBUG] installing extension de.featjar.analysis.sat4j.cli.CoreCommand
+[15/09/2026, 16:42] [DEBUG] installing extension de.featjar.analysis.sat4j.cli.InciidentCommand
+[15/09/2026, 16:42] [DEBUG] installing extension de.featjar.analysis.sat4j.cli.LegacyYASACommand
+[15/09/2026, 16:42] [DEBUG] installing extension de.featjar.analysis.sat4j.cli.ProjectionCommand
+[15/09/2026, 16:42] [DEBUG] installing extension de.featjar.analysis.sat4j.cli.SolutionCountCommand
+[15/09/2026, 16:42] [DEBUG] installing extension de.featjar.analysis.sat4j.cli.SolutionsCommand
+[15/09/2026, 16:42] [DEBUG] installing extension de.featjar.analysis.sat4j.cli.TWiseCommand
+[15/09/2026, 16:42] [DEBUG] installing extension de.featjar.analysis.sat4j.cli.TWiseCoverageCommand
+[15/09/2026, 16:42] [DEBUG] installing extension de.featjar.analysis.sat4j.cli.YASACommand
+[15/09/2026, 16:42] [DEBUG] installing extension point de.featjar.base.shell.ShellCommands
+[15/09/2026, 16:42] [DEBUG] installing extension de.featjar.base.shell.command.ClearShellCommand
+[15/09/2026, 16:42] [DEBUG] installing extension de.featjar.base.shell.command.DeleteShellCommand
+[15/09/2026, 16:42] [DEBUG] installing extension de.featjar.base.shell.command.ExitShellCommand
+[15/09/2026, 16:42] [DEBUG] installing extension de.featjar.base.shell.command.HelpShellCommand
+[15/09/2026, 16:42] [DEBUG] installing extension de.featjar.base.shell.command.ListVariablesShellCommand
+[15/09/2026, 16:42] [DEBUG] installing extension de.featjar.base.shell.command.LoadShellCommand
+[15/09/2026, 16:42] [DEBUG] installing extension de.featjar.base.shell.command.PrintShellCommand
+[15/09/2026, 16:42] [DEBUG] installing extension de.featjar.base.shell.command.RunShellCommand
+[15/09/2026, 16:42] [DEBUG] installing extension de.featjar.base.shell.command.RunDirectlyShellCommand
+[15/09/2026, 16:42] [DEBUG] installing extension de.featjar.base.shell.command.StoreShellCommand
+[15/09/2026, 16:42] [DEBUG] installing extension point de.featjar.base.shell.VariableTypes
+[15/09/2026, 16:42] [DEBUG] installing extension de.featjar.base.shell.type.PathType
+[15/09/2026, 16:42] [DEBUG] installing extension de.featjar.shell.type.ConfigType
+[15/09/2026, 16:42] [DEBUG] installing extension de.featjar.shell.type.FeatureModelType
+[15/09/2026, 16:42] [DEBUG] installing extension de.featjar.shell.type.FormulaType
+[15/09/2026, 16:42] [DEBUG] installing extension de.featjar.shell.type.SampleType
+[15/09/2026, 16:42] [DEBUG] installing extension de.featjar.shell.type.SampleGroupType
+[15/09/2026, 16:42] [DEBUG] setting new log configuration
+[15/09/2026, 16:42] [DEBUG] setting new cache configuration
+2026-09-15 16:43:01,215837900 [main] INFO  WebsocketServerLauncher - GLSP server is running and listening on Endpoint : http://127.0.0.1:8081/featuremodel
+[GLSP-Server]:Startup completed. Accepting requests on port:8081
+2026-09-15 16:43:46,909628000 [DefaultActionDispatcher 1] INFO  DefaultActionDispatcher - Terminating DefaultActionDispatcher thread DefaultActionDispatcher 1
+2026-09-15 16:43:46,909628000 [DefaultActionDispatcher 1] INFO  DefaultActionDispatcher - Terminating DefaultActionDispatcher
+[15/09/2026, 16:43] [DEBUG]  Created class featJAR.impl.FeatureImplwith ID 16dc2d4794494a2fb6bf61340d53a034
+[15/09/2026, 16:43] [MESSAGE] Client Message: Keep connection alive ping
+[15/09/2026, 16:44] [MESSAGE] Client Message: Keep connection alive ping
