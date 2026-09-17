@@ -215,16 +215,25 @@ public class Preprocessor {
                         stack.push((IFormula)
                                 annotationParser.parse(matcher.group(5)).orElseThrow());
                     } else if (matcher.group(3) != null) {
-                        stack.push(new Not(stack.pop()));
+                        stack.push(new Not(popChecked(stack, line)));
                     } else if (matcher.group(2) != null) {
-                        stack.pop();
+                        popChecked(stack, line);
                     } else if (matcher.group(6) != null) {
-                          stack.push(new Not(stack.pop()));
-                          stack.push(parse(matcher.group(7)));
-                      }
+                        stack.push(new Not(popChecked(stack, line)));
+                        stack.push((IFormula)
+                                annotationParser.parse(matcher.group(7)).orElseThrow());
+                    }
                     return (IFormula) False.INSTANCE;
                 })
                 .collect(Collectors.toList());
+    }
+
+    private IFormula popChecked(LinkedList<IFormula> stack, String line) {
+        if (stack.isEmpty()) {
+            throw new IllegalArgumentException(
+                    "Unbalanced presence annotation (empty stack): " + line);
+        }
+        return stack.pop();
     }
 
     public List<String> extractVariableNames(Stream<String> lines) {
