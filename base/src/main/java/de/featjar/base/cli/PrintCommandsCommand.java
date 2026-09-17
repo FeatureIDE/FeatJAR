@@ -57,7 +57,7 @@ public class PrintCommandsCommand extends ACommand {
 
     @Override
     public Optional<String> getDescription() {
-        return Optional.of("Prints all available commands");
+        return Optional.of("Prints all available commands.");
     }
 
     @Override

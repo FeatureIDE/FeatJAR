@@ -58,7 +58,7 @@ public class PrintHelpCommand extends ACommand {
                     .ifPresent(
                             description -> sb.append("\t\t").append(description).append("\n"));
             option.getPossibleArguments().ifPresent(possibleArguments -> sb.append(
-                            "\t\t\tpossible: " + possibleArguments.stream().collect(Collectors.joining("|")))
+                            "\t\tpossible: " + possibleArguments.stream().collect(Collectors.joining("|")))
                     .append("\n"));
             option.getDefaultArgument().ifPresent(defaultValue -> sb.append("\t\tdefault:  " + defaultValue)
                     .append("\n"));
@@ -67,7 +67,7 @@ public class PrintHelpCommand extends ACommand {
 
     @Override
     public Optional<String> getDescription() {
-        return Optional.of("Prints help");
+        return Optional.of("Prints usage information and general options.");
     }
 
     @Override
