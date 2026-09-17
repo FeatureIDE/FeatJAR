@@ -66,7 +66,29 @@ public class PreprocessorTest {
                 List.of("false", "A", "false", "A && B", "A && B", "false", "A && !B", "false", "A", "false", "true"),
                 presenceConditions(lines));
     }
-
+    @Test
+    public void elifAnnotations() {
+        List<String> lines = List.of(
+                "//#if A",
+                "  System.out.println(\"\");",
+                "//#elif B",
+                "  System.out.println(\"\");",
+                "//#else",
+                "  System.out.println(\"\");",
+                "//#endif",
+                "  System.out.println(\"\");");
+        assertEquals(
+                List.of(
+                        "false",       // //#if A
+                        "A",           // inside #if A
+                        "false",       // //#elif B
+                        "!A && B",     // inside #elif B
+                        "false",       // //#else
+                        "!A && !B",    // inside #else
+                        "false",       // //#endif
+                        "true"),       // outside all blocks
+                presenceConditions(lines));
+    }
     @Test
     public void noAnnotations() {
         assertEquals(List.of("true", "true"), presenceConditions(List.of("int a;", "int b;")));

@@ -218,7 +218,10 @@ public class Preprocessor {
                         stack.push(new Not(stack.pop()));
                     } else if (matcher.group(2) != null) {
                         stack.pop();
-                    }
+                    } else if (matcher.group(6) != null) {
+                          stack.push(new Not(stack.pop()));
+                          stack.push(parse(matcher.group(7)));
+                      }
                     return (IFormula) False.INSTANCE;
                 })
                 .collect(Collectors.toList());
