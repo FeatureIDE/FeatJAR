@@ -4,7 +4,7 @@
 # Build
 /*/bin/
 /*/build/
-build/
+/build/
 
 # Intelij
 **/.idea/
@@ -21,4 +21,4 @@ build/
 **/.DS_Store
 
 # Misc
-test/
+/test/
