@@ -244,12 +244,12 @@ public class FeatureModelAnalyzer {
      * {@return all core features of the feature model}
      */
     public Result<List<String>> core() {
-  return fmComputation
-                  .map(ComputeFormula::new)
-                  .map(ComputeNNFFormula::new)
-                  .map(ComputeCNFFormula::new)
-                  .map(ComputeBooleanClauseList::new)
-                  .map(ComputeCoreSAT4J::new)
+        return fmComputation
+                .map(ComputeFormula::new)
+                .map(ComputeNNFFormula::new)
+                .map(ComputeCNFFormula::new)
+                .map(ComputeBooleanClauseList::new)
+                .map(ComputeCoreSAT4J::new)
                 .map(ComputeConfigurationFromAssignment::new)
                 .computeResult()
                 .map(c -> c.get(0).getSelected());
@@ -257,21 +257,18 @@ public class FeatureModelAnalyzer {
 
     /**
      * {@return all dead features of the feature model}
-     *
-     * Uses {@link CoreSolver#SAT4J} to compute the result. Use {@link #dead(CoreSolver)} to select a different solver.
      */
     public Result<List<String>> dead() {
-    return fmComputation
-                    .map(ComputeFormula::new)
-                    .map(ComputeNNFFormula::new)
-                    .map(ComputeCNFFormula::new)
-                    .map(ComputeBooleanClauseList::new)
-                    .map(ComputeCoreSAT4J::new)
+        return fmComputation
+                .map(ComputeFormula::new)
+                .map(ComputeNNFFormula::new)
+                .map(ComputeCNFFormula::new)
+                .map(ComputeBooleanClauseList::new)
+                .map(ComputeCoreSAT4J::new)
                 .map(ComputeConfigurationFromAssignment::new)
                 .computeResult()
                 .map(c -> c.get(0).getDeselected());
     }
-
 
     /**
      * {@return converts a list of feature names to the corresponding feature objects from the feature model}
