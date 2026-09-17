@@ -5,7 +5,10 @@
         <extension id="de.featjar.base.computation.Cache" />
     </point>
     <point id="de.featjar.base.env.Binaries" priority="90" />
-    <point id="de.featjar.base.cli.Commands" />
+    <point id="de.featjar.base.cli.Commands">
+        <extension id="de.featjar.base.cli.PrintCommandsCommand" />
+        <extension id="de.featjar.base.cli.PrintHelpCommand" />
+    </point>
     <point id="de.featjar.base.shell.ShellCommands">
         <extension id="de.featjar.base.shell.command.ClearShellCommand" />
         <extension id="de.featjar.base.shell.command.DeleteShellCommand" />

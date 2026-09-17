@@ -427,7 +427,8 @@ public final class FeatJAR extends IO implements AutoCloseable {
         if (Problem.containsError(problems)) {
             FeatJAR.log().problems(problems);
             FeatJAR.log()
-                    .plainMessage(OptionList.printHelp(optionInput.getCommand().orElse(null)));
+                    .plainMessage(
+                            "Type \"commands\" to show all available commands or \"help\" to print usage information");
             return FeatJAR.ERROR_COMPUTING_RESULT;
         }
 
