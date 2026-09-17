@@ -205,7 +205,9 @@ public class Preprocessor {
                     stack.push(lineNumber);
                 } else if (matcher.group(2) != null) { // this is an #endif
                     if (stack.isEmpty()) {
-                        problems.add("Line " + lineNumber + ": #endif without #if");
+                        problems.add("Line " + lineNumber 
+                        + ": #endif without #if. "
+                        + "Suggestion: remove the #endif or add a matching #if.");
                     } else {
                         stack.pop();
                     }
@@ -216,7 +218,9 @@ public class Preprocessor {
         // the remaining #if lines have no matching #endif
         while (!stack.isEmpty()) {
             int startLine = stack.removeLast();
-            problems.add("Line " + startLine + ": #if has no matching #endif");
+            problems.add("Line " + startLine 
+            + ": #if has no matching #endif. "
+            + "Suggestion: add a matching #endif.");
         }
         return problems;
     }

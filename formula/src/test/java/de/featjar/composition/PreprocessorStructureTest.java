@@ -53,7 +53,7 @@ public class PreprocessorStructureTest {
         List<String> problems = preprocessor.checkStructure(lines.stream());
 
         assertEquals(1, problems.size());
-        assertEquals("Line 2: #endif without #if", problems.get(0));
+        assertEquals("Line 2: #endif without #if. Suggestion: remove the #endif or add a matching #if.", problems.get(0));
     }
 
     @Test
@@ -67,7 +67,7 @@ public class PreprocessorStructureTest {
         List<String> problems = preprocessor.checkStructure(lines.stream());
 
         assertEquals(1, problems.size());
-        assertEquals("Line 3: #if has no matching #endif", problems.get(0));
+        assertEquals("Line 3: #if has no matching #endif. Suggestion: add a matching #endif.", problems.get(0));
     }
 
     @Test
@@ -95,7 +95,7 @@ public class PreprocessorStructureTest {
         List<String> problems = preprocessor.checkStructure(lines.stream());
 
         assertEquals(2, problems.size());
-        assertEquals("Line 1: #if has no matching #endif", problems.get(0));
-        assertEquals("Line 2: #if has no matching #endif", problems.get(1));
+        assertEquals("Line 1: #if has no matching #endif. Suggestion: add a matching #endif.", problems.get(0));
+        assertEquals("Line 2: #if has no matching #endif. Suggestion: add a matching #endif.", problems.get(1));
     }
 }
