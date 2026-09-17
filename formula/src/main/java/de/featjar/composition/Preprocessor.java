@@ -194,23 +194,30 @@ public class Preprocessor {
     public List<String> checkStructure(Stream<String> lines) {
         LinkedList<Integer> stack = new LinkedList<>();
         List<String> problems = new ArrayList<>();
+        List<Integer> ifLines = new ArrayList<>();
+        List<String> lineList = lines.toList();
         int lineNumber = 0;
+        int lastEndifLine = 0;
 
-        for (String line : lines.toList()) {
+        for (String line : lineList) {
             lineNumber++;
             Matcher matcher = annotationPattern.matcher(line);
 
             if (matcher.matches()) {
                 if (matcher.group(4) != null) { // this line is an #if (check notes.md file for more)
                     stack.push(lineNumber);
+                    ifLines.add(lineNumber);
                 } else if (matcher.group(2) != null) { // this is an #endif
                     if (stack.isEmpty()) {
-                        problems.add("Line " + lineNumber 
-                        + ": #endif without #if. "
-                        + "Suggestion: remove the #endif or add a matching #if.");
+                        String addIfSuggestion = lastEndifLine == 0
+                                ? "add a matching #if before line 1"
+                                : "add a matching #if on line " + (lastEndifLine + 1);
+                        problems.add("Line " + lineNumber + ": #endif without #if. Suggestion: remove the #endif or "
+                                + addIfSuggestion + ".");
                     } else {
                         stack.pop();
                     }
+                    lastEndifLine = lineNumber;
                 }
             }
         }
@@ -218,9 +225,23 @@ public class Preprocessor {
         // the remaining #if lines have no matching #endif
         while (!stack.isEmpty()) {
             int startLine = stack.removeLast();
-            problems.add("Line " + startLine 
-            + ": #if has no matching #endif. "
-            + "Suggestion: add a matching #endif.");
+            int nextIfLine = 0;
+            for (int ifLine : ifLines) {
+                if (ifLine > startLine) {
+                    nextIfLine = ifLine;
+                    break;
+                }
+            }
+
+            String suggestion;
+            if (nextIfLine > 0) {
+                suggestion = "add a matching #endif before line " + nextIfLine;
+            } else if (startLine == lineList.size()) {
+                suggestion = "remove the #if";
+            } else {
+                suggestion = "add a matching #endif at the end of the file";
+            }
+            problems.add("Line " + startLine + ": #if has no matching #endif. Suggestion: " + suggestion + ".");
         }
         return problems;
     }

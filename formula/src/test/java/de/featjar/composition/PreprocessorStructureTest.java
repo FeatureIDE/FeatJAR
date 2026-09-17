@@ -24,8 +24,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import de.featjar.formula.io.textual.JavaSymbols;
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
 import org.junit.jupiter.api.Test;
 
 public class PreprocessorStructureTest {
@@ -53,7 +53,9 @@ public class PreprocessorStructureTest {
         List<String> problems = preprocessor.checkStructure(lines.stream());
 
         assertEquals(1, problems.size());
-        assertEquals("Line 2: #endif without #if. Suggestion: remove the #endif or add a matching #if.", problems.get(0));
+        assertEquals(
+                "Line 2: #endif without #if. Suggestion: remove the #endif or add a matching #if before line 1.",
+                problems.get(0));
     }
 
     @Test
@@ -67,7 +69,7 @@ public class PreprocessorStructureTest {
         List<String> problems = preprocessor.checkStructure(lines.stream());
 
         assertEquals(1, problems.size());
-        assertEquals("Line 3: #if has no matching #endif. Suggestion: add a matching #endif.", problems.get(0));
+        assertEquals("Line 3: #if has no matching #endif. Suggestion: remove the #if.", problems.get(0));
     }
 
     @Test
@@ -95,7 +97,42 @@ public class PreprocessorStructureTest {
         List<String> problems = preprocessor.checkStructure(lines.stream());
 
         assertEquals(2, problems.size());
-        assertEquals("Line 1: #if has no matching #endif. Suggestion: add a matching #endif.", problems.get(0));
-        assertEquals("Line 2: #if has no matching #endif. Suggestion: add a matching #endif.", problems.get(1));
+        assertEquals(
+                "Line 1: #if has no matching #endif. Suggestion: add a matching #endif before line 2.",
+                problems.get(0));
+        assertEquals("Line 2: #if has no matching #endif. Suggestion: remove the #if.", problems.get(1));
+    }
+
+    @Test
+    public void testEndifWithoutIfAfterEndif() {
+        Preprocessor preprocessor = new Preprocessor("//#", JavaSymbols.INSTANCE);
+        List<String> lines = new ArrayList<>();
+        lines.add("//#if A");
+        lines.add("code");
+        lines.add("//#endif");
+        lines.add("code");
+        lines.add("//#endif");
+
+        List<String> problems = preprocessor.checkStructure(lines.stream());
+
+        assertEquals(1, problems.size());
+        assertEquals(
+                "Line 5: #endif without #if. Suggestion: remove the #endif or add a matching #if on line 4.",
+                problems.get(0));
+    }
+
+    @Test
+    public void testMissingEndifAtEndOfFile() {
+        Preprocessor preprocessor = new Preprocessor("//#", JavaSymbols.INSTANCE);
+        List<String> lines = new ArrayList<>();
+        lines.add("//#if A");
+        lines.add("code");
+
+        List<String> problems = preprocessor.checkStructure(lines.stream());
+
+        assertEquals(1, problems.size());
+        assertEquals(
+                "Line 1: #if has no matching #endif. Suggestion: add a matching #endif at the end of the file.",
+                problems.get(0));
     }
 }
