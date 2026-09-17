@@ -18,66 +18,71 @@
  *
  * See <https://github.com/FeatureIDE/FeatJAR-formula> for further information.
  */
-package de.featjar.composition;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
+package de.featjar.formula;
 
 import de.featjar.base.FeatJAR;
-import de.featjar.base.tree.Trees;
-import de.featjar.formula.io.textual.ExpressionSerializer;
-import de.featjar.formula.io.textual.JavaSymbols;
-import java.util.List;
-import java.util.stream.Collectors;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-/***
- * added the unit test
- * Tests {@link Preprocessor#computePresenceConditions(java.util.stream.Stream)}.
- */
-public class PreprocessorTest {
+public class FormulaCommandsTest {
 
-    @BeforeAll
-    public static void begin() {
-        FeatJAR.testConfiguration().initialize();
-    }
-
-    @AfterAll
-    public static void end() {
-        FeatJAR.deinitialize();
+    @Test
+    void convertToDimcasCommandFails() throws IOException {
+        Path tempFile = Files.createTempFile("featJarTest", ".txt");
+        int exitCode = FeatJAR.runTest(
+                "convert-formula",
+                "--input",
+                "src/testFixtures/resources/GPL/model.xml",
+                "--output-format",
+                "DIMACS",
+                "--overwrite",
+                "--output",
+                tempFile.toString());
+        Assertions.assertEquals(1, exitCode);
     }
 
     @Test
-    public void nestedAnnotations() {
-        List<String> lines = List.of(
-                "//#if A",
-                "  System.out.println(\"\");",
-                "//#if B",
-                "  System.out.println(\"\");",
-                "  System.out.println(\"\");",
-                "//#else",
-                "  System.out.println(\"\");",
-                "//#endif",
-                "  System.out.println(\"\");",
-                "//#endif",
-                "  System.out.println(\"\");");
-        assertEquals(
-                List.of("false", "A", "false", "A && B", "A && B", "false", "A && !B", "false", "A", "false", "true"),
-                presenceConditions(lines));
+    void convertToCNFDimcasCommandSucceeds() throws IOException {
+        Path tempFile = Files.createTempFile("featJarTest", ".txt");
+        int exitCode = FeatJAR.runTest(
+                "convert-formula",
+                "--input",
+                "src/testFixtures/resources/GPL/model.xml",
+                "--output-format",
+                "CNF-DIMACS",
+                "--overwrite",
+                "--output",
+                tempFile.toString());
+        Assertions.assertEquals(0, exitCode);
+        Assertions.assertEquals(
+                Files.readString(Path.of("./src/test/resources/testConvertFormatCommand.dimacs")),
+                Files.readString(tempFile));
     }
 
     @Test
-    public void noAnnotations() {
-        assertEquals(List.of("true", "true"), presenceConditions(List.of("int a;", "int b;")));
-    }
-
-    private static List<String> presenceConditions(List<String> lines) {
-        ExpressionSerializer serializer = new ExpressionSerializer();
-        serializer.setSymbols(JavaSymbols.INSTANCE);
-        return new Preprocessor("//#", JavaSymbols.INSTANCE)
-                .computePresenceConditions(lines.stream()).stream()
-                        .map(pc -> Trees.traverse(pc, serializer).orElseThrow())
-                        .collect(Collectors.toList());
+    void printFormulaWorksCorrectly() throws IOException {
+        Path tempFile = Files.createTempFile("featJarTest", ".txt");
+        int exitCode = FeatJAR.runTest(
+                "print",
+                "--input",
+                "../formula/src/testFixtures/resources/GPL/model.xml",
+                "--tab",
+                "TAB",
+                "--notation",
+                "PREFIX",
+                "--format",
+                "de.featjar.formula.io.textual.JavaSymbols",
+                "--newline",
+                "NEWLINE",
+                "--enforce-parentheses",
+                "--enquote-whitespace",
+                "--output",
+                tempFile.toString());
+        Assertions.assertEquals(0, exitCode);
+        Assertions.assertEquals(
+                Files.readString(Path.of("./src/test/resources/testPrintCommand")), Files.readString(tempFile));
     }
 }
