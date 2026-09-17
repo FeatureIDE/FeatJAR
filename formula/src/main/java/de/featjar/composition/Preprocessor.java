@@ -21,6 +21,7 @@
 package de.featjar.composition;
 
 import de.featjar.base.FeatJAR;
+import de.featjar.base.data.Problem;
 import de.featjar.base.data.Result;
 import de.featjar.formula.assignment.Assignment;
 import de.featjar.formula.io.textual.Symbols;
@@ -32,6 +33,7 @@ import de.featjar.formula.structure.predicate.False;
 import de.featjar.formula.structure.predicate.True;
 import de.featjar.formula.structure.term.value.Variable;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Function;
@@ -229,6 +231,46 @@ public class Preprocessor {
                 .distinct()
                 .map(Variable::getName)
                 .collect(Collectors.toList());
+    }
+
+    /**
+     * {@return a message for each annotation with a syntactically invalid condition, including its line number}
+     *
+     * @param lines the line stream
+     */
+    public List<String> validate(Stream<String> lines) {
+        List<String> problems = new ArrayList<>();
+
+        Iterator<String> it = lines.iterator();
+        int lineNumber = 0;
+        while (it.hasNext()) {
+            String line = it.next();
+            lineNumber++;
+
+            Matcher matcher = annotationPattern.matcher(line);
+            if (!matcher.matches()) continue;
+
+            if (matcher.group(4) != null) {
+                checkCondition(matcher, 5, lineNumber, line, problems);
+            } else if (matcher.group(6) != null) {
+                checkCondition(matcher, 7, lineNumber, line, problems);
+            }
+        }
+
+        return problems;
+    }
+
+    private void checkCondition(Matcher matcher, int group, int lineNumber, String line, List<String> out) {
+        String expression = matcher.group(group);
+        Result<IExpression> parse = annotationParser.parse(expression);
+
+        if (!parse.isPresent()) {
+            for (Problem p : parse.getProblems()) {
+                out.add(String.format("line %d: %s", lineNumber, p.getMessage()));
+            }
+        } else if (!(parse.get() instanceof IFormula)) {
+            out.add(String.format("line %d: condition is not a boolean formula: \"%s\"", lineNumber, expression));
+        }
     }
 
     public List<String> extractAnnotations(Stream<String> lines) {
