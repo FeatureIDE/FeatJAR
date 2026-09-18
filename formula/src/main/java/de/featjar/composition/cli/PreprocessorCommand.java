@@ -25,6 +25,7 @@ import de.featjar.base.cli.ACommand;
 import de.featjar.base.cli.Option;
 import de.featjar.base.cli.OptionList;
 import de.featjar.base.cli.Options;
+import de.featjar.base.data.Problem;
 import de.featjar.base.data.Result;
 import de.featjar.base.io.IO;
 import de.featjar.composition.Preprocessor;
@@ -137,16 +138,13 @@ public class PreprocessorCommand extends ACommand {
     }
 
     private int checkStructure(Path file, Charset charset, Preprocessor preprocessor) throws IOException {
-        List<String> problems;
+        List<Problem> problems;
         try (Stream<String> lines = Files.lines(file, charset)) {
             problems = preprocessor.checkStructure(lines);
         }
 
-        for (String problem : problems) {
-            FeatJAR.log().error(file + ": " + problem);
-        }
+        FeatJAR.log().problems(problems);
         return (problems.isEmpty() ? 0 : 1);
-            
     }
 
     private Stream<String> preprocess(

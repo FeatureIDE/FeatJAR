@@ -21,7 +21,10 @@
 package de.featjar.composition;
 
 import de.featjar.base.FeatJAR;
+import de.featjar.base.data.Problem;
+import de.featjar.base.data.Problem.Severity;
 import de.featjar.base.data.Result;
+import de.featjar.base.io.format.ParseProblem;
 import de.featjar.formula.assignment.Assignment;
 import de.featjar.formula.io.textual.Symbols;
 import de.featjar.formula.structure.IExpression;
@@ -29,6 +32,7 @@ import de.featjar.formula.structure.term.value.Variable;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.regex.Matcher;
@@ -191,9 +195,9 @@ public class Preprocessor {
     /**
      * Checks matching if/endif annotations
      */
-    public List<String> checkStructure(Stream<String> lines) {
+    public List<Problem> checkStructure(Stream<String> lines) {
         LinkedList<Integer> stack = new LinkedList<>();
-        List<String> problems = new ArrayList<>();
+        List<Problem> problems = new ArrayList<>();
         List<Integer> ifLines = new ArrayList<>();
         List<String> lineList = lines.toList();
         int lineNumber = 0;
@@ -212,8 +216,10 @@ public class Preprocessor {
                         String addIfSuggestion = lastEndifLine == 0
                                 ? "add a matching #if before line 1"
                                 : "add a matching #if on line " + (lastEndifLine + 1);
-                        problems.add("Line " + lineNumber + ": #endif without #if. Suggestion: remove the #endif or "
-                                + addIfSuggestion + ".");
+                        problems.add(new ParseProblem(
+                                "#endif without #if. Suggestion: remove the #endif or " + addIfSuggestion + ".",
+                                Severity.ERROR,
+                                lineNumber));
                     } else {
                         stack.pop();
                     }
@@ -223,12 +229,15 @@ public class Preprocessor {
         }
 
         // the remaining #if lines have no matching #endif
+        ListIterator<Integer> iterator = ifLines.listIterator();
         while (!stack.isEmpty()) {
             int startLine = stack.removeLast();
             int nextIfLine = 0;
-            for (int ifLine : ifLines) {
-                if (ifLine > startLine) {
-                    nextIfLine = ifLine;
+            while (iterator.hasNext()) {
+                int next = iterator.next();
+                if (next > startLine) {
+                    nextIfLine = next;
+                    iterator.previous();
                     break;
                 }
             }
@@ -241,7 +250,8 @@ public class Preprocessor {
             } else {
                 suggestion = "add a matching #endif at the end of the file";
             }
-            problems.add("Line " + startLine + ": #if has no matching #endif. Suggestion: " + suggestion + ".");
+            problems.add(new ParseProblem(
+                    "#if has no matching #endif. Suggestion: " + suggestion + ".", Severity.ERROR, startLine));
         }
         return problems;
     }

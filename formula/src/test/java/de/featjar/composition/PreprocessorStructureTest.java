@@ -23,8 +23,11 @@ package de.featjar.composition;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import de.featjar.base.data.Problem;
+import de.featjar.base.data.Problem.Severity;
+import de.featjar.base.io.format.ParseProblem;
 import de.featjar.formula.io.textual.JavaSymbols;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 
@@ -33,12 +36,9 @@ public class PreprocessorStructureTest {
     @Test
     public void testMatchingIfAndEndif() {
         Preprocessor preprocessor = new Preprocessor("//#", JavaSymbols.INSTANCE);
-        List<String> lines = new ArrayList<>();
-        lines.add("//#if A");
-        lines.add("code");
-        lines.add("//#endif");
+        List<String> lines = Arrays.asList("//#if A", "code", "//#endif");
 
-        List<String> problems = preprocessor.checkStructure(lines.stream());
+        List<Problem> problems = preprocessor.checkStructure(lines.stream());
 
         assertTrue(problems.isEmpty());
     }
@@ -46,43 +46,39 @@ public class PreprocessorStructureTest {
     @Test
     public void testEndifWithoutIf() {
         Preprocessor preprocessor = new Preprocessor("//#", JavaSymbols.INSTANCE);
-        List<String> lines = new ArrayList<>();
-        lines.add("code");
-        lines.add("//#endif");
+        List<String> lines = Arrays.asList("code", "//#endif");
 
-        List<String> problems = preprocessor.checkStructure(lines.stream());
+        List<Problem> problems = preprocessor.checkStructure(lines.stream());
+        ParseProblem problem = (ParseProblem) problems.get(0);
 
         assertEquals(1, problems.size());
         assertEquals(
-                "Line 2: #endif without #if. Suggestion: remove the #endif or add a matching #if before line 1.",
-                problems.get(0));
+                "#endif without #if. Suggestion: remove the #endif or add a matching #if before line 1.",
+                problem.getMessage());
+        assertEquals(Severity.ERROR, problem.getSeverity());
+        assertEquals(2, problem.getLineNumber());
     }
 
     @Test
-    public void testMissingEndif() {
+    public void testIfOnLastLineSuggestsRemoval() {
         Preprocessor preprocessor = new Preprocessor("//#", JavaSymbols.INSTANCE);
-        List<String> lines = new ArrayList<>();
-        lines.add("");
-        lines.add("code");
-        lines.add("//#if A");
+        List<String> lines = Arrays.asList("code", "//#if A");
 
-        List<String> problems = preprocessor.checkStructure(lines.stream());
+        List<Problem> problems = preprocessor.checkStructure(lines.stream());
+        ParseProblem problem = (ParseProblem) problems.get(0);
 
         assertEquals(1, problems.size());
-        assertEquals("Line 3: #if has no matching #endif. Suggestion: remove the #if.", problems.get(0));
+        assertEquals("#if has no matching #endif. Suggestion: remove the #if.", problem.getMessage());
+        assertEquals(Severity.ERROR, problem.getSeverity());
+        assertEquals(2, problem.getLineNumber());
     }
 
     @Test
     public void testNestedBlocks() {
         Preprocessor preprocessor = new Preprocessor("//#", JavaSymbols.INSTANCE);
-        List<String> lines = new ArrayList<>();
-        lines.add("//#if A");
-        lines.add("//#if B");
-        lines.add("code");
-        lines.add("//#endif");
-        lines.add("//#endif");
+        List<String> lines = Arrays.asList("//#if A", "//#if B", "code", "//#endif", "//#endif");
 
-        List<String> problems = preprocessor.checkStructure(lines.stream());
+        List<Problem> problems = preprocessor.checkStructure(lines.stream());
 
         assertTrue(problems.isEmpty());
     }
@@ -90,49 +86,48 @@ public class PreprocessorStructureTest {
     @Test
     public void testTwoMissingEndifs() {
         Preprocessor preprocessor = new Preprocessor("//#", JavaSymbols.INSTANCE);
-        List<String> lines = new ArrayList<>();
-        lines.add("//#if A");
-        lines.add("//#if B");
+        List<String> lines = Arrays.asList("//#if A", "//#if B");
 
-        List<String> problems = preprocessor.checkStructure(lines.stream());
+        List<Problem> problems = preprocessor.checkStructure(lines.stream());
+        ParseProblem firstProblem = (ParseProblem) problems.get(0);
+        ParseProblem secondProblem = (ParseProblem) problems.get(1);
 
         assertEquals(2, problems.size());
         assertEquals(
-                "Line 1: #if has no matching #endif. Suggestion: add a matching #endif before line 2.",
-                problems.get(0));
-        assertEquals("Line 2: #if has no matching #endif. Suggestion: remove the #if.", problems.get(1));
+                "#if has no matching #endif. Suggestion: add a matching #endif before line 2.",
+                firstProblem.getMessage());
+        assertEquals(1, firstProblem.getLineNumber());
+        assertEquals("#if has no matching #endif. Suggestion: remove the #if.", secondProblem.getMessage());
+        assertEquals(2, secondProblem.getLineNumber());
     }
 
     @Test
     public void testEndifWithoutIfAfterEndif() {
         Preprocessor preprocessor = new Preprocessor("//#", JavaSymbols.INSTANCE);
-        List<String> lines = new ArrayList<>();
-        lines.add("//#if A");
-        lines.add("code");
-        lines.add("//#endif");
-        lines.add("code");
-        lines.add("//#endif");
+        List<String> lines = Arrays.asList("//#if A", "code", "//#endif", "code", "//#endif");
 
-        List<String> problems = preprocessor.checkStructure(lines.stream());
+        List<Problem> problems = preprocessor.checkStructure(lines.stream());
+        ParseProblem problem = (ParseProblem) problems.get(0);
 
         assertEquals(1, problems.size());
         assertEquals(
-                "Line 5: #endif without #if. Suggestion: remove the #endif or add a matching #if on line 4.",
-                problems.get(0));
+                "#endif without #if. Suggestion: remove the #endif or add a matching #if on line 4.",
+                problem.getMessage());
+        assertEquals(5, problem.getLineNumber());
     }
 
     @Test
-    public void testMissingEndifAtEndOfFile() {
+    public void testMissingEndifAfterCodeSuggestsEndOfFile() {
         Preprocessor preprocessor = new Preprocessor("//#", JavaSymbols.INSTANCE);
-        List<String> lines = new ArrayList<>();
-        lines.add("//#if A");
-        lines.add("code");
+        List<String> lines = Arrays.asList("//#if A", "code");
 
-        List<String> problems = preprocessor.checkStructure(lines.stream());
+        List<Problem> problems = preprocessor.checkStructure(lines.stream());
+        ParseProblem problem = (ParseProblem) problems.get(0);
 
         assertEquals(1, problems.size());
         assertEquals(
-                "Line 1: #if has no matching #endif. Suggestion: add a matching #endif at the end of the file.",
-                problems.get(0));
+                "#if has no matching #endif. Suggestion: add a matching #endif at the end of the file.",
+                problem.getMessage());
+        assertEquals(1, problem.getLineNumber());
     }
 }
