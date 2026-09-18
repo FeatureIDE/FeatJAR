@@ -21,7 +21,10 @@
 package de.featjar.composition;
 
 import de.featjar.base.FeatJAR;
+import de.featjar.base.data.Problem;
+import de.featjar.base.data.Problem.Severity;
 import de.featjar.base.data.Result;
+import de.featjar.base.io.format.ParseProblem;
 import de.featjar.formula.assignment.Assignment;
 import de.featjar.formula.io.textual.Symbols;
 import de.featjar.formula.structure.IExpression;
@@ -34,6 +37,7 @@ import de.featjar.formula.structure.term.value.Variable;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.regex.Matcher;
@@ -237,6 +241,70 @@ public class Preprocessor {
             throw new IllegalArgumentException("Unbalanced presence annotation (empty stack): " + line);
         }
         return stack.pop();
+    }
+
+    /**
+     * Checks matching if/endif annotations
+     */
+    public List<Problem> checkStructure(Stream<String> lines) {
+        LinkedList<Integer> stack = new LinkedList<>();
+        List<Problem> problems = new ArrayList<>();
+        List<Integer> ifLines = new ArrayList<>();
+        List<String> lineList = lines.toList();
+        int lineNumber = 0;
+        int lastEndifLine = 0;
+
+        for (String line : lineList) {
+            lineNumber++;
+            Matcher matcher = annotationPattern.matcher(line);
+
+            if (matcher.matches()) {
+                if (matcher.group(4) != null) { // this line is an #if (check notes.md file for more)
+                    stack.push(lineNumber);
+                    ifLines.add(lineNumber);
+                } else if (matcher.group(2) != null) { // this is an #endif
+                    if (stack.isEmpty()) {
+                        String addIfSuggestion = lastEndifLine == 0
+                                ? "add a matching #if before line 1"
+                                : "add a matching #if on line " + (lastEndifLine + 1);
+                        problems.add(new ParseProblem(
+                                "#endif without #if. Suggestion: remove the #endif or " + addIfSuggestion + ".",
+                                Severity.ERROR,
+                                lineNumber));
+                    } else {
+                        stack.pop();
+                    }
+                    lastEndifLine = lineNumber;
+                }
+            }
+        }
+
+        // the remaining #if lines have no matching #endif
+        ListIterator<Integer> iterator = ifLines.listIterator();
+        while (!stack.isEmpty()) {
+            int startLine = stack.removeLast();
+            int nextIfLine = 0;
+            while (iterator.hasNext()) {
+                int next = iterator.next();
+                if (next > startLine) {
+                    nextIfLine = next;
+                    iterator.previous();
+                    break;
+                }
+            }
+
+            String suggestion;
+            if (nextIfLine > 0) {
+                suggestion = "add a matching #endif before line " + nextIfLine;
+            } else if (startLine == lineList.size()) {
+                suggestion = "remove the #if";
+            } else {
+                suggestion = "add a matching #endif at the end of the file";
+            }
+            problems.add(new ParseProblem(
+                    "#if has no matching #endif. Suggestion: " + suggestion + ".", Severity.ERROR, startLine));
+        }
+        return problems;
     }
 
     public List<String> extractVariableNames(Stream<String> lines) {
