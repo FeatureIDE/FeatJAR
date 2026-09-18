@@ -336,10 +336,12 @@ public class OptionList {
             if (!listIterator.hasNext()) {
                 addProblem(
                         problemList,
-                        Severity.WARNING,
-                        "Option %s is supplied without value, but a value is required, using default value (%s)",
+                        option.getDefaultArgument().isPresent() ? Severity.WARNING : Severity.ERROR,
+                        "Option %s is supplied without value, but a value is required%s",
                         option.getName(),
-                        option.getDefaultArgument().orElse(""));
+                        option.getDefaultArgument()
+                                .map(arg -> ", using default value (" + arg + ")")
+                                .orElse(""));
                 continue;
             }
             String nextArgument = listIterator.next();
@@ -347,10 +349,12 @@ public class OptionList {
                 listIterator.previous();
                 addProblem(
                         problemList,
-                        Severity.WARNING,
-                        "Option %s is supplied without value, but a value is required, using default value (%s)",
+                        option.getDefaultArgument().isPresent() ? Severity.WARNING : Severity.ERROR,
+                        "Option %s is supplied without value, but a value is required%s",
                         option.getName(),
-                        option.getDefaultArgument().orElse(""));
+                        option.getDefaultArgument()
+                                .map(arg -> ", using default value (" + arg + ")")
+                                .orElse(""));
                 continue;
             }
             listIterator.remove();
@@ -380,11 +384,13 @@ public class OptionList {
         if (!option.validateArgument(nextArgument)) {
             addProblem(
                     problemList,
-                    Severity.WARNING,
-                    "Invalid argument %s for option %s, using default value (%s)",
+                    option.getDefaultArgument().isPresent() ? Severity.WARNING : Severity.ERROR,
+                    "Invalid argument %s for option %s%s",
                     nextArgument,
                     option.getName(),
-                    option.getDefaultArgument().orElse(""));
+                    option.getDefaultArgument()
+                            .map(arg -> ", using default value (" + arg + ")")
+                            .orElse(""));
             return Result.empty();
         }
 
@@ -393,11 +399,13 @@ public class OptionList {
             problemList.addAll(parseResult.getProblems());
             addProblem(
                     problemList,
-                    Severity.WARNING,
-                    "Could not parse argument %s for option %s, using default value (%s)%s",
+                    option.getDefaultArgument().isPresent() ? Severity.WARNING : Severity.ERROR,
+                    "Could not parse argument %s for option %s%s%s",
                     nextArgument,
                     option.getName(),
-                    option.getDefaultArgument().orElse(""),
+                    option.getDefaultArgument()
+                            .map(arg -> ", using default value (" + arg + ")")
+                            .orElse(""),
                     option.getPossibleArguments()
                             .map(list -> " (possible values: " + list.stream().collect(Collectors.joining(",")) + ")")
                             .orElse(""));
