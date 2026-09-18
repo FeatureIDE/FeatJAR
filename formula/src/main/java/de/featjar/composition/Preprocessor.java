@@ -196,51 +196,6 @@ public class Preprocessor {
         return lines.sequential().filter(new Filter(assignment));
     }
 
-    /**
-     * {@return the presence condition of each line, in order}
-     *
-     * @param lines the line stream
-     */
-    public List<IFormula> computePresenceConditions(Stream<String> lines) {
-        List<IFormula> presenceConditions = new ArrayList<>();
-        LinkedList<IFormula> stack = new LinkedList<>();
-
-        Iterator<String> it = lines.iterator();
-        int lineNumber = 0;
-        while (it.hasNext()) {
-            String line = it.next();
-            lineNumber++;
-
-            Matcher matcher = annotationPattern.matcher(line);
-            if (!matcher.matches()) {
-                if (stack.isEmpty()) {
-                    presenceConditions.add(True.INSTANCE);
-                } else {
-                    presenceConditions.add(stack.size() == 1 ? stack.get(0) : new And(stack));
-                }
-                continue;
-            }
-
-            if (matcher.group(4) != null) {
-                stack.addLast((IFormula) annotationParser.parse(matcher.group(5)).orElseThrow());
-            } else if (matcher.group(3) != null) {
-                if (stack.isEmpty()) {
-                    FeatJAR.log().warning("Line %d: no annotation for else", lineNumber);
-                } else {
-                    stack.addLast(new Not(stack.removeLast()));
-                }
-            } else if (matcher.group(2) != null) {
-                if (stack.isEmpty()) {
-                    FeatJAR.log().warning("Line %d: no annotation to end", lineNumber);
-                } else {
-                    stack.removeLast();
-                }
-            }
-            presenceConditions.add(False.INSTANCE);
-        }
-
-        return presenceConditions;
-    }
 
     public List<String> extractVariableNames(Stream<String> lines) {
         return lines.flatMap(new VariableNames())
