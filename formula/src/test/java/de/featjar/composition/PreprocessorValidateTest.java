@@ -19,7 +19,9 @@ class PreprocessorValidateTest {
     }
 
     private List<String> validate(String... lines) {
-        return preprocessor.validate(Stream.of(lines));
+        return preprocessor.validate(Stream.of(lines)).stream()
+                .map(p -> String.format("line %d: %s", p.getLineNumber(), p.getMessage()))
+                .toList();
     }
 
     @Test
@@ -181,7 +183,8 @@ class PreprocessorValidateTest {
         List<String> problems = validate(
                 "// this is a normal comment",
                 "int A = 1;",
-                "if (A) {  }"          
+                "if (A) {  }"
+        );
 
         assertTrue(problems.isEmpty());
     }

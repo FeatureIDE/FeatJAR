@@ -99,7 +99,9 @@ public class PreprocessorTest {
     }
 
     private static List<String> validate(List<String> lines) {
-        return new Preprocessor("//#", JavaSymbols.INSTANCE).validate(lines.stream());
+        return new Preprocessor("//#", JavaSymbols.INSTANCE).validate(lines.stream()).stream()
+                .map(p -> String.format("line %d: %s", p.getLineNumber(), p.getMessage()))
+                .collect(Collectors.toList());
     }
 
     private static List<String> presenceConditions(List<String> lines) {

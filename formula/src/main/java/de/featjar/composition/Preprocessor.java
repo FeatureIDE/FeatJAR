@@ -23,6 +23,7 @@ package de.featjar.composition;
 import de.featjar.base.FeatJAR;
 import de.featjar.base.data.Problem;
 import de.featjar.base.data.Result;
+import de.featjar.base.io.format.ParseProblem;
 import de.featjar.formula.assignment.Assignment;
 import de.featjar.formula.io.textual.Symbols;
 import de.featjar.formula.structure.IExpression;
@@ -201,29 +202,44 @@ public class Preprocessor {
      * @param lines the line stream
      */
     public List<IFormula> computePresenceConditions(Stream<String> lines) {
+        List<IFormula> presenceConditions = new ArrayList<>();
         LinkedList<IFormula> stack = new LinkedList<>();
-        return lines.sequential()
-                .map(line -> {
-                    Matcher matcher = annotationPattern.matcher(line);
-                    if (!matcher.matches()) {
-                        if (stack.isEmpty()) {
-                            return (IFormula) True.INSTANCE;
-                        }
-                        List<IFormula> conjuncts = new ArrayList<>();
-                        stack.descendingIterator().forEachRemaining(conjuncts::add);
-                        return conjuncts.size() == 1 ? conjuncts.get(0) : new And(conjuncts);
-                    }
-                    if (matcher.group(4) != null) {
-                        stack.push((IFormula)
-                                annotationParser.parse(matcher.group(5)).orElseThrow());
-                    } else if (matcher.group(3) != null) {
-                        stack.push(new Not(stack.pop()));
-                    } else if (matcher.group(2) != null) {
-                        stack.pop();
-                    }
-                    return (IFormula) False.INSTANCE;
-                })
-                .collect(Collectors.toList());
+
+        Iterator<String> it = lines.iterator();
+        int lineNumber = 0;
+        while (it.hasNext()) {
+            String line = it.next();
+            lineNumber++;
+
+            Matcher matcher = annotationPattern.matcher(line);
+            if (!matcher.matches()) {
+                if (stack.isEmpty()) {
+                    presenceConditions.add(True.INSTANCE);
+                } else {
+                    presenceConditions.add(stack.size() == 1 ? stack.get(0) : new And(stack));
+                }
+                continue;
+            }
+
+            if (matcher.group(4) != null) {
+                stack.addLast((IFormula) annotationParser.parse(matcher.group(5)).orElseThrow());
+            } else if (matcher.group(3) != null) {
+                if (stack.isEmpty()) {
+                    FeatJAR.log().warning("Line %d: no annotation for else", lineNumber);
+                } else {
+                    stack.addLast(new Not(stack.removeLast()));
+                }
+            } else if (matcher.group(2) != null) {
+                if (stack.isEmpty()) {
+                    FeatJAR.log().warning("Line %d: no annotation to end", lineNumber);
+                } else {
+                    stack.removeLast();
+                }
+            }
+            presenceConditions.add(False.INSTANCE);
+        }
+
+        return presenceConditions;
     }
 
     public List<String> extractVariableNames(Stream<String> lines) {
@@ -234,12 +250,12 @@ public class Preprocessor {
     }
 
     /**
-     * {@return a message for each annotation with a syntactically invalid condition, including its line number}
+     * {@return a problem for each annotation with a syntactically invalid condition, including its line number}
      *
      * @param lines the line stream
      */
-    public List<String> validate(Stream<String> lines) {
-        List<String> problems = new ArrayList<>();
+    public List<ParseProblem> validate(Stream<String> lines) {
+        List<ParseProblem> problems = new ArrayList<>();
 
         Iterator<String> it = lines.iterator();
         int lineNumber = 0;
@@ -251,26 +267,29 @@ public class Preprocessor {
             if (!matcher.matches()) continue;
 
             if (matcher.group(4) != null) {
-                checkCondition(matcher, 5, lineNumber, line, problems);
+                problems.addAll(checkCondition(matcher.group(5), lineNumber));
             } else if (matcher.group(6) != null) {
-                checkCondition(matcher, 7, lineNumber, line, problems);
+                problems.addAll(checkCondition(matcher.group(7), lineNumber));
             }
         }
 
         return problems;
     }
 
-    private void checkCondition(Matcher matcher, int group, int lineNumber, String line, List<String> out) {
-        String expression = matcher.group(group);
-        Result<IExpression> parse = annotationParser.parse(expression);
+    private List<ParseProblem> checkCondition(String condition, int lineNumber) {
+        Result<IExpression> parse = annotationParser.parse(condition);
 
         if (!parse.isPresent()) {
-            for (Problem p : parse.getProblems()) {
-                out.add(String.format("line %d: %s", lineNumber, p.getMessage()));
-            }
+            return parse.getProblems().stream()
+                    .map(p -> new ParseProblem(p.getMessage(), p.getSeverity(), lineNumber))
+                    .toList();
         } else if (!(parse.get() instanceof IFormula)) {
-            out.add(String.format("line %d: condition is not a boolean formula: \"%s\"", lineNumber, expression));
+            return List.of(new ParseProblem(
+                    String.format("condition is not a boolean formula: \"%s\"", condition),
+                    Problem.Severity.ERROR,
+                    lineNumber));
         }
+        return List.of();
     }
 
     public List<String> extractAnnotations(Stream<String> lines) {
