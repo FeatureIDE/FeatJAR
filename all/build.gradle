@@ -28,6 +28,14 @@ application {
 	mainClass = 'de.featjar.base.FeatJAR'
 }
 
+run {
+    if (project.hasProperty('FeatJARArgs')) {
+        String rawArgs = project.getProperty('FeatJARArgs').toString()
+        List<String> parsedArgs = rawArgs.split(',')
+        setArgs(parsedArgs)
+    }
+}
+
 jar {
     preserveFileTimestamps = true
 }
