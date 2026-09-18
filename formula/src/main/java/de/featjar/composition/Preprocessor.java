@@ -200,6 +200,7 @@ public class Preprocessor {
      */
     public List<IFormula> computePresenceConditions(Stream<String> lines) {
         LinkedList<IFormula> stack = new LinkedList<>();
+        LinkedList<Integer> elifCounts = new LinkedList<>(); // each elif adds one extra stack entry to its if
         return lines.sequential()
                 .map(line -> {
                     Matcher matcher = annotationPattern.matcher(line);
@@ -214,12 +215,15 @@ public class Preprocessor {
                     if (matcher.group(4) != null) {
                         stack.push((IFormula)
                                 annotationParser.parse(matcher.group(5)).orElseThrow());
+                        elifCounts.push(0);
                     } else if (matcher.group(3) != null) {
                         stack.push(new Not(popChecked(stack, line)));
                     } else if (matcher.group(2) != null) {
                         popChecked(stack, line);
+                        for (int i = elifCounts.pop(); i > 0; i--) stack.pop();
                     } else if (matcher.group(6) != null) {
                         stack.push(new Not(popChecked(stack, line)));
+                        elifCounts.push(elifCounts.pop() + 1);
                         stack.push((IFormula)
                                 annotationParser.parse(matcher.group(7)).orElseThrow());
                     }
