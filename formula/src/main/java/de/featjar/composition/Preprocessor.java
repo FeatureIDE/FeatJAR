@@ -22,10 +22,18 @@ package de.featjar.composition;
 
 import de.featjar.base.FeatJAR;
 import de.featjar.base.data.Result;
+import de.featjar.base.tree.Trees;
 import de.featjar.formula.assignment.Assignment;
+import de.featjar.formula.io.textual.ExpressionSerializer;
 import de.featjar.formula.io.textual.Symbols;
 import de.featjar.formula.structure.IExpression;
+import de.featjar.formula.structure.IFormula;
+import de.featjar.formula.structure.connective.And;
+import de.featjar.formula.structure.connective.Not;
+import de.featjar.formula.structure.predicate.False;
+import de.featjar.formula.structure.predicate.True;
 import de.featjar.formula.structure.term.value.Variable;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Function;
@@ -187,6 +195,52 @@ public class Preprocessor {
         return lines.sequential().filter(new Filter(assignment));
     }
 
+    /**
+     * {@return the presence condition of each line, in order}
+     *
+     * @param lines the line stream
+     */
+    public List<IFormula> computePresenceConditions(Stream<String> lines) {
+        LinkedList<IFormula> stack = new LinkedList<>();
+        LinkedList<Integer> elifCounts = new LinkedList<>(); // each elif adds one extra stack entry to its if
+        return lines.sequential()
+                .map(line -> {
+                    Matcher matcher = annotationPattern.matcher(line);
+                    if (!matcher.matches()) {
+                        if (stack.isEmpty()) {
+                            return (IFormula) True.INSTANCE;
+                        }
+                        List<IFormula> conjuncts = new ArrayList<>();
+                        stack.descendingIterator().forEachRemaining(conjuncts::add);
+                        return conjuncts.size() == 1 ? conjuncts.get(0) : new And(conjuncts);
+                    }
+                    if (matcher.group(4) != null) {
+                        stack.push((IFormula)
+                                annotationParser.parse(matcher.group(5)).orElseThrow());
+                        elifCounts.push(0);
+                    } else if (matcher.group(3) != null) {
+                        stack.push(new Not(popChecked(stack, line)));
+                    } else if (matcher.group(2) != null) {
+                        popChecked(stack, line);
+                        for (int i = elifCounts.pop(); i > 0; i--) stack.pop();
+                    } else if (matcher.group(6) != null) {
+                        stack.push(new Not(popChecked(stack, line)));
+                        elifCounts.push(elifCounts.pop() + 1);
+                        stack.push((IFormula)
+                                annotationParser.parse(matcher.group(7)).orElseThrow());
+                    }
+                    return (IFormula) False.INSTANCE;
+                })
+                .collect(Collectors.toList());
+    }
+
+    private IFormula popChecked(LinkedList<IFormula> stack, String line) {
+        if (stack.isEmpty()) {
+            throw new IllegalArgumentException("Unbalanced presence annotation (empty stack): " + line);
+        }
+        return stack.pop();
+    }
+
     public List<String> extractVariableNames(Stream<String> lines) {
         return lines.flatMap(new VariableNames())
                 .distinct()
@@ -196,5 +250,32 @@ public class Preprocessor {
 
     public List<String> extractAnnotations(Stream<String> lines) {
         return lines.filter(annotationPattern.asMatchPredicate()).collect(Collectors.toList());
+    }
+
+    /**
+     * {@return one message per block of code lines whose presence condition is not satisfiable}
+     *
+     * @param lines the line stream
+     * @param isSatisfiable tests a presence condition, e.g., together with a feature model
+     */
+    public List<String> findDeadCode(Stream<String> lines, Predicate<IFormula> isSatisfiable) {
+        List<IFormula> presence = computePresenceConditions(lines);
+        ExpressionSerializer serializer = new ExpressionSerializer();
+        serializer.setSymbols(annotationParser.getSymbols());
+        List<String> dead = new ArrayList<>();
+        // a code block is a maximal run of lines between annotations, which have the presence condition False
+        for (int start = 0, i = 0; i <= presence.size(); i++) {
+            if (i == presence.size() || presence.get(i) == False.INSTANCE) {
+                if (start < i && !isSatisfiable.test(presence.get(start))) {
+                    dead.add(String.format(
+                            "Dead code at lines %d-%d: %s",
+                            start + 1,
+                            i,
+                            Trees.traverse(presence.get(start), serializer).orElseThrow()));
+                }
+                start = i + 1;
+            }
+        }
+        return dead;
     }
 }

@@ -3,6 +3,7 @@
 	<point id="de.featjar.base.cli.Commands">
 		<extension id="de.featjar.analysis.sat4j.cli.AtomicSetsCommand" />
 		<extension id="de.featjar.analysis.sat4j.cli.CoreCommand" />
+		<extension id="de.featjar.analysis.sat4j.cli.DeadCodeCommand" />
 		<extension id="de.featjar.analysis.sat4j.cli.InciidentCommand" />
 		<extension id="de.featjar.analysis.sat4j.cli.LegacyYASACommand" />
 		<extension id="de.featjar.analysis.sat4j.cli.ProjectionCommand" />
