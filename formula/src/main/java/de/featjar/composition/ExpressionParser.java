@@ -110,21 +110,26 @@ public class ExpressionParser {
     private IExpression parseExpression(String formulaString) throws ParseException {
         LinkedList<LinkedList<Token>> stack = new LinkedList<>();
         stack.push(new LinkedList<>());
-        Token lastOpen = null;
+        LinkedList<Token> openTokens = new LinkedList<>();
 
         for (Token currentToken : tokenize(formulaString)) {
             switch (currentToken.type) {
                 case CLOSE:
-                    if (stack.size() <= 1) {
+                    if (openTokens.isEmpty()) {
                         throw new ParseException(
                                 "Closing parenthesis has no match.", currentToken.lineNumber, currentToken.position);
                     }
-                    Token subExpression = parseSubExpression(stack.pop());
+                    Token open = openTokens.pop();
+                    Token subExpression = new Token(
+                            TokenClass.EXPRESSION,
+                            parseSubExpression(stack.pop(), open.position),
+                            open.lineNumber,
+                            open.position);
                     LinkedList<Token> l = stack.peek();
                     l.add(subExpression);
                     break;
                 case OPEN:
-                    lastOpen = currentToken;
+                    openTokens.push(currentToken);
                     stack.push(new LinkedList<>());
                     break;
                 default:
@@ -132,66 +137,100 @@ public class ExpressionParser {
                     break;
             }
         }
-        int size = stack.size();
-        if (size > 1) {
-            throw new ParseException("Open parenthesis has no match.", lastOpen.lineNumber, lastOpen.position);
-        } else if (size == 0) {
-            throw new IllegalStateException();
+        if (!openTokens.isEmpty()) {
+            Token open = openTokens.peek();
+            throw new ParseException("Open parenthesis has no match.", open.lineNumber, open.position);
         }
-        return (IExpression) parseSubExpression(stack.pop()).value;
+        return parseSubExpression(stack.pop(), 0);
     }
 
-    private Token parseSubExpression(List<Token> tokenList) {
-        ListIterator<Token> iterator = tokenList.listIterator();
-        return parseSubExpression(iterator);
+    private IExpression parseSubExpression(List<Token> tokenList, int position) throws ParseException {
+        IExpression expression = parseSubExpression(tokenList.listIterator());
+        if (expression == null) {
+            throw new ParseException("Missing condition.", 1, position);
+        }
+        return expression;
     }
 
     @SuppressWarnings("unchecked")
-    private Token parseSubExpression(ListIterator<Token> iterator) {
+    private IExpression parseSubExpression(ListIterator<Token> iterator) throws ParseException {
         IExpression expression = null;
         while (iterator.hasNext()) {
             Token token = iterator.next();
-            switch (token.type) {
-                case QUOTED_IDENTIFIER:
-                case IDENTIFIER:
-                    expression = new Literal((String) token.value);
-                    break;
-                case NUMBER:
-                    expression = new Constant(token.value);
-                    break;
-                case EXPRESSION:
-                    expression = (IExpression) token.value;
-                    break;
-                case OPERATOR:
-                    Class<? extends IExpression> value = (Class<? extends IExpression>) token.value;
-                    if (value == Literal.class) {
-                        expression = (IFormula) iterator.next().value;
-                    } else if (value == Not.class) {
-                        expression = new Not((IFormula) iterator.next().value);
-                    } else if (value == And.class) {
-                        expression = new And((IFormula) expression, (IFormula) parseSubExpression(iterator).value);
-                    } else if (value == Or.class) {
-                        expression = new Or((IFormula) expression, (IFormula) parseSubExpression(iterator).value);
-                    } else if (value == Implies.class) {
-                        expression = new Implies((IFormula) expression, (IFormula) parseSubExpression(iterator).value);
-                    } else if (value == BiImplies.class) {
-                        expression =
-                                new BiImplies((IFormula) expression, (IFormula) parseSubExpression(iterator).value);
-                    } else {
-                        throw new IllegalStateException();
-                    }
-                    break;
-                case OPEN:
-                case CLOSE:
-                    throw new IllegalStateException();
-                default:
-                    break;
+            if (token.type != TokenClass.OPERATOR || isUnaryOperator(token)) {
+                if (expression != null) {
+                    throw new ParseException(
+                            String.format("Unexpected '%s', expected an operator.", text(token)),
+                            token.lineNumber,
+                            token.position);
+                }
+                expression = parseOperand(token, iterator);
+                continue;
+            }
+            Class<? extends IExpression> value = (Class<? extends IExpression>) token.value;
+            if (!(expression instanceof IFormula) || !iterator.hasNext()) {
+                throw missingOperand(token);
+            }
+            IExpression right = parseSubExpression(iterator);
+            if (!(right instanceof IFormula)) {
+                throw missingOperand(token);
+            }
+            if (value == And.class) {
+                expression = new And((IFormula) expression, (IFormula) right);
+            } else if (value == Or.class) {
+                expression = new Or((IFormula) expression, (IFormula) right);
+            } else if (value == Implies.class) {
+                expression = new Implies((IFormula) expression, (IFormula) right);
+            } else if (value == BiImplies.class) {
+                expression = new BiImplies((IFormula) expression, (IFormula) right);
+            } else {
+                throw new ParseException(
+                        String.format("Unsupported operator '%s'.", text(token)), token.lineNumber, token.position);
             }
         }
-        if (expression == null) {
-            throw new IllegalStateException();
+        return expression;
+    }
+
+    private IExpression parseOperand(Token token, ListIterator<Token> iterator) throws ParseException {
+        switch (token.type) {
+            case QUOTED_IDENTIFIER:
+            case IDENTIFIER:
+                return new Literal((String) token.value);
+            case NUMBER:
+                return new Constant(token.value);
+            case EXPRESSION:
+                return (IExpression) token.value;
+            default:
+                if (isUnaryOperator(token) && iterator.hasNext()) {
+                    IExpression operand = parseOperand(iterator.next(), iterator);
+                    if (operand instanceof IFormula) {
+                        return token.value == Not.class ? new Not((IFormula) operand) : operand;
+                    }
+                }
+                throw missingOperand(token);
         }
-        return new Token(TokenClass.EXPRESSION, expression, -1, -1);
+    }
+
+    private boolean isUnaryOperator(Token token) {
+        return token.value == Not.class || token.value == Literal.class;
+    }
+
+    private ParseException missingOperand(Token operator) {
+        return new ParseException(
+                String.format("Missing operand for '%s'.", text(operator)), operator.lineNumber, operator.position);
+    }
+
+    @SuppressWarnings("unchecked")
+    private String text(Token token) {
+        switch (token.type) {
+            case OPERATOR:
+                return symbols.getSymbolResult((Class<? extends IExpression>) token.value)
+                        .orElse(String.valueOf(token.value));
+            case EXPRESSION:
+                return String.valueOf(PARENTHESIS_OPEN);
+            default:
+                return String.valueOf(token.value);
+        }
     }
 
     private List<Token> tokenize(String expression) {
@@ -248,27 +287,23 @@ public class ExpressionParser {
         if (tokenBuilder.length() != 0) {
             String tokenString = tokenBuilder.toString();
             tokenBuilder.delete(0, tokenBuilder.length());
+            int startPosition = position - tokenString.length();
 
             if (Pattern.compile("(-)?[0-9]+").matcher(tokenString).matches()) {
-                tokens.add(new Token(TokenClass.NUMBER, Integer.parseInt(tokenString), lineNumber, position));
+                tokens.add(new Token(TokenClass.NUMBER, Integer.parseInt(tokenString), lineNumber, startPosition));
             } else {
                 Matcher matcher = Pattern.compile("\\w+").matcher(tokenString);
-                if (matcher.matches()) {
-                    createToken(tokens, lineNumber, position, tokenString);
-                } else if (matcher.find()) {
-                    int startIndex = 0;
-                    do {
-                        int matcherStart = matcher.start();
-                        int matcherEnd = matcher.end();
-                        String firstSubstring = tokenString.substring(startIndex, matcherStart);
-                        String secondSubstring = tokenString.substring(matcherStart, matcherEnd);
-                        startIndex = matcherEnd;
-                        createToken(tokens, lineNumber, position, firstSubstring);
-                        createToken(tokens, lineNumber, position, secondSubstring);
-                    } while (startIndex < tokenString.length() && matcher.find(startIndex));
-                } else {
-                    createToken(tokens, lineNumber, position, tokenString);
+                int startIndex = 0;
+                while (matcher.find()) {
+                    createToken(
+                            tokens,
+                            lineNumber,
+                            startPosition + startIndex,
+                            tokenString.substring(startIndex, matcher.start()));
+                    createToken(tokens, lineNumber, startPosition + matcher.start(), matcher.group());
+                    startIndex = matcher.end();
                 }
+                createToken(tokens, lineNumber, startPosition + startIndex, tokenString.substring(startIndex));
             }
         }
     }
