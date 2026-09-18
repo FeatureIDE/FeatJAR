@@ -167,7 +167,7 @@ public class ExpressionParser {
                     if (value == Literal.class) {
                         expression = (IFormula) iterator.next().value;
                     } else if (value == Not.class) {
-                        expression = new Not((IFormula) iterator.next().value);
+                        expression = new Not((IFormula) parseSubExpression(List.of(iterator.next())).value);
                     } else if (value == And.class) {
                         expression = new And((IFormula) expression, (IFormula) parseSubExpression(iterator).value);
                     } else if (value == Or.class) {
