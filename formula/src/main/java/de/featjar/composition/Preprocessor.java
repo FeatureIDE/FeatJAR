@@ -230,8 +230,7 @@ public class Preprocessor {
 
     private IFormula popChecked(LinkedList<IFormula> stack, String line) {
         if (stack.isEmpty()) {
-            throw new IllegalArgumentException(
-                    "Unbalanced presence annotation (empty stack): " + line);
+            throw new IllegalArgumentException("Unbalanced presence annotation (empty stack): " + line);
         }
         return stack.pop();
     }
