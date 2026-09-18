@@ -79,8 +79,7 @@ public class RunShellCommand implements IShellCommand {
             }
 
         } catch (IllegalArgumentException iae) {
-            iae.printStackTrace();
-            FeatJAR.log().error(iae.getMessage());
+            FeatJAR.log().error(iae);
             FeatJAR.log().info(String.format("Usage %s", getDescription().get()));
         }
     }

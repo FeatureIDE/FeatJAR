@@ -45,9 +45,8 @@ public abstract class ACommand implements ICommand {
     /**
      * Input option for loading files.
      */
-    public static final Option<Path> INPUT_OPTION = Options.newOption("input", Options.PathParser)
-            .setDescription("Path to input file(s)")
-            .setValidator(Options.PathValidator);
+    public static final Option<Path> INPUT_OPTION =
+            Options.newOption("input", Options.ExistingPathParser).setDescription("Path to input file(s)");
 
     /**
      * Output option for saving files.

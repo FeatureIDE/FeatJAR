@@ -60,16 +60,14 @@ public class TWiseCoverageCommand extends AAnalysisCommand<CoverageStatistic> {
     /**
      * Input option for feature model path.
      */
-    public static final Option<Path> FM_OPTION = Options.newOption("fm", Options.PathParser)
-            .setDescription("Path to feature model. Cannot be chosen together with --ref")
-            .setValidator(Options.PathValidator);
+    public static final Option<Path> FM_OPTION = Options.newOption("fm", Options.ExistingPathParser)
+            .setDescription("Path to feature model. Cannot be chosen together with --ref");
 
     /**
      * Input option for feature model path.
      */
-    public static final Option<Path> REFERENCE_SAMPLE_OPTION = Options.newOption("ref", Options.PathParser)
-            .setDescription("Path to reference sample. Cannot be chosen together with --fm")
-            .setValidator(Options.PathValidator);
+    public static final Option<Path> REFERENCE_SAMPLE_OPTION = Options.newOption("ref", Options.ExistingPathParser)
+            .setDescription("Path to reference sample. Cannot be chosen together with --fm");
 
     /**
      * Value of t.
@@ -79,14 +77,12 @@ public class TWiseCoverageCommand extends AAnalysisCommand<CoverageStatistic> {
             .setDefaultArgument("2");
 
     public static final Option<Path> INCLUDE_INTERACTIONS = Options.newOption(
-                    "include-interactions", Options.PathParser)
-            .setDescription("Path to list of interactions that will be considered.")
-            .setValidator(Options.PathValidator);
+                    "include-interactions", Options.ExistingPathParser)
+            .setDescription("Path to list of interactions that will be considered.");
 
     public static final Option<Path> EXCLUDE_INTERACTIONS = Options.newOption(
-                    "exclude-interactions", Options.PathParser)
-            .setDescription("Path to list of interactions that will be ignored.")
-            .setValidator(Options.PathValidator);
+                    "exclude-interactions", Options.ExistingPathParser)
+            .setDescription("Path to list of interactions that will be ignored.");
 
     public static final Option<Boolean> COVERAGE_ONLY_OPTION = Options.newFlag("coverage-only") //
             .setDescription("Shows only coverage value.");

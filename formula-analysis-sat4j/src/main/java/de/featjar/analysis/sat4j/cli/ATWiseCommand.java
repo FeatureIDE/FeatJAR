@@ -71,17 +71,15 @@ public abstract class ATWiseCommand extends ASAT4JAnalysisCommand<BooleanAssignm
      * Path option for initial fixed sample.
      */
     public static final Option<Path> INITIAL_FIXED_SAMPLE_OPTION = Options.newOption(
-                    "initial-sample", Options.PathParser)
-            .setDescription("Path to initial fixed sample file. Configurations in this sample will not be modified.")
-            .setValidator(Options.PathValidator);
+                    "initial-sample", Options.ExistingPathParser)
+            .setDescription("Path to initial fixed sample file. Configurations in this sample will not be modified.");
 
     /**
      * Path option for initial variable sample.
      */
     public static final Option<Path> INITIAL_VARIABLE_SAMPLE_OPTION = Options.newOption(
-                    "initial-variable-sample", Options.PathParser)
-            .setDescription("Path to initial variable sample file. Configurations in this sample can be modified.")
-            .setValidator(Options.PathValidator);
+                    "initial-variable-sample", Options.ExistingPathParser)
+            .setDescription("Path to initial variable sample file. Configurations in this sample can be modified.");
 
     /**
      * Strategy for completing partial configurations.

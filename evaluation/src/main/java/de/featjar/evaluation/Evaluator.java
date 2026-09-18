@@ -55,21 +55,22 @@ public abstract class Evaluator extends ACommand {
         return new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss").format(new Timestamp(System.currentTimeMillis()));
     }
 
-    public static final Option<Path> modelsPathOption = Options.newOption("models", Options.PathParser)
+    public static final Option<Path> modelsPathOption = Options.newOption("models", Options.ExistingPathParser)
             .setDefaultArgument("models")
-            .setDescription("Path to feature model files.")
-            .setValidator(Options.PathValidator);
-    public static final Option<Path> resourcesPathOption = Options.newOption("resources", Options.PathParser)
+            .setDescription("Path to feature model files.");
+
+    public static final Option<Path> resourcesPathOption = Options.newOption("resources", Options.ExistingPathParser)
             .setDefaultArgument("resources")
-            .setDescription("Path to other resources necessary for the evaluation.")
-            .setValidator(Options.PathValidator);
+            .setDescription("Path to other resources necessary for the evaluation.");
 
     public static final Option<Long> timeout = Options.newOption(
                     "timeout", Options.LongParser, Long.toString(Long.MAX_VALUE))
             .setDescription("The timeout value for individual runs in milliseconds.");
+
     public static final Option<Integer> memory = Options.newOption("memory", Options.IntegerParser, "-1")
             .setDescription(
                     "The max memory used by started Java processes in gigabytes. Sets the JVM -Xmx parameter of started java process. A negative value defaults to the standard value for the JVM. (Does not affect the memory of this process!)");
+
     public static final Option<Long> randomSeed =
             Options.newOption("seed", Options.LongParser).setDescription("The seed used by some random operations.");
 
@@ -78,7 +79,9 @@ public abstract class Evaluator extends ACommand {
     public static final MultiOption<String> systemsOption =
             (MultiOption<String>) Options.newListOption("systems", Options.StringParser)
                     .setDescription("The systems considered in the evaluation.");
+
     public static final RangeOption systemIterationsOption = Options.newRangeOption("systemIterations");
+
     public static final RangeOption algorithmIterationsOption = Options.newRangeOption("algorithmIterations");
 
     public OptionList optionParser;

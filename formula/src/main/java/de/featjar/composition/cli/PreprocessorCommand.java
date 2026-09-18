@@ -57,9 +57,8 @@ public class PreprocessorCommand extends ACommand {
         FALSE
     }
 
-    public static final Option<Path> CONFIGURATION_OPTION = Options.newOption("configuration", Options.PathParser)
-            .setDescription("Path to configuration file")
-            .setValidator(Options.PathValidator);
+    public static final Option<Path> CONFIGURATION_OPTION =
+            Options.newOption("configuration", Options.ExistingPathParser).setDescription("Path to configuration file");
 
     public static final Option<Mode> MODE_OPTION = Options.newEnumOption("mode", Mode.class)
             .setDefaultArgument(Mode.PROCESS.name())

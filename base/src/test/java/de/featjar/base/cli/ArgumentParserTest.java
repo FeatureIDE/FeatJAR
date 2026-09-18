@@ -68,8 +68,8 @@ class ArgumentParserTest {
 
     @Test
     void parseOption() {
-        Option<Integer> option1 = new SingleOption<>("x", Integer::valueOf);
-        Option<Integer> option2 = new SingleOption<>("y", Integer::valueOf);
+        Option<Integer> option1 = new SingleOption<>("x", Options.IntegerParser);
+        Option<Integer> option2 = new SingleOption<>("y", Options.IntegerParser);
 
         OptionList parser = new OptionList("--x", "42");
         parser.parseArguments();

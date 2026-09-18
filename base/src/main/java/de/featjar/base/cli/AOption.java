@@ -27,7 +27,6 @@ import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.function.Function;
-import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -77,12 +76,12 @@ public abstract class AOption<T> implements Option<T> {
      *
      * @param name   the name of the option
      * @param parser the parser for the option's value
-     * @param defaultValue the default value in case no other is provided or can be parsed
+     * @param defaultArgument the default value in case no other is provided or can be parsed
      */
-    protected AOption(String name, String defaultValue) {
+    protected AOption(String name, String defaultArgument) {
         super();
         this.name = name;
-        this.defaultArgument = defaultValue;
+        this.defaultArgument = defaultArgument;
     }
 
     @Override
@@ -97,25 +96,13 @@ public abstract class AOption<T> implements Option<T> {
 
     @Override
     public Result<T> parse(String argument) {
-        try {
-            T value = getParser().apply(argument);
-            return getValidator().test(value)
-                    ? Result.of(value)
-                    : Result.empty(new IllegalArgumentException("Invalid argument " + argument));
-        } catch (Exception e) {
-            return Result.empty(e);
-        }
+        return getParser().apply(argument);
     }
 
     /**
      * {@return this option's parser}
      */
-    protected abstract Function<String, T> getParser();
-
-    /**
-     * {@return this option's validator}
-     */
-    protected abstract Predicate<T> getValidator();
+    protected abstract Function<String, Result<T>> getParser();
 
     @Override
     public Optional<String> getDescription() {
@@ -141,7 +128,7 @@ public abstract class AOption<T> implements Option<T> {
     @Override
     public Result<T> getDefaultValue() {
         try {
-            return Result.ofOptional(getDefaultArgument().map(getParser()));
+            return Result.ofOptional(getDefaultArgument()).mapResult(getParser());
         } catch (Exception e) {
             return Result.empty(e);
         }

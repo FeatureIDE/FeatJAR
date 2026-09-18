@@ -49,10 +49,8 @@ public abstract class AAnalysisCommand<T> extends ACommand {
             .setDescription(
                     "Disable parallel computation. (Ignored if timeout option is specified, as computations with timeout are always non-parallel.)");
 
-    public static final Option<Duration> TIMEOUT_OPTION = Options.newOption(
-                    "timeout", s -> Duration.ofSeconds(Long.parseLong(s)))
+    public static final Option<Duration> TIMEOUT_OPTION = Options.newOption("timeout", Options.TimeoutParser)
             .setDescription("Timeout in seconds. (Disables parallel computing.)")
-            .setValidator(timeout -> !timeout.isNegative())
             .setDefaultArgument("0");
 
     /**

@@ -63,14 +63,12 @@ public class YASACommand extends ATWiseCommand {
             .setDescription("Start with smaller values for t.");
 
     public static final Option<Path> INCLUDE_INTERACTIONS = Options.newOption(
-                    "include-interactions", Options.PathParser)
-            .setDescription("Path to list of interactions that will be considered.")
-            .setValidator(Options.PathValidator);
+                    "include-interactions", Options.ExistingPathParser)
+            .setDescription("Path to list of interactions that will be considered.");
 
     public static final Option<Path> EXCLUDE_INTERACTIONS = Options.newOption(
-                    "exclude-interactions", Options.PathParser)
-            .setDescription("Path to list of interactions that will be ignored.")
-            .setValidator(Options.PathValidator);
+                    "exclude-interactions", Options.ExistingPathParser)
+            .setDescription("Path to list of interactions that will be ignored.");
 
     @Override
     public Optional<String> getDescription() {

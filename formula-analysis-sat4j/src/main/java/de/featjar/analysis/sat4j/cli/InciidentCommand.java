@@ -63,16 +63,15 @@ public class InciidentCommand extends ASAT4JAnalysisCommand<BooleanAssignmentLis
     /**
      * Path option for initial sample.
      */
-    public static final Option<Path> INITIAL_SAMPLE_OPTION = Options.newOption("initial-sample", Options.PathParser)
-            .setDescription("Path to initial sample file.")
-            .setValidator(Options.PathValidator);
+    public static final Option<Path> INITIAL_SAMPLE_OPTION = Options.newOption(
+                    "initial-sample", Options.ExistingPathParser)
+            .setDescription("Path to initial sample file.");
 
     /**
      * Path option for initial sample.
      */
-    public static final Option<Path> TESTER_EXECUTABLE = Options.newOption("verifier", Options.PathParser)
-            .setDescription("Path to initial sample file.")
-            .setValidator(Options.PathValidator);
+    public static final Option<Path> TESTER_EXECUTABLE =
+            Options.newOption("verifier", Options.ExistingPathParser).setDescription("Path to initial sample file.");
 
     public static final Option<IFormat<BooleanAssignmentList>> FORMAT = Options.newOutputFormatOption(
             BooleanAssignmentListFormats.class, new BooleanAssignmentListDimacsFormat().getName());

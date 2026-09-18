@@ -49,11 +49,10 @@ public abstract class ASAT4JAnalysisCommand<T> extends AAnalysisCommand<T> {
     /**
      * Timeout option for canceling running computations.
      */
-    public static final Option<Duration> SAT_TIMEOUT_OPTION = Options.newOption(
-                    "solver_timeout", s -> Duration.ofMillis(Long.parseLong(s)))
-            .setDescription("Timeout in milliseconds")
-            .setValidator(timeout -> !timeout.isNegative())
-            .setDefaultArgument("0");
+    public static final Option<Duration> SAT_TIMEOUT_OPTION = //
+            Options.newOption("solver_timeout", Options.TimeoutParser)
+                    .setDescription("Timeout in milliseconds")
+                    .setDefaultArgument("0");
 
     protected VariableMap variableMap;
 

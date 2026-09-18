@@ -20,17 +20,18 @@
  */
 package de.featjar.formula.cli;
 
-import de.featjar.base.FeatJAR;
 import de.featjar.base.cli.ACommand;
 import de.featjar.base.cli.Option;
 import de.featjar.base.cli.OptionList;
 import de.featjar.base.cli.Options;
+import de.featjar.base.data.Result;
 import de.featjar.base.io.text.GenericTextFormat;
 import de.featjar.base.tree.Trees;
 import de.featjar.formula.io.FormulaFormats;
 import de.featjar.formula.io.textual.ExpressionSerializer;
 import de.featjar.formula.io.textual.ShortSymbols;
 import de.featjar.formula.io.textual.Symbols;
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -75,14 +76,22 @@ public class PrintCommand extends ACommand {
     /**
      * Defines the symbols.
      */
-    public static final Option<Symbols> SYMBOLS_OPTION = Options.newOption("format", (arg) -> {
+    public static final Option<Symbols> SYMBOLS_OPTION = Options.newOption("symbols", arg -> {
                 try {
-                    return (Symbols) Class.forName(arg).getField("INSTANCE").get(null);
+                    return Result.of(
+                            (Symbols) Class.forName(arg).getField("INSTANCE").get(null));
                 } catch (IllegalAccessException | NoSuchFieldException | ClassNotFoundException e) {
-                    FeatJAR.log().error(e);
-                    return ExpressionSerializer.STANDARD_SYMBOLS;
+                    return Result.empty(e);
                 }
             })
+            .setPossibleArguments(List.of(
+                    "JavaSymbols",
+                    "LaTexSymbols",
+                    "LogicalSymbols",
+                    "PropositionalModelSymbols",
+                    "ShortSymbols",
+                    "TextualSymbols",
+                    "UVLSymbols"))
             .setDescription("Defines the symbols.")
             .setDefaultArgument(ShortSymbols.class.getName());
 

@@ -20,13 +20,13 @@
  */
 package de.featjar.base.cli;
 
+import de.featjar.base.data.Result;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.function.Function;
-import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 /**
@@ -41,12 +41,7 @@ public class MultiOption<T> extends AOption<List<T>> {
     /**
      * A parser that parses a string into the type of the option.
      */
-    protected final Function<String, T> parser;
-
-    /**
-     * A validator that check whether a given value is valid.
-     */
-    protected Predicate<T> validator;
+    protected final Function<String, Result<T>> parser;
 
     /**
      * Creates an option.
@@ -54,19 +49,8 @@ public class MultiOption<T> extends AOption<List<T>> {
      * @param name   the name of the option
      * @param parser the parser for the option's value
      */
-    protected MultiOption(String name, Function<String, T> parser) {
-        this(name, parser, null, null, null);
-    }
-
-    /**
-     * Creates an option.
-     *
-     * @param name   the name of the option
-     * @param parser the parser for the option's value
-     * @param validator the validator for the option's value
-     */
-    protected MultiOption(String name, Function<String, T> parser, Predicate<T> validator) {
-        this(name, parser, validator, null, null);
+    protected MultiOption(String name, Function<String, Result<T>> parser) {
+        this(name, parser, null, null);
     }
 
     /**
@@ -76,8 +60,8 @@ public class MultiOption<T> extends AOption<List<T>> {
      * @param parser the parser for the option's value
      * @param possibleValues the possibleValues for the option
      */
-    protected MultiOption(String name, Function<String, T> parser, Collection<String> possibleValues) {
-        this(name, parser, null, possibleValues, null);
+    protected MultiOption(String name, Function<String, Result<T>> parser, Collection<String> possibleValues) {
+        this(name, parser, possibleValues, null);
     }
 
     /**
@@ -85,10 +69,10 @@ public class MultiOption<T> extends AOption<List<T>> {
      *
      * @param name   the name of the option
      * @param parser the parser for the option's value
-     * @param defaultValue the default value in case no other is provided or can be parsed
+     * @param defaultArgument the default value in case no other is provided or can be parsed
      */
-    protected MultiOption(String name, Function<String, T> parser, String defaultValue) {
-        this(name, parser, null, null, defaultValue);
+    protected MultiOption(String name, Function<String, Result<T>> parser, String defaultArgument) {
+        this(name, parser, null, defaultArgument);
     }
 
     /**
@@ -97,54 +81,21 @@ public class MultiOption<T> extends AOption<List<T>> {
      * @param name   the name of the option
      * @param parser the parser for the option's value
      * @param possibleValues the possibleValues for the option
-     * @param defaultValue the default value in case no other is provided or can be parsed
+     * @param defaultArgument the default value in case no other is provided or can be parsed
      */
     protected MultiOption(
-            String name, Function<String, T> parser, Collection<String> possibleValues, String defaultValue) {
-        this(name, parser, null, possibleValues, defaultValue);
-    }
-
-    /**
-     * Creates an option.
-     *
-     * @param name   the name of the option
-     * @param parser the parser for the option's value
-     * @param validator the validator for the option's value
-     * @param defaultValue the default value in case no other is provided or can be parsed
-     */
-    protected MultiOption(String name, Function<String, T> parser, Predicate<T> validator, String defaultValue) {
-        this(name, parser, validator, null, defaultValue);
-    }
-
-    /**
-     * Creates an option.
-     *
-     * @param name   the name of the option
-     * @param parser the parser for the option's value
-     * @param validator the validator for the option's value
-     * @param possibleValues the possibleValues for the option
-     * @param defaultValue the default value in case no other is provided or can be parsed
-     */
-    protected MultiOption(
-            String name,
-            Function<String, T> parser,
-            Predicate<T> validator,
-            Collection<String> possibleValues,
-            String defaultValue) {
-        super(name, defaultValue);
+            String name, Function<String, Result<T>> parser, Collection<String> possibleValues, String defaultArgument) {
+        super(name, defaultArgument);
         this.parser = Objects.requireNonNull(parser);
-        this.validator = validator == null ? t -> true : validator;
         setPossibleArguments(possibleValues);
     }
 
     @Override
-    public Function<String, List<T>> getParser() {
-        return arg -> Arrays.stream(arg.split("[,\n]")).map(parser).toList();
-    }
-
-    @Override
-    public Predicate<List<T>> getValidator() {
-        return arg -> arg.stream().allMatch(validator);
+    public Function<String, Result<List<T>>> getParser() {
+        return Options.parser(arg -> Arrays.stream(arg.split("[,\n]"))
+                .map(parser)
+                .map(Result::orElseThrow)
+                .toList());
     }
 
     @Override
@@ -154,14 +105,9 @@ public class MultiOption<T> extends AOption<List<T>> {
                         .allMatch(possibleValues::containsKey);
     }
 
-    public MultiOption<T> setValidator(Predicate<T> validator) {
-        this.validator = validator;
-        return this;
-    }
-
     @Override
-    public MultiOption<T> setDefaultArgument(String defaultValue) {
-        return (MultiOption<T>) super.setDefaultArgument(defaultValue);
+    public MultiOption<T> setDefaultArgument(String defaultArgument) {
+        return (MultiOption<T>) super.setDefaultArgument(defaultArgument);
     }
 
     @Override

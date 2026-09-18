@@ -70,10 +70,8 @@ public class ProjectionCommand extends ACommand {
     /**
      * Timeout in seconds.
      */
-    public static final Option<Duration> TIMEOUT_OPTION = Options.newOption(
-                    "timeout", s -> Duration.ofSeconds(Long.parseLong(s)))
+    public static final Option<Duration> TIMEOUT_OPTION = Options.newOption("timeout", Options.TimeoutParser)
             .setDescription("Timeout in seconds.")
-            .setValidator(timeout -> !timeout.isNegative())
             .setDefaultArgument("0");
 
     public static final Option<IFormat<BooleanAssignmentList>> OUTPUT_FORMAT = Options.newOutputFormatOption(
