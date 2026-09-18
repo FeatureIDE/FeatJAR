@@ -443,12 +443,18 @@ public final class FeatJAR extends IO implements AutoCloseable {
             FeatJAR.log().problems(problems);
             if (optionalCommand.isEmpty()) {
                 FeatJAR.log().error("No command provided");
-                FeatJAR.log().plainMessage(OptionList.printAvailableCommands());
+                FeatJAR.log()
+                        .plainMessage(
+                                "Type \"commands\" to show all available commands or \"help\" to print usage information");
                 return FeatJAR.ERROR_COMPUTING_RESULT;
             } else {
                 ICommand command = optionalCommand.get();
                 FeatJAR.log().debug("Running command %s", command.getIdentifier());
-                return command.run(optionInput);
+                try {
+                    return command.run(optionInput);
+                } catch (Exception e) {
+                    FeatJAR.log().error(e);
+                }
             }
         }
         return 0;
