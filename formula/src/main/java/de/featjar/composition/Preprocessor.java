@@ -35,6 +35,7 @@ import de.featjar.formula.structure.predicate.False;
 import de.featjar.formula.structure.predicate.True;
 import de.featjar.formula.structure.term.value.Variable;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
@@ -312,6 +313,49 @@ public class Preprocessor {
                 .distinct()
                 .map(Variable::getName)
                 .collect(Collectors.toList());
+    }
+
+    /**
+     * {@return a problem for each annotation with a syntactically invalid condition, including its line number}
+     *
+     * @param lines the line stream
+     */
+    public List<ParseProblem> validate(Stream<String> lines) {
+        List<ParseProblem> problems = new ArrayList<>();
+
+        Iterator<String> it = lines.iterator();
+        int lineNumber = 0;
+        while (it.hasNext()) {
+            String line = it.next();
+            lineNumber++;
+
+            Matcher matcher = annotationPattern.matcher(line);
+            if (!matcher.matches()) continue;
+
+            if (matcher.group(4) != null) {
+                problems.addAll(checkCondition(matcher.group(5), lineNumber));
+            } else if (matcher.group(6) != null) {
+                problems.addAll(checkCondition(matcher.group(7), lineNumber));
+            }
+        }
+
+        return problems;
+    }
+
+    private List<ParseProblem> checkCondition(String condition, int lineNumber) {
+        Result<IExpression> parse = annotationParser.parse(condition);
+
+        if (!parse.isPresent()) {
+            return parse.getProblems().stream()
+                    .map(p -> new ParseProblem(p.getMessage(), p.getSeverity(), lineNumber))
+                    .toList();
+        } else if (!(parse.get() instanceof IFormula)) {
+            return List.of(new ParseProblem(
+                    String.format("condition is not a boolean formula: \"%s\"", condition),
+                    Problem.Severity.ERROR,
+                    lineNumber));
+        }
+        return List.of();
     }
 
     public List<String> extractAnnotations(Stream<String> lines) {

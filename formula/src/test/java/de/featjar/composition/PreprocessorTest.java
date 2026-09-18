@@ -96,6 +96,39 @@ public class PreprocessorTest {
         assertEquals(List.of("true", "true"), presenceConditions(List.of("int a;", "int b;")));
     }
 
+    @Test
+    public void validateReportsInvalidConditions() {
+        List<String> lines = List.of(
+                "//#if A oder B",
+                "  System.out.println(\"\");",
+                "//#elif A &&",
+                "//#elif (A || B",
+                "//#elif ()",
+                "//#elif 1",
+                "//#endif");
+        assertEquals(
+                List.of(
+                        "line 1: Unexpected 'oder', expected an operator.",
+                        "line 3: Missing operand for '&&'.",
+                        "line 4: Open parenthesis has no match.",
+                        "line 5: Missing condition.",
+                        "line 6: condition is not a boolean formula: \"1\""),
+                validate(lines));
+    }
+
+    @Test
+    public void validateAcceptsValidConditions() {
+        List<String> lines = List.of("//#if !A", "//#elif A && (B || !C)", "//#elif A&&B", "//#else", "//#endif");
+        assertEquals(List.of(), validate(lines));
+    }
+
+    private static List<String> validate(List<String> lines) {
+        return new Preprocessor("//#", JavaSymbols.INSTANCE)
+                .validate(lines.stream()).stream()
+                        .map(p -> String.format("line %d: %s", p.getLineNumber(), p.getMessage()))
+                        .collect(Collectors.toList());
+    }
+
     private static List<String> presenceConditions(List<String> lines) {
         ExpressionSerializer serializer = new ExpressionSerializer();
         serializer.setSymbols(JavaSymbols.INSTANCE);

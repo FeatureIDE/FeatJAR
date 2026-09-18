@@ -34,7 +34,6 @@ import de.featjar.formula.assignment.Assignment;
 import de.featjar.formula.io.textual.CPPAssignmentFormat;
 import de.featjar.formula.io.textual.ExpressionSerializer;
 import de.featjar.formula.io.textual.JavaSymbols;
-import de.featjar.formula.structure.IFormula;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -45,7 +44,6 @@ import java.nio.file.StandardOpenOption;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 public class PreprocessorCommand extends ACommand {
@@ -217,12 +215,8 @@ public class PreprocessorCommand extends ACommand {
             throws IOException {
         ExpressionSerializer serializer = new ExpressionSerializer();
         serializer.setSymbols(JavaSymbols.INSTANCE);
-        List<IFormula> presenceConditions = preprocessor.computePresenceConditions(Files.lines(in, charset));
-        return IntStream.range(0, presenceConditions.size())
-                .mapToObj(i -> String.format(
-                        "%d: %s",
-                        i + 1,
-                        Trees.traverse(presenceConditions.get(i), serializer).orElseThrow()));
+        return preprocessor.computePresenceConditions(Files.lines(in, charset)).stream()
+                .map(formula -> Trees.traverse(formula, serializer).orElseThrow());
     }
 
     @Override
