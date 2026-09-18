@@ -25,6 +25,7 @@ import de.featjar.base.cli.ACommand;
 import de.featjar.base.cli.Option;
 import de.featjar.base.cli.OptionList;
 import de.featjar.base.cli.Options;
+import de.featjar.base.data.Problem;
 import de.featjar.base.data.Result;
 import de.featjar.base.io.IO;
 import de.featjar.composition.Preprocessor;
@@ -48,7 +49,8 @@ public class PreprocessorCommand extends ACommand {
     public static enum Mode {
         PROCESS,
         PRINT_VARIABLES,
-        PRINT_ANNOTATIONS
+        PRINT_ANNOTATIONS,
+        CHECK_STRUCTURE
     }
 
     public static enum MissingVariables {
@@ -88,6 +90,8 @@ public class PreprocessorCommand extends ACommand {
         Stream<String> stream = null;
         try {
             switch (mode) {
+                case CHECK_STRUCTURE:
+                    return checkStructure(in, charset, preprocessor);
                 case PROCESS:
                     stream = preprocess(
                             in,
@@ -131,6 +135,16 @@ public class PreprocessorCommand extends ACommand {
             stream.forEach(FeatJAR.log()::plainMessage);
         }
         return 0;
+    }
+
+    private int checkStructure(Path file, Charset charset, Preprocessor preprocessor) throws IOException {
+        List<Problem> problems;
+        try (Stream<String> lines = Files.lines(file, charset)) {
+            problems = preprocessor.checkStructure(lines);
+        }
+
+        FeatJAR.log().problems(problems);
+        return (problems.isEmpty() ? 0 : 1);
     }
 
     private Stream<String> preprocess(
