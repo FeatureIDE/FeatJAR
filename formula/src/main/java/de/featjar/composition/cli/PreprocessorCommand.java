@@ -28,10 +28,13 @@ import de.featjar.base.cli.Options;
 import de.featjar.base.data.Problem;
 import de.featjar.base.data.Result;
 import de.featjar.base.io.IO;
+import de.featjar.base.tree.Trees;
 import de.featjar.composition.Preprocessor;
 import de.featjar.formula.assignment.Assignment;
 import de.featjar.formula.io.textual.CPPAssignmentFormat;
+import de.featjar.formula.io.textual.ExpressionSerializer;
 import de.featjar.formula.io.textual.JavaSymbols;
+import de.featjar.formula.structure.IFormula;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -42,6 +45,7 @@ import java.nio.file.StandardOpenOption;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 public class PreprocessorCommand extends ACommand {
@@ -50,7 +54,8 @@ public class PreprocessorCommand extends ACommand {
         PROCESS,
         PRINT_VARIABLES,
         PRINT_ANNOTATIONS,
-        CHECK_STRUCTURE
+        CHECK_STRUCTURE,
+        PRINT_PRESENCE_CONDITIONS
     }
 
     public static enum MissingVariables {
@@ -106,6 +111,9 @@ public class PreprocessorCommand extends ACommand {
                     break;
                 case PRINT_ANNOTATIONS:
                     stream = printAnnotations(in, charset, preprocessor);
+                    break;
+                case PRINT_PRESENCE_CONDITIONS:
+                    stream = printPresenceConditions(in, charset, preprocessor);
                     break;
                 default:
                     return 1;
@@ -203,6 +211,18 @@ public class PreprocessorCommand extends ACommand {
 
     private Stream<String> printAnnotations(Path in, Charset charset, Preprocessor preprocessor) throws IOException {
         return preprocessor.extractAnnotations(Files.lines(in, charset)).stream();
+    }
+
+    private Stream<String> printPresenceConditions(Path in, Charset charset, Preprocessor preprocessor)
+            throws IOException {
+        ExpressionSerializer serializer = new ExpressionSerializer();
+        serializer.setSymbols(JavaSymbols.INSTANCE);
+        List<IFormula> presenceConditions = preprocessor.computePresenceConditions(Files.lines(in, charset));
+        return IntStream.range(0, presenceConditions.size())
+                .mapToObj(i -> String.format(
+                        "%d: %s",
+                        i + 1,
+                        Trees.traverse(presenceConditions.get(i), serializer).orElseThrow()));
     }
 
     @Override

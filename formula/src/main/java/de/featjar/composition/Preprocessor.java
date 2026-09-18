@@ -28,6 +28,11 @@ import de.featjar.base.io.format.ParseProblem;
 import de.featjar.formula.assignment.Assignment;
 import de.featjar.formula.io.textual.Symbols;
 import de.featjar.formula.structure.IExpression;
+import de.featjar.formula.structure.IFormula;
+import de.featjar.formula.structure.connective.And;
+import de.featjar.formula.structure.connective.Not;
+import de.featjar.formula.structure.predicate.False;
+import de.featjar.formula.structure.predicate.True;
 import de.featjar.formula.structure.term.value.Variable;
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -190,6 +195,52 @@ public class Preprocessor {
      */
     public Stream<String> preprocess(Stream<String> lines, Assignment assignment) {
         return lines.sequential().filter(new Filter(assignment));
+    }
+
+    /**
+     * {@return the presence condition of each line, in order}
+     *
+     * @param lines the line stream
+     */
+    public List<IFormula> computePresenceConditions(Stream<String> lines) {
+        LinkedList<IFormula> stack = new LinkedList<>();
+        LinkedList<Integer> elifCounts = new LinkedList<>(); // each elif adds one extra stack entry to its if
+        return lines.sequential()
+                .map(line -> {
+                    Matcher matcher = annotationPattern.matcher(line);
+                    if (!matcher.matches()) {
+                        if (stack.isEmpty()) {
+                            return (IFormula) True.INSTANCE;
+                        }
+                        List<IFormula> conjuncts = new ArrayList<>();
+                        stack.descendingIterator().forEachRemaining(conjuncts::add);
+                        return conjuncts.size() == 1 ? conjuncts.get(0) : new And(conjuncts);
+                    }
+                    if (matcher.group(4) != null) {
+                        stack.push((IFormula)
+                                annotationParser.parse(matcher.group(5)).orElseThrow());
+                        elifCounts.push(0);
+                    } else if (matcher.group(3) != null) {
+                        stack.push(new Not(popChecked(stack, line)));
+                    } else if (matcher.group(2) != null) {
+                        popChecked(stack, line);
+                        for (int i = elifCounts.pop(); i > 0; i--) stack.pop();
+                    } else if (matcher.group(6) != null) {
+                        stack.push(new Not(popChecked(stack, line)));
+                        elifCounts.push(elifCounts.pop() + 1);
+                        stack.push((IFormula)
+                                annotationParser.parse(matcher.group(7)).orElseThrow());
+                    }
+                    return (IFormula) False.INSTANCE;
+                })
+                .collect(Collectors.toList());
+    }
+
+    private IFormula popChecked(LinkedList<IFormula> stack, String line) {
+        if (stack.isEmpty()) {
+            throw new IllegalArgumentException("Unbalanced presence annotation (empty stack): " + line);
+        }
+        return stack.pop();
     }
 
     /**
