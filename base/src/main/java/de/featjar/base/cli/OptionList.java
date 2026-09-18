@@ -56,8 +56,6 @@ import java.util.stream.Collectors;
  */
 public class OptionList {
 
-    private static final String GENERAL_CONFIG_NAME = "general";
-
     private final List<Option<?>> options;
 
     private final List<String> originalCommandLineArguments;
@@ -121,7 +119,7 @@ public class OptionList {
                 return problemList;
             }
 
-            arguments.addAll(parseConfigurationFiles(arguments, problemList));
+            parseConfigurationFiles(arguments, problemList);
             if (Problem.containsError(problemList)) {
                 return problemList;
             }
@@ -183,73 +181,27 @@ public class OptionList {
         }
     }
 
-    private List<String> parseConfigurationFiles(List<String> commandLineArguments, List<Problem> problemList) {
-        List<String> configFileArguments = new ArrayList<>();
-        final Path configDir;
-        int configurationDirIndex =
-                commandLineArguments.indexOf("--" + FeatJAROptions.CONFIGURATION_DIR_OPTION.getName());
-        if (configurationDirIndex < 0) {
-            configDir = Path.of("");
-        } else {
-            int argumentIndex = configurationDirIndex + 1;
-            if (argumentIndex >= commandLineArguments.size()) {
-                addProblem(
-                        problemList,
-                        Severity.ERROR,
-                        "Option %s is supplied without value, but a value is required",
-                        FeatJAROptions.CONFIGURATION_DIR_OPTION.getName());
-                return configFileArguments;
-            }
-            parseOption(FeatJAROptions.CONFIGURATION_DIR_OPTION, commandLineArguments.get(argumentIndex), problemList);
-            Result<Path> configDirValue = getResult(FeatJAROptions.CONFIGURATION_DIR_OPTION);
-            if (configDirValue.isEmpty()) {
-                problemList.addAll(configDirValue.getProblems());
-                return configFileArguments;
-            }
-            commandLineArguments
-                    .subList(configurationDirIndex, configurationDirIndex + 2)
-                    .clear();
-            configDir = configDirValue.get();
-            if (!Files.isDirectory(configDir)) {
-                addProblem(
-                        problemList,
-                        Severity.ERROR,
-                        "Specified configuration directory %s is not a directory",
-                        configDir.toString());
-                return configFileArguments;
-            }
-        }
-
-        int configurationNamesIndex =
-                commandLineArguments.indexOf("--" + FeatJAROptions.CONFIGURATION_OPTION.getName());
-        if (configurationNamesIndex >= 0) {
-            int argumentIndex = configurationNamesIndex + 1;
-            if (argumentIndex >= commandLineArguments.size()) {
+    private void parseConfigurationFiles(List<String> arguments, List<Problem> problemList) {
+        int optionIndex = arguments.indexOf("--" + FeatJAROptions.CONFIGURATION_OPTION.getName());
+        if (optionIndex >= 0) {
+            int argumentIndex = optionIndex + 1;
+            if (argumentIndex >= arguments.size()) {
                 addProblem(
                         problemList,
                         Severity.ERROR,
                         "Option %s is supplied without value, but a value is required",
                         FeatJAROptions.CONFIGURATION_OPTION.getName());
-                return configFileArguments;
+                return;
             }
-            parseOption(FeatJAROptions.CONFIGURATION_OPTION, commandLineArguments.get(argumentIndex), problemList);
-            Result<List<String>> config = getResult(FeatJAROptions.CONFIGURATION_OPTION);
-            if (config.isEmpty()) {
-                problemList.addAll(config.getProblems());
-                return configFileArguments;
+            parseOption(FeatJAROptions.CONFIGURATION_OPTION, arguments.get(argumentIndex), problemList);
+            Result<List<Path>> optionValue = getResult(FeatJAROptions.CONFIGURATION_OPTION);
+            if (optionValue.isEmpty()) {
+                problemList.addAll(optionValue.getProblems());
+                return;
             }
-            commandLineArguments
-                    .subList(configurationNamesIndex, configurationNamesIndex + 2)
-                    .clear();
+            arguments.subList(optionIndex, optionIndex + 2).clear();
 
-            List<String> configNameList = config.get();
-            ArrayList<String> reverseNameList = new ArrayList<>(configNameList.size() + 1);
-            reverseNameList.add(GENERAL_CONFIG_NAME);
-            reverseNameList.addAll(configNameList);
-            Collections.reverse(reverseNameList);
-
-            for (String name : reverseNameList) {
-                Path configPath = configDir.resolve(name + ".properties");
+            for (Path configPath : optionValue.get()) {
                 final Properties properties = new Properties();
                 try (InputStream input = Files.newInputStream(configPath)) {
                     properties.load(input);
@@ -260,8 +212,8 @@ public class OptionList {
                 }
                 try {
                     for (Entry<Object, Object> propertyEntry : properties.entrySet()) {
-                        configFileArguments.add("--" + propertyEntry.getKey().toString());
-                        configFileArguments.add(propertyEntry.getValue().toString());
+                        arguments.add("--" + propertyEntry.getKey().toString());
+                        arguments.add(propertyEntry.getValue().toString());
                     }
                 } catch (final Exception e) {
                     problemList.add(new Problem(e));
@@ -269,7 +221,6 @@ public class OptionList {
                 }
             }
         }
-        return configFileArguments;
     }
 
     private void parseRemainingArguments(LinkedList<String> arguments, List<Problem> problemList) {
