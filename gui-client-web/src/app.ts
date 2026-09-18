@@ -22,7 +22,8 @@ import {
     GLSPClient,
     GLSPWebSocketProvider,
     MessageAction,
-    StatusAction
+    StatusAction,
+    CreateNodeOperation
 } from '@eclipse-glsp/client';
 import { Container } from 'inversify';
 import { join, resolve } from 'path';
@@ -50,7 +51,9 @@ const DIAGRAM_TYPE = 'featuremodel-diagram';
 // see in FeatureModelServerLauncher.java "/featuremodel"
 const ENDPOINT_ID = 'featuremodel';
 const MODEL_FILE = 'gui_model' + '.' + ENDPOINT_ID;
-
+const OPTIONAL_FEATURE_ID = 'feature-optional';
+const MANDATORY_FEATURE_ID = 'feature-mandatory';
+const MULTIPLE_FEATURE_ID = 'feature-multiple';
 const loc = window.location.pathname;
 const CLIENT_PATH = loc.substring(0, loc.lastIndexOf('/'));
 const CLIENT_ABSOLUTE_EMF_FILE_PATH = resolve(join(CLIENT_PATH, '..', 'app', MODEL_FILE));
@@ -220,12 +223,36 @@ function installKeyBindings(actionDispatcher: GLSPActionDispatcher): void {
     document.addEventListener('keydown', (event: KeyboardEvent) => {
         const dispatcher = container?.get(GLSPActionDispatcher) ?? actionDispatcher;
 
-        if (event.ctrlKey && event.altKey && event.code === 'KeyE') {
+               if (event.ctrlKey && event.altKey && event.code === 'KeyE') {
             event.preventDefault();
             dispatcher.dispatch(ExitAction.create());
         } else if (event.ctrlKey && event.altKey && event.code === 'KeyS') {
             event.preventDefault();
             dispatcher.dispatch(SaveAction.create());
+        } else if (
+            event.code === 'Insert' &&
+            !event.repeat &&
+            !isEditableTarget(event.target) &&
+            !event.ctrlKey &&
+            !event.shiftKey &&
+            !event.altKey &&
+            !event.metaKey
+        ) {
+            event.preventDefault();
+            dispatcher.dispatch(CreateNodeOperation.create(OPTIONAL_FEATURE_ID));
+        } else if (event.ctrlKey && event.altKey && event.code === 'KeyM') {
+            event.preventDefault();
+            dispatcher.dispatch(CreateNodeOperation.create(MANDATORY_FEATURE_ID));
+        } else if (event.ctrlKey && event.altKey && event.code === 'KeyU') {
+            event.preventDefault();
+            dispatcher.dispatch(CreateNodeOperation.create(MULTIPLE_FEATURE_ID));
         }
     });
+}
+function isEditableTarget(target: EventTarget | null): boolean {
+    if (!(target instanceof HTMLElement)) {
+        return false;
+    }
+    const tagName = target.tagName;
+    return tagName === 'INPUT' || tagName === 'TEXTAREA' || target.isContentEditable;
 }
