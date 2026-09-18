@@ -30,7 +30,7 @@ import java.util.Optional;
 public class PrintCommandsCommand extends ACommand {
 
     @Override
-    public int run(OptionList optionParser) {
+    public int run(OptionParser optionParser) {
         List<ICommand> commands = FeatJAR.extensionPoint(Commands.class).getExtensions();
         if (commands.isEmpty()) {
             FeatJAR.log()

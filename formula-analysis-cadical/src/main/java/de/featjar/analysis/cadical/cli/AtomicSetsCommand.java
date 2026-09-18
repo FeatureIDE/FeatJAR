@@ -22,7 +22,7 @@ package de.featjar.analysis.cadical.cli;
 
 import de.featjar.analysis.cadical.computation.ComputeAtomicCadiCal;
 import de.featjar.base.cli.Option;
-import de.featjar.base.cli.OptionList;
+import de.featjar.base.cli.OptionParser;
 import de.featjar.base.cli.Options;
 import de.featjar.base.computation.IComputation;
 import de.featjar.base.io.format.IFormat;
@@ -48,14 +48,14 @@ public class AtomicSetsCommand extends ACadicalAnalysisCommand<BooleanAssignment
 
     @Override
     public IComputation<BooleanAssignmentList> newAnalysis(
-            OptionList optionParser, IComputation<BooleanAssignmentList> formula) {
+            OptionParser optionParser, IComputation<BooleanAssignmentList> formula) {
         return formula.map(ComputeAtomicCadiCal::new)
                 .set(ComputeAtomicCadiCal.OMIT_CORE, optionParser.get(OMIT_CORE))
                 .set(ComputeAtomicCadiCal.OMIT_SINGLE_SETS, optionParser.get(OMIT_SINGLE_SETS));
     }
 
     @Override
-    protected IFormat<BooleanAssignmentList> getOuputFormat(OptionList optionParser) {
+    protected IFormat<BooleanAssignmentList> getOuputFormat(OptionParser optionParser) {
         return optionParser.get(FORMAT);
     }
 

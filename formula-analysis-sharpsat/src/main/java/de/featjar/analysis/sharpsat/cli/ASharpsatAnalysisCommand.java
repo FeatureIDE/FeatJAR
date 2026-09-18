@@ -21,7 +21,7 @@
 package de.featjar.analysis.sharpsat.cli;
 
 import de.featjar.analysis.AAnalysisCommand;
-import de.featjar.base.cli.OptionList;
+import de.featjar.base.cli.OptionParser;
 import de.featjar.base.computation.Computations;
 import de.featjar.base.computation.IComputation;
 import de.featjar.formula.computation.ComputeCNFFormula;
@@ -34,7 +34,7 @@ public abstract class ASharpsatAnalysisCommand<T> extends AAnalysisCommand<T> {
     protected IFormula inputFormula;
 
     @Override
-    protected IComputation<T> newComputation(OptionList optionParser) {
+    protected IComputation<T> newComputation(OptionParser optionParser) {
         inputFormula = readFromInput(optionParser, FormulaFormats.getInstance()).orElseThrow();
         return newAnalysis(
                 Computations.of(inputFormula).map(ComputeNNFFormula::new).map(ComputeCNFFormula::new));

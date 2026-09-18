@@ -44,8 +44,8 @@ class ArgumentParserTest {
         FeatJAR.deinitialize();
     }
 
-    OptionList parser(String... args) {
-        OptionList optionList = new OptionList(args);
+    OptionParser parser(String... args) {
+        OptionParser optionList = new OptionParser(args);
         optionList.addOptions(Options.getAllOptions(FeatJAROptions.class));
         optionList.addOptions(Options.getAllOptions(LogOptions.class));
         List<Problem> problems = optionList.parseArguments();
@@ -61,7 +61,7 @@ class ArgumentParserTest {
     @Test
     void getVerbosity() {
         // assertEquals(Log.Verbosity.DEBUG, parser("arg", "--log-info").getVerbosity()); TODO: mock System.exit
-        OptionList parser = parser("--log-info", "debug");
+        OptionParser parser = parser("--log-info", "debug");
         parser.parseArguments();
         assertEquals(Log.Verbosity.DEBUG, parser.get(LogOptions.LOG_INFO_OPTION).get(0));
     }
@@ -71,7 +71,7 @@ class ArgumentParserTest {
         Option<Integer> option1 = new SingleOption<>("x", Options.IntegerParser);
         Option<Integer> option2 = new SingleOption<>("y", Options.IntegerParser);
 
-        OptionList parser = new OptionList("--x", "42");
+        OptionParser parser = new OptionParser("--x", "42");
         parser.parseArguments();
         parser.addOptions(List.of(option1, option2)).parseArguments();
 

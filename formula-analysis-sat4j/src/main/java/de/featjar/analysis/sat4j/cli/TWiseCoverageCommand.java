@@ -24,7 +24,7 @@ import de.featjar.analysis.AAnalysisCommand;
 import de.featjar.analysis.sat4j.computation.ComputeConstraintedTWiseCoverage;
 import de.featjar.analysis.sat4j.io.textual.CoverageStatisticTextFormat;
 import de.featjar.base.cli.Option;
-import de.featjar.base.cli.OptionList;
+import de.featjar.base.cli.OptionParser;
 import de.featjar.base.cli.Options;
 import de.featjar.base.computation.Computations;
 import de.featjar.base.computation.IComputation;
@@ -99,7 +99,7 @@ public class TWiseCoverageCommand extends AAnalysisCommand<CoverageStatistic> {
     }
 
     @Override
-    protected IComputation<CoverageStatistic> newComputation(OptionList optionParser) {
+    protected IComputation<CoverageStatistic> newComputation(OptionParser optionParser) {
         coverageOnly = optionParser.getResult(COVERAGE_ONLY_OPTION).orElseThrow();
         countOnly = optionParser.getResult(COUNT_ONLY_OPTION).orElseThrow();
 
@@ -198,7 +198,7 @@ public class TWiseCoverageCommand extends AAnalysisCommand<CoverageStatistic> {
     }
 
     @Override
-    protected IFormat<CoverageStatistic> getOuputFormat(OptionList optionParser) {
+    protected IFormat<CoverageStatistic> getOuputFormat(OptionParser optionParser) {
         return new CoverageStatisticTextFormat(coverageOnly, countOnly);
     }
 

@@ -23,7 +23,7 @@ package de.featjar.analysis.ddnnife.cli;
 import de.featjar.analysis.ddnnife.computation.ComputeDdnnifeWrapper;
 import de.featjar.analysis.ddnnife.computation.ComputeRandomSolutionsDdnnife;
 import de.featjar.base.cli.Option;
-import de.featjar.base.cli.OptionList;
+import de.featjar.base.cli.OptionParser;
 import de.featjar.base.cli.Options;
 import de.featjar.base.computation.IComputation;
 import de.featjar.base.io.format.IFormat;
@@ -47,14 +47,14 @@ public class RandomSolutionsCommand extends ADdnnifeAnalysisCommand<BooleanAssig
     }
 
     @Override
-    public IComputation<BooleanAssignmentList> newAnalysis(OptionList optionParser, ComputeDdnnifeWrapper formula) {
+    public IComputation<BooleanAssignmentList> newAnalysis(OptionParser optionParser, ComputeDdnnifeWrapper formula) {
         return formula.map(ComputeRandomSolutionsDdnnife::new)
                 .set(ComputeRandomSolutionsDdnnife.SOLUTION_COUNT, optionParser.get(SOLUTION_COUNT_OPTION))
                 .set(ComputeRandomSolutionsDdnnife.RANDOM_SEED, optionParser.get(RANDOM_SEED_OPTION));
     }
 
     @Override
-    protected IFormat<BooleanAssignmentList> getOuputFormat(OptionList optionParser) {
+    protected IFormat<BooleanAssignmentList> getOuputFormat(OptionParser optionParser) {
         return optionParser.get(FORMAT);
     }
 

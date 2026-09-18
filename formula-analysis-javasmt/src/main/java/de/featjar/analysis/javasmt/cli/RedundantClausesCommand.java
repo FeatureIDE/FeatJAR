@@ -24,7 +24,7 @@ import de.featjar.analysis.javasmt.computation.ComputeJavaSMTFormula;
 import de.featjar.analysis.javasmt.computation.ComputeRedundantClauses;
 import de.featjar.analysis.javasmt.computation.ComputeRedundantClausesIncrementally;
 import de.featjar.base.cli.Option;
-import de.featjar.base.cli.OptionList;
+import de.featjar.base.cli.OptionParser;
 import de.featjar.base.cli.Options;
 import de.featjar.base.computation.IComputation;
 import de.featjar.base.io.format.IFormat;
@@ -48,7 +48,7 @@ public class RedundantClausesCommand extends AJavasmtAnalysisCommand<List<IExpre
 
     @Override
     public IComputation<List<IExpression>> newAnalysis(
-            OptionList optionParser, IComputation<? extends IFormula> formula) {
+            OptionParser optionParser, IComputation<? extends IFormula> formula) {
         Boolean remove = optionParser.get(REMOVE);
         if (remove) {
             return formula.map(ComputeJavaSMTFormula::new)
@@ -62,7 +62,7 @@ public class RedundantClausesCommand extends AJavasmtAnalysisCommand<List<IExpre
     }
 
     @Override
-    protected IFormat<List<IExpression>> getOuputFormat(OptionList optionParser) {
+    protected IFormat<List<IExpression>> getOuputFormat(OptionParser optionParser) {
         return new ExpressionListStringFormat();
     }
 

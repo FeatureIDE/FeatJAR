@@ -22,7 +22,7 @@ package de.featjar.formula.cli;
 
 import de.featjar.base.cli.ACommand;
 import de.featjar.base.cli.Option;
-import de.featjar.base.cli.OptionList;
+import de.featjar.base.cli.OptionParser;
 import de.featjar.base.cli.Options;
 import de.featjar.base.data.Result;
 import de.featjar.base.io.text.GenericTextFormat;
@@ -118,7 +118,7 @@ public class PrintCommand extends ACommand {
             .setDefaultArgument(String.valueOf(ExpressionSerializer.STANDARD_ENQUOTE_WHITESPACE));
 
     @Override
-    public int run(OptionList optionParser) {
+    public int run(OptionParser optionParser) {
         return writeResult(
                 optionParser,
                 readFromInput(optionParser, FormulaFormats.getInstance())
@@ -126,7 +126,7 @@ public class PrintCommand extends ACommand {
                 new GenericTextFormat<>());
     }
 
-    private ExpressionSerializer getSerializer(OptionList optionParser) {
+    private ExpressionSerializer getSerializer(OptionParser optionParser) {
         ExpressionSerializer serializer = new ExpressionSerializer();
         serializer.setTab(optionParser.getResult(TAB_OPTION).get().getWhitespaceValue());
         serializer.setNotation(optionParser.getResult(NOTATION_OPTION).get());

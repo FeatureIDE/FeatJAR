@@ -23,7 +23,7 @@ package de.featjar.composition.cli;
 import de.featjar.base.FeatJAR;
 import de.featjar.base.cli.ACommand;
 import de.featjar.base.cli.Option;
-import de.featjar.base.cli.OptionList;
+import de.featjar.base.cli.OptionParser;
 import de.featjar.base.cli.Options;
 import de.featjar.base.data.Result;
 import de.featjar.base.io.IO;
@@ -74,7 +74,7 @@ public class PreprocessorCommand extends ACommand {
             .setDescription("The prefix that precedes each annotation");
 
     @Override
-    public int run(OptionList optionParser) {
+    public int run(OptionParser optionParser) {
         Path in = optionParser.getResult(INPUT_OPTION).orElseThrow();
         Path out = optionParser.getResult(OUTPUT_OPTION).orElse(null);
         Charset charset = StandardCharsets.UTF_8;

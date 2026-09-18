@@ -25,7 +25,7 @@ import de.featjar.base.cli.ACommand;
 import de.featjar.base.cli.Commands;
 import de.featjar.base.cli.ICommand;
 import de.featjar.base.cli.Option;
-import de.featjar.base.cli.OptionList;
+import de.featjar.base.cli.OptionParser;
 import de.featjar.base.data.Problem;
 import de.featjar.base.data.Result;
 import de.featjar.base.shell.AbortException;
@@ -84,9 +84,9 @@ public class RunShellCommand implements IShellCommand {
         }
     }
 
-    private OptionList alterOptions(ICommand cliCommand) throws AbortException {
+    private OptionParser alterOptions(ICommand cliCommand) throws AbortException {
         FeatJAR.log().message("Alter options? Select a number or leave blank to proceed.");
-        OptionList shellOptions = new OptionList();
+        OptionParser shellOptions = new OptionParser();
         shellOptions.addOptions(cliCommand.getOptions());
 
         printOptions(shellOptions);
@@ -125,7 +125,7 @@ public class RunShellCommand implements IShellCommand {
         return shellOptions;
     }
 
-    private void printOptions(OptionList shellOptions) {
+    private void printOptions(OptionParser shellOptions) {
         AtomicInteger i = new AtomicInteger(1);
         shellOptions.getOptions().forEach(o -> {
             FeatJAR.log()

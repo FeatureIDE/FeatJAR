@@ -23,7 +23,7 @@ package de.featjar.analysis;
 import de.featjar.base.FeatJAR;
 import de.featjar.base.cli.ACommand;
 import de.featjar.base.cli.Option;
-import de.featjar.base.cli.OptionList;
+import de.featjar.base.cli.OptionParser;
 import de.featjar.base.cli.Options;
 import de.featjar.base.computation.IComputation;
 import de.featjar.base.data.Result;
@@ -60,7 +60,7 @@ public abstract class AAnalysisCommand<T> extends ACommand {
             .setDescription("Path to file containig the execution time");
 
     @Override
-    public int run(OptionList optionParser) {
+    public int run(OptionParser optionParser) {
         boolean browseCache = optionParser.getResult(BROWSE_CACHE_OPTION).get();
         boolean parallel = !optionParser.getResult(NON_PARALLEL).get();
         Duration timeout = optionParser.getResult(TIMEOUT_OPTION).get();
@@ -111,9 +111,9 @@ public abstract class AAnalysisCommand<T> extends ACommand {
         return writeResult(optionParser, result, getOuputFormat(optionParser));
     }
 
-    protected abstract IComputation<T> newComputation(OptionList optionParser);
+    protected abstract IComputation<T> newComputation(OptionParser optionParser);
 
-    protected IFormat<T> getOuputFormat(OptionList optionParser) {
+    protected IFormat<T> getOuputFormat(OptionParser optionParser) {
         return new GenericTextFormat<>();
     }
 }

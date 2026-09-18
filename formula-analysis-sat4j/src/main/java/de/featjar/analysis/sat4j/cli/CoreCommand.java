@@ -22,7 +22,7 @@ package de.featjar.analysis.sat4j.cli;
 
 import de.featjar.analysis.sat4j.computation.ComputeCoreDeadMIG;
 import de.featjar.base.cli.Option;
-import de.featjar.base.cli.OptionList;
+import de.featjar.base.cli.OptionParser;
 import de.featjar.base.cli.Options;
 import de.featjar.base.computation.IComputation;
 import de.featjar.base.io.format.IFormat;
@@ -49,13 +49,13 @@ public class CoreCommand extends ASAT4JAnalysisCommand<BooleanAssignmentList> {
 
     @Override
     public IComputation<BooleanAssignmentList> newAnalysis(
-            OptionList optionParser, IComputation<BooleanAssignmentList> formula) {
+            OptionParser optionParser, IComputation<BooleanAssignmentList> formula) {
         return formula.map(ComputeCoreDeadMIG::new)
                 .mapResult(CoreCommand.class, "list", a -> new BooleanAssignmentList(variableMap, a));
     }
 
     @Override
-    protected IFormat<BooleanAssignmentList> getOuputFormat(OptionList optionParser) {
+    protected IFormat<BooleanAssignmentList> getOuputFormat(OptionParser optionParser) {
         return optionParser.get(FORMAT);
     }
 

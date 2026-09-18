@@ -49,12 +49,13 @@ import java.util.Properties;
 import java.util.stream.Collectors;
 
 /**
- * Parses a list of strings.
+ * Parses a list of arguments against a given list of {@link Option options}.
+ * Fills a map assigning a value to the given options.
  *
  * @author Elias Kuiter
  * @author Sebastian Krieter
  */
-public class OptionList {
+public class OptionParser {
 
     private final List<Option<?>> options;
 
@@ -63,41 +64,41 @@ public class OptionList {
     private final LinkedHashMap<String, Object> properties = new LinkedHashMap<>();
 
     /**
-     * Creates a new option list.
+     * Creates a new option parser.
      *
      * @param arguments the arguments
      */
-    public OptionList(String... arguments) {
+    public OptionParser(String... arguments) {
         this(List.of(arguments));
     }
 
     /**
-     * Creates a new option list.
+     * Creates a new option parser.
      *
      * @param arguments the arguments
      */
-    public OptionList(List<String> arguments) {
+    public OptionParser(List<String> arguments) {
         this.originalCommandLineArguments = new ArrayList<>(arguments);
         this.options = new ArrayList<>();
     }
 
     /**
-     * Creates a new option list.
+     * Creates a new option parser.
      *
      * @param options the list of options
      * @param arguments the arguments
      */
-    public OptionList(List<Option<?>> options, String... arguments) {
+    public OptionParser(List<Option<?>> options, String... arguments) {
         this(options, List.of(arguments));
     }
 
     /**
-     * Creates a new option list.
+     * Creates a new option parser.
      *
      * @param options the list of options
      * @param arguments the arguments
      */
-    public OptionList(List<Option<?>> options, List<String> arguments) {
+    public OptionParser(List<Option<?>> options, List<String> arguments) {
         this.originalCommandLineArguments = new ArrayList<>(arguments);
         this.options = new ArrayList<>(options);
     }
@@ -421,7 +422,7 @@ public class OptionList {
      * @param options the options to add
      * @return this option list
      */
-    public OptionList addOptions(List<Option<?>> options) {
+    public OptionParser addOptions(List<Option<?>> options) {
         this.options.addAll(options);
         return this;
     }

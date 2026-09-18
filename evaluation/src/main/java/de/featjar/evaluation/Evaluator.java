@@ -24,7 +24,7 @@ import de.featjar.base.FeatJAR;
 import de.featjar.base.cli.ACommand;
 import de.featjar.base.cli.MultiOption;
 import de.featjar.base.cli.Option;
-import de.featjar.base.cli.OptionList;
+import de.featjar.base.cli.OptionParser;
 import de.featjar.base.cli.Options;
 import de.featjar.base.cli.RangeOption;
 import de.featjar.base.io.csv.CSVFile;
@@ -84,7 +84,7 @@ public abstract class Evaluator extends ACommand {
 
     public static final RangeOption algorithmIterationsOption = Options.newRangeOption("algorithmIterations");
 
-    public OptionList optionParser;
+    public OptionParser optionParser;
     public OptionCombiner optionCombiner;
 
     public Path outputPath;
@@ -97,7 +97,7 @@ public abstract class Evaluator extends ACommand {
     public Path tempPath;
     public List<String> systemNames;
 
-    public OptionList getOptionParser() {
+    public OptionParser getOptionParser() {
         return optionParser;
     }
 
@@ -146,7 +146,7 @@ public abstract class Evaluator extends ACommand {
     protected abstract void runEvaluation() throws Exception;
 
     @Override
-    public int run(OptionList optionParser) {
+    public int run(OptionParser optionParser) {
         this.optionParser = optionParser;
         this.optionCombiner = new OptionCombiner(optionParser);
         try {
