@@ -28,23 +28,19 @@ import de.featjar.base.cli.OptionList;
 import de.featjar.base.cli.Options;
 import de.featjar.base.computation.Computations;
 import de.featjar.base.io.IO;
-import de.featjar.base.tree.Trees;
 import de.featjar.composition.Preprocessor;
 import de.featjar.formula.assignment.conversion.ComputeBooleanClauseList;
 import de.featjar.formula.computation.ComputeCNFFormula;
 import de.featjar.formula.computation.ComputeNNFFormula;
 import de.featjar.formula.io.FormulaFormats;
-import de.featjar.formula.io.textual.ExpressionSerializer;
 import de.featjar.formula.io.textual.JavaSymbols;
 import de.featjar.formula.structure.IFormula;
 import de.featjar.formula.structure.connective.And;
 import de.featjar.formula.structure.connective.Reference;
-import de.featjar.formula.structure.predicate.False;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
+import java.util.function.Predicate;
 
 public class DeadCodeCommand extends ACommand {
 
@@ -62,11 +58,13 @@ public class DeadCodeCommand extends ACommand {
             IFormula featureModel = IO.load(
                             optionParser.getResult(FEATURE_MODEL_OPTION).orElseThrow(), FormulaFormats.getInstance())
                     .orElseThrow();
-            Preprocessor preprocessor =
-                    new Preprocessor(optionParser.getResult(PREFIX_OPTION).orElseThrow(), JavaSymbols.INSTANCE);
-            List<String> lines =
-                    Files.readAllLines(optionParser.getResult(INPUT_OPTION).orElseThrow());
-            detectDead(preprocessor, lines, featureModel).forEach(FeatJAR.log()::plainMessage);
+            new Preprocessor(optionParser.getResult(PREFIX_OPTION).orElseThrow(), JavaSymbols.INSTANCE)
+                    .findDeadCode(
+                            Files.readAllLines(
+                                    optionParser.getResult(INPUT_OPTION).orElseThrow())
+                                    .stream(),
+                            consistentWith(featureModel))
+                    .forEach(FeatJAR.log()::plainMessage);
             return 0;
         } catch (Exception e) {
             FeatJAR.log().error(e);
@@ -75,38 +73,16 @@ public class DeadCodeCommand extends ACommand {
     }
 
     /**
-     * {@return one message per block of code lines whose presence condition contradicts the feature model}
+     * {@return a test whether a presence condition can be true in some configuration of the feature model}
      */
-    public static List<String> detectDead(Preprocessor preprocessor, List<String> lines, IFormula featureModel) {
+    public static Predicate<IFormula> consistentWith(IFormula featureModel) {
         IFormula model = featureModel instanceof Reference reference ? reference.getExpression() : featureModel;
-        List<IFormula> presence = preprocessor.computePresenceConditions(lines.stream());
-        ExpressionSerializer serializer = new ExpressionSerializer();
-        serializer.setSymbols(JavaSymbols.INSTANCE);
-        List<String> dead = new ArrayList<>();
-        for (int start = 0; start < lines.size(); start++) {
-            // annotation lines have the condition False; only the first line of each code block is checked
-            if (presence.get(start) == False.INSTANCE || (start > 0 && presence.get(start - 1) != False.INSTANCE)) {
-                continue;
-            }
-            int end = start;
-            while (end + 1 < lines.size() && presence.get(end + 1) != False.INSTANCE) {
-                end++;
-            }
-            boolean satisfiable = Computations.of((IFormula) new And(model, presence.get(start)))
-                    .map(ComputeNNFFormula::new)
-                    .map(ComputeCNFFormula::new)
-                    .map(ComputeBooleanClauseList::new)
-                    .map(ComputeSatisfiableSAT4J::new)
-                    .compute();
-            if (!satisfiable) {
-                dead.add(String.format(
-                        "Dead code at lines %d-%d: %s",
-                        start + 1,
-                        end + 1,
-                        Trees.traverse(presence.get(start), serializer).orElseThrow()));
-            }
-        }
-        return dead;
+        return condition -> Computations.of((IFormula) new And(model, condition))
+                .map(ComputeNNFFormula::new)
+                .map(ComputeCNFFormula::new)
+                .map(ComputeBooleanClauseList::new)
+                .map(ComputeSatisfiableSAT4J::new)
+                .compute();
     }
 
     @Override

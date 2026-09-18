@@ -27,6 +27,7 @@ import de.featjar.analysis.sat4j.cli.DeadCodeCommand;
 import de.featjar.composition.Preprocessor;
 import de.featjar.formula.io.textual.JavaSymbols;
 import java.util.List;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -74,7 +75,7 @@ public class DeadCodeTest extends AnalysisTest {
     }
 
     private static List<String> dead(String... lines) {
-        return DeadCodeCommand.detectDead(
-                new Preprocessor("//#", JavaSymbols.INSTANCE), List.of(lines), loadFormula("GPL/model.xml"));
+        return new Preprocessor("//#", JavaSymbols.INSTANCE)
+                .findDeadCode(Stream.of(lines), DeadCodeCommand.consistentWith(loadFormula("GPL/model.xml")));
     }
 }
