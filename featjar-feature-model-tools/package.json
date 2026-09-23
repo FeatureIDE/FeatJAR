@@ -87,7 +87,7 @@
         {
           "id": "featjarBar",
           "title": "FeatJar",
-          "icon": "ressources/featjar.svg"
+          "icon": "resources/featjar.svg"
         }
       ]
     },
@@ -96,7 +96,7 @@
         {
           "id": "uvlFiles",
           "name": "UVL Files",
-          "icon": "ressources/featjar.svg"
+          "icon": "resources/featjar.svg"
         }
       ]
     }

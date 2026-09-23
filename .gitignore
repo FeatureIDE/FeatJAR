@@ -28,3 +28,6 @@
 featjar-feature-model-tools/node_modules/**
 featjar-feature-model-tools/out/** 
 featjar-feature-model-tools/package-lock.json 
+
+#uvl files in resources for tests
+featjar-feature-model-tools/resources/*.uvl
