@@ -28,6 +28,18 @@
        {
         "command": "featjar-extension.openGui",
         "title": "FeatJAR: Open GUI"
+      },
+      {
+        "command": "featjar-extension.countConfigurations",
+       "title": "Count Configurations"
+      },
+      {
+        "command": "featjar-extension.coreDeadFeatures",
+       "title": "Count Core/Dead Features"
+      },
+      {
+        "command": "featjar-extension.modelTest",
+       "title": "model stats "
       }
     ],
     "menus": {
@@ -40,7 +52,23 @@
           "command": "featjar-extension.openGui",
           "when": "resourceExtname == .uvl"
         }
-      ]
+      ],
+      "view/item/context": [
+    {
+        "command": "featjar-extension.checkSatisfiability",
+        "when": "view == uvlFiles"
+    },
+    {
+        "command": "featjar-extension.countConfigurations",
+        "when": "view == uvlFiles"
+    },{
+        "command": "featjar-extension.coreDeadFeatures",
+        "when": "view == uvlFiles"
+    },{
+        "command": "featjar-extension.modelTest",
+        "when": "view == uvlFiles"
+    }
+    ]
     },
     "customEditors": [
       {
@@ -53,7 +81,25 @@
         ],
         "priority": "default"
       }
-    ]
+    ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "featjarBar",
+          "title": "FeatJar",
+          "icon": "ressources/featjar.svg"
+        }
+      ]
+    },
+    "views": {
+      "featjarBar": [
+        {
+          "id": "uvlFiles",
+          "name": "UVL Files",
+          "icon": "ressources/featjar.svg"
+        }
+      ]
+    }
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",
