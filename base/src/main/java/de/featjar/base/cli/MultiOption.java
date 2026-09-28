@@ -84,7 +84,10 @@ public class MultiOption<T> extends AOption<List<T>> {
      * @param defaultArgument the default value in case no other is provided or can be parsed
      */
     protected MultiOption(
-            String name, Function<String, Result<T>> parser, Collection<String> possibleValues, String defaultArgument) {
+            String name,
+            Function<String, Result<T>> parser,
+            Collection<String> possibleValues,
+            String defaultArgument) {
         super(name, defaultArgument);
         this.parser = Objects.requireNonNull(parser);
         setPossibleArguments(possibleValues);

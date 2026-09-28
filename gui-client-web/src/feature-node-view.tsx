@@ -45,6 +45,9 @@ export class FeatureNodeView extends RectangularNodeView {
         const isConstraintBox = node.cssClasses?.includes('constraint-box') || false;
         const isConstraintTitle = node.cssClasses?.includes('constraint-title') || false;
 
+        const isCollapsed = node.cssClasses?.includes('collapsed') || false;
+        const collapsedCount = Number((node as GNodeWithArgs).args?.collapsedCount ?? 0);
+
         /*
          * Constraint box only a container
          */
@@ -135,6 +138,24 @@ export class FeatureNodeView extends RectangularNodeView {
                 {showOptionalMarker && <circle cx={width / 2} cy={0} r={5} fill='white' stroke='black' stroke-width={1.5} />}
 
                 {context.renderChildren(node)}
+                {isCollapsed && this.renderCollapsedBadge(width, height, collapsedCount)}
+            </g>
+        );
+    }
+    protected renderCollapsedBadge(width: number, height: number, count: number): VNode {
+        const text = `+${count}`;
+        const badgeWidth = 12 + text.length * 7;
+        const badgeHeight = 16;
+        const x = (width - badgeWidth) / 2;
+        const y = height + 6;
+
+        return (
+            <g>
+                <line x1={width / 2} y1={height} x2={width / 2} y2={y} stroke='black' stroke-width={1} stroke-dasharray='2,2' />
+                <rect x={x} y={y} width={badgeWidth} height={badgeHeight} rx={8} ry={8} fill='#555' />
+                <text x={width / 2} y={y + badgeHeight / 2} text-anchor='middle' dominant-baseline='central' fill='white' font-size='11px'>
+                    {text}
+                </text>
             </g>
         );
     }

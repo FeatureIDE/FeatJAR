@@ -54,6 +54,17 @@ export interface SetFeatureColorAction extends Action {
     elementId: string;
     color: string;
 }
+export interface ToggleShowAttributesAction extends Action {
+    kind: typeof ToggleShowAttributesAction.KIND;
+    enabled: boolean;
+}
+
+export namespace ToggleShowAttributesAction {
+    export const KIND = 'toggleShowAttributes';
+    export function create(enabled: boolean): ToggleShowAttributesAction {
+        return { kind: KIND, enabled };
+    }
+}
 export namespace SetFeatureColorAction {
     export const KIND = 'setFeatureColor';
     export function create(elementId: string, color: string): SetFeatureColorAction {

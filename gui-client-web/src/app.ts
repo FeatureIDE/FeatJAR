@@ -1,4 +1,3 @@
-
 /********************************************************************************
  * Copyright (c) 2019-2024 EclipseSource and others.
  *
@@ -55,7 +54,7 @@ const MODEL_FILE = 'gui_model' + '.' + ENDPOINT_ID;
 const OPTIONAL_FEATURE_ID = 'feature-optional';
 const MANDATORY_FEATURE_ID = 'feature-mandatory';
 const MULTIPLE_FEATURE_ID = 'feature-multiple';
-const loc = decodeURIComponent(window.location.pathname);//added by wihed
+const loc = decodeURIComponent(window.location.pathname); //added by wihed
 const CLIENT_PATH = loc.substring(0, loc.lastIndexOf('/'));
 const CLIENT_ABSOLUTE_EMF_FILE_PATH = resolve(join(CLIENT_PATH, '..', 'app', MODEL_FILE));
 const CLIENT_ID = 'sprotty';
@@ -224,7 +223,7 @@ function installKeyBindings(actionDispatcher: GLSPActionDispatcher): void {
     document.addEventListener('keydown', (event: KeyboardEvent) => {
         const dispatcher = container?.get(GLSPActionDispatcher) ?? actionDispatcher;
 
-               if (event.ctrlKey && event.altKey && event.code === 'KeyE') {
+        if (event.ctrlKey && event.altKey && event.code === 'KeyE') {
             event.preventDefault();
             dispatcher.dispatch(ExitAction.create());
         } else if (event.ctrlKey && event.altKey && event.code === 'KeyS') {

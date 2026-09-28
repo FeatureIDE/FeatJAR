@@ -12,8 +12,7 @@ import { injectable, inject } from 'inversify';
 // TODO maybe merge all actions into one file / folder ?
 import { ExitAction } from './client-exit-action';
 import { SaveAction } from './client-save-action';
-import { SetFeatureColorAction } from './set-type-actions';
-
+import { SetFeatureColorAction, ToggleShowAttributesAction } from './set-type-actions';
 /**
  * Toolbar that contains the save, exit, and set-color actions.
  *
@@ -64,9 +63,30 @@ export class SessionManagementPanel extends AbstractUIExtension implements IDiag
         this.setColorButtonEnabled(false);
         containerElement.appendChild(this.colorButton);
 
+        containerElement.appendChild(this.createShowAttributesToggle());
+
         this.selectionService.addListener(this);
     }
+    /**
+     * Builds the "Show attributes" checkbox
+     * and sends its state to the server whenever it's switched.
+     */
+    protected createShowAttributesToggle(): HTMLElement {
+        const wrapper = document.createElement('label');
+        wrapper.className = 'session-management-panel-toggle';
 
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.id = 'chk-show-attributes';
+        checkbox.onchange = () => {
+            console.log('Show attributes toggled:', checkbox.checked);
+            this.actionDispatcher.dispatch(ToggleShowAttributesAction.create(checkbox.checked));
+        };
+
+        wrapper.appendChild(checkbox);
+        wrapper.appendChild(document.createTextNode('Show attributes'));
+        return wrapper;
+    }
     protected createButton(id: string, label: string, onClick: () => void): HTMLElement {
         const button = document.createElement('div');
         button.id = id;

@@ -26,10 +26,14 @@ import featJAR.Attributes;
 import featJAR.FeatJARFactory;
 import featJAR.Feature;
 import featJAR.Identifiable;
+import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
- * Contains setter and getter methods for {@link Attributes} named in {@link AttributeKeys}
+ * Contains setter and getter methods for {@link Attributes} named in
+ * {@link AttributeKeys}
  */
 public final class AttributeKeysUtils {
 
@@ -80,5 +84,24 @@ public final class AttributeKeysUtils {
 
     public static Optional<String> getColor(Feature feature) {
         return getAttribute(feature, AttributeKeys.COLOR).map(Attributes::getValue);
+    }
+
+    /**
+     * Keys this editor uses internally (implementation type, hidden state, color)
+     * to store its own view settings on a feature. These are not shown to the
+     * user as regular attributes.
+     */
+    private static final Set<String> INTERNAL_KEYS =
+            Set.of(AttributeKeys.IMPLLEMENTATION, AttributeKeys.HIDDEN, AttributeKeys.COLOR);
+
+    /**
+     * Returns a feature's own attributes, filtering out the ones this editor
+     * uses internally (implementation type, hidden state, color) so they
+     * don't get shown to the user as if they were real feature data.
+     */
+    public static List<Attributes> getDisplayableAttributes(Feature feature) {
+        return feature.getAttributes().stream()
+                .filter(a -> !INTERNAL_KEYS.contains(a.getKey()))
+                .collect(Collectors.toList());
     }
 }

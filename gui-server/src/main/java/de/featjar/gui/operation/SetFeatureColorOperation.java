@@ -7,7 +7,6 @@ import org.eclipse.glsp.server.operations.Operation;
  * Carries the "Set Color..." request from the client to the server —
  * which feature was selected, and which color was entered for it.
  */
-
 public class SetFeatureColorOperation extends Operation {
 
     public static final String KIND = "setFeatureColor";

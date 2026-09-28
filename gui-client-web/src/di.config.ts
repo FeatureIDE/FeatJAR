@@ -34,7 +34,8 @@ import {
     GLabel,
     GLabelView,
     editLabelFeature,
-    contextMenuModule
+    contextMenuModule,
+    NodeCreationTool
 } from '@eclipse-glsp/client';
 import { Container } from 'inversify';
 import { makeLoggerMiddleware } from 'inversify-logger-middleware';
@@ -43,7 +44,8 @@ import { FeatureCardinalityEdgeView } from './feature-edge-view';
 import { getParameters } from './url-parameters';
 import { SessionManagementPanel } from './session-management-panel';
 import { FeatureSearchProvider } from './feature-search-provider';
-
+import { FeatureSearchBar } from './feature-search-bar';
+import { ImmediateNodeCreationTool } from './immediate-node-creation-tool';
 
 import '../css/diagram.css';
 import '../css/command-palette.css';
@@ -101,14 +103,21 @@ export default function createContainer(options: IDiagramOptions): Container {
     container.bind(TYPES.IDiagramStartup).toService(SessionManagementPanel);
     // Command palette search
     container.bind(TYPES.ICommandPaletteActionProvider).to(FeatureSearchProvider).inSingletonScope();
-
+    // Persistent feature search bar
+    container.bind(FeatureSearchBar).toSelf().inSingletonScope();
+    container.bind(TYPES.IUIExtension).toService(FeatureSearchBar);
+    container.bind(TYPES.IDiagramStartup).toService(FeatureSearchBar);
     // Cardinality labels
     configureModelElement(ctx, 'label-edge-cardinality', GLabel, GLabelView);
     configureModelElement(ctx, 'label-node-cardinality', GLabel, GLabelView);
+    configureModelElement(ctx, 'label-attribute', GLabel, GLabelView);
 
     bindOrRebind(container, TYPES.ILogger).to(ConsoleLogger).inSingletonScope();
     bindOrRebind(container, TYPES.LogLevel).toConstantValue(LogLevel.warn);
     container.bind(TYPES.IMarqueeBehavior).toConstantValue({ entireEdge: true, entireElement: true });
+    // Palette buttons (Add Feature, Add Node, Add Constraint, ...) create the element right away
+    // instead of waiting for a placement click that the server ignores anyway (issue #23).
+    bindOrRebind(container, NodeCreationTool).to(ImmediateNodeCreationTool).inSingletonScope();
 
     if (parameters.inversifyLog) {
         configureInversifyLogger(container);

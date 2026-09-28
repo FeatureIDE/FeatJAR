@@ -7,6 +7,7 @@ import {
 } from './set-type-actions';
 
 import { addFeatureBelow } from './create-feature-actions'; // added
+import { ToggleCollapseAction } from './toggle-collapse-action';
 
 interface Entry {
     label: string;
@@ -28,7 +29,7 @@ export function initializeNodeContextMenu(actionDispatcher: IActionDispatcher): 
         console.log('contextmenu fired on', event.target);
         const nodeElement = (event.target as Element).closest('[data-svg-metadata-type="node"]');
         event.preventDefault();
-// if we didn't click on a node, we're on empty canvas:that's where "Add Constraint" should show up
+        // if we didn't click on a node, we're on empty canvas:that's where "Add Constraint" should show up
         if (!nodeElement) {
             const addEntries: Entry[] = [
                 {
@@ -67,6 +68,12 @@ function buildEntries(id: string, css: string, actionDispatcher: IActionDispatch
             { label: 'AND', action: SetNodeTypeAction.create(id, 'node-and') },
             { label: 'Set Bounds', action: () => promptForBounds(id, true) }
         ];
+        const classes = css.split(/\s+/);
+        if (classes.includes('collapsed')) {
+            entries.push({ label: 'Expand Subtree', action: ToggleCollapseAction.create(id) });
+        } else if (classes.includes('collapsible')) {
+            entries.push({ label: 'Collapse Subtree', action: ToggleCollapseAction.create(id) });
+        }
 
         return entries;
     }
@@ -83,11 +90,17 @@ function buildEntries(id: string, css: string, actionDispatcher: IActionDispatch
             // New: brings in the "add feature below" logic implemented in create-feature-actions.ts.
             { label: 'New Feature', action: () => addFeatureBelow(id, actionDispatcher) }
         ];
+        const classes = css.split(/\s+/);
+        if (classes.includes('collapsed')) {
+            entries.push({ label: 'Expand Subtree', action: ToggleCollapseAction.create(id) });
+        } else if (classes.includes('collapsible')) {
+            entries.push({ label: 'Collapse Subtree', action: ToggleCollapseAction.create(id) });
+        }
 
         return entries;
     }
-     // added for #27 - right click on an existing constraint now gives a Delete option.
-    if (css.includes('constraint-node')){
+    // added for #27 - right click on an existing constraint now gives a Delete option.
+    if (css.includes('constraint-node')) {
         entries = [{ label: 'Delete', action: DeleteElementOperation.create([id]) }];
     }
 

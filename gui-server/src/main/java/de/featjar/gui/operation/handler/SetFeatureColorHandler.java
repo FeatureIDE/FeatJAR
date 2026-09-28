@@ -19,7 +19,6 @@ import org.eclipse.glsp.server.operations.GModelOperationHandler;
  * The diagram picks this up automatically afterwards and repaints
  * the node.
  */
-
 public class SetFeatureColorHandler extends GModelOperationHandler<SetFeatureColorOperation> {
 
     @Inject
