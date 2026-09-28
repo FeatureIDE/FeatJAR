@@ -21,60 +21,36 @@ export function featJarPath(): string {
 	return path.join(os.homedir(), '.featjar-bin', 'feat.jar');
 }
 
-export async function checkSatisfiable( uri: vscode.Uri, output: vscode.OutputChannel,): Promise<boolean> {
+export async function checkSatisfiable(uri: vscode.Uri): Promise<boolean | undefined> {
     const result = await executeInExtensionShell(['solutions-sat4j', '--input', uri.fsPath, '--limit', '1', '--format', 'SimpleCSV',]);
 
     if (isErrorResult(result)) {
-        return false;
+        return;
     }
 
-    const satisfiable = result.split('\n').some(line => line.startsWith('0;'));
-
-    output.clear();
-    output.appendLine(satisfiable? 'The model is satisfiable.': 'The model is not satisfiable.');
-    output.show();
 	return result.split('\n').some(line => line.startsWith('0;'));
 }
-export async function printModelStats(uri: vscode.Uri, output: vscode.OutputChannel) {
+export async function printModelStats(uri: vscode.Uri): Promise<string | undefined> {
     const result = await executeInExtensionShell(['print-model-stats', '--input', uri.fsPath,]);
 
     if (isErrorResult(result)) {
         return;
     }
 
-    console.log(result);
-    output.clear();
-    output.appendLine(`the stats : ${result.trim()}`);
-    output.show();
+    return result;
 }
-export async function countConfigurations(uri: vscode.Uri, output: vscode.OutputChannel) {
+export async function countConfigurations(uri: vscode.Uri): Promise<string | undefined> {
     const result = await executeInExtensionShell(['count-sat4j', '--input', uri.fsPath,]);
 
     if (isErrorResult(result)) {
         return;
     }
 
-    console.log(result);
-    output.clear();
-    output.appendLine(`Number of configurations: ${result.trim()}`);
-    output.show();
+    return result;
 }
 
-export async function analyzeCoreDead(uri: vscode.Uri | undefined, output: vscode.OutputChannel) {
+export async function analyzeCoreDead(uri: vscode.Uri): Promise<{ core: number; dead: number } | undefined> {
     // The implementation here is with AI assistance
-    if (!uri) {
-        vscode.window.showWarningMessage('Select a UVL file in the FeatJAR sidebar.');
-        return;
-    }
-
-    const satisfiable = await checkSatisfiable(uri, output);
-
-    if (!satisfiable) {
-        output.appendLine('Core/Dead analysis not possible: model is not satisfiable.');
-        output.show();
-        return;
-    }
-
     const result = await executeInExtensionShell(['core-sat4j', '--input', uri.fsPath, '--output-format', 'LiteralList',]);
 
     if (isErrorResult(result)) {
@@ -100,9 +76,7 @@ export async function analyzeCoreDead(uri: vscode.Uri | undefined, output: vscod
 
     const dead = literals.filter(value => value.startsWith('-')).length;
 
-    output.clear();
-    output.appendLine(`Core Features: ${core} | Dead Features: ${dead}`);
-    output.show();
+    return { core, dead };
 }
 
 export async function featJarDownload(): Promise<void> {

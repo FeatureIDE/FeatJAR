@@ -21,7 +21,16 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 	
 	const checkSatisfiability = vscode.commands.registerCommand(
 		'featjar-extension.checkSatisfiability',
-		(uri: vscode.Uri) => checkSatisfiable(uri, output)
+		async (uri: vscode.Uri) => {
+			const satisfiable = await checkSatisfiable(uri);
+			if (satisfiable === undefined) {
+				return;
+			}
+
+			output.clear();
+			output.appendLine(satisfiable ? 'The model is satisfiable.' : 'The model is not satisfiable.');
+			output.show();
+		}
 	);
 
 	const openFeatJarGui = vscode.commands.registerCommand(
@@ -41,15 +50,60 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 		});
 	const modelTest = vscode.commands.registerCommand(
         'featjar-extension.modelTest',
-		(uri: vscode.Uri) => printModelStats(uri, output),
+		async (uri: vscode.Uri) => {
+			const result = await printModelStats(uri);
+			if (result === undefined) {
+				return;
+			}
+
+			console.log(result);
+			output.clear();
+			output.appendLine(`the stats : ${result.trim()}`);
+			output.show();
+		},
     );
 	const countConfigurationsCommand = vscode.commands.registerCommand(
     	'featjar-extension.countConfigurations',
-		(uri: vscode.Uri) => countConfigurations(uri, output),
+		async (uri: vscode.Uri) => {
+			const result = await countConfigurations(uri);
+			if (result === undefined) {
+				return;
+			}
+
+			console.log(result);
+			output.clear();
+			output.appendLine(`Number of configurations: ${result.trim()}`);
+			output.show();
+		},
     );
 	const coreDeadFeatures = vscode.commands.registerCommand(
         'featjar-extension.coreDeadFeatures',
-        (uri: vscode.Uri | undefined) => analyzeCoreDead(uri, output),
+        async (uri: vscode.Uri | undefined) => {
+            if (!uri) {
+                vscode.window.showWarningMessage('Select a UVL file in the FeatJAR sidebar.');
+                return;
+            }
+
+            const satisfiable = await checkSatisfiable(uri);
+            if (satisfiable === undefined) {
+                return;
+            }
+
+            if (!satisfiable) {
+                output.appendLine('Core/Dead analysis not possible: model is not satisfiable.');
+                output.show();
+                return;
+            }
+
+            const result = await analyzeCoreDead(uri);
+            if (result === undefined) {
+                return;
+            }
+
+            output.clear();
+            output.appendLine(`Core Features: ${result.core} | Dead Features: ${result.dead}`);
+            output.show();
+        },
     );
 	
 
