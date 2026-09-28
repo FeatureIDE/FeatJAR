@@ -23,7 +23,7 @@ package de.featjar.analysis.ganak.cli;
 import de.featjar.analysis.AAnalysisCommand;
 import de.featjar.analysis.ganak.computation.AGanakAnalysis;
 import de.featjar.base.cli.Option;
-import de.featjar.base.cli.OptionList;
+import de.featjar.base.cli.OptionParser;
 import de.featjar.base.cli.Options;
 import de.featjar.base.computation.IComputation;
 import de.featjar.base.data.Result;
@@ -66,7 +66,7 @@ public abstract class AGanakAnalysisCommand<T> extends AAnalysisCommand<T> {
     protected VariableMap variableMap;
 
     @Override
-    protected IComputation<T> newComputation(OptionList optionParser) {
+    protected IComputation<T> newComputation(OptionParser optionParser) {
         Result<IFormula> parseResult = readFromInput(optionParser, optionParser.get(INPUT_FORMAT));
 
         final AGanakAnalysis<T> newAnalysis = newAnalysis(
@@ -85,5 +85,5 @@ public abstract class AGanakAnalysisCommand<T> extends AAnalysisCommand<T> {
     }
 
     protected abstract AGanakAnalysis<T> newAnalysis(
-            OptionList optionParser, IComputation<BooleanAssignmentList> formula);
+            OptionParser optionParser, IComputation<BooleanAssignmentList> formula);
 }

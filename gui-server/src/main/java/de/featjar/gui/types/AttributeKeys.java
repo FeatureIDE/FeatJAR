@@ -29,4 +29,5 @@ public class AttributeKeys {
 
     public static final String IMPLLEMENTATION = "implementation";
     public static final String HIDDEN = "hidden";
+    public static final String COLOR = "color";
 }

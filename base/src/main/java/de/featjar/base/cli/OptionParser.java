@@ -49,14 +49,13 @@ import java.util.Properties;
 import java.util.stream.Collectors;
 
 /**
- * Parses a list of strings.
+ * Parses a list of arguments against a given list of {@link Option options}.
+ * Fills a map assigning a value to the given options.
  *
  * @author Elias Kuiter
  * @author Sebastian Krieter
  */
-public class OptionList {
-
-    private static final String GENERAL_CONFIG_NAME = "general";
+public class OptionParser {
 
     private final List<Option<?>> options;
 
@@ -65,41 +64,41 @@ public class OptionList {
     private final LinkedHashMap<String, Object> properties = new LinkedHashMap<>();
 
     /**
-     * Creates a new option list.
+     * Creates a new option parser.
      *
      * @param arguments the arguments
      */
-    public OptionList(String... arguments) {
+    public OptionParser(String... arguments) {
         this(List.of(arguments));
     }
 
     /**
-     * Creates a new option list.
+     * Creates a new option parser.
      *
      * @param arguments the arguments
      */
-    public OptionList(List<String> arguments) {
+    public OptionParser(List<String> arguments) {
         this.originalCommandLineArguments = new ArrayList<>(arguments);
         this.options = new ArrayList<>();
     }
 
     /**
-     * Creates a new option list.
+     * Creates a new option parser.
      *
      * @param options the list of options
      * @param arguments the arguments
      */
-    public OptionList(List<Option<?>> options, String... arguments) {
+    public OptionParser(List<Option<?>> options, String... arguments) {
         this(options, List.of(arguments));
     }
 
     /**
-     * Creates a new option list.
+     * Creates a new option parser.
      *
      * @param options the list of options
      * @param arguments the arguments
      */
-    public OptionList(List<Option<?>> options, List<String> arguments) {
+    public OptionParser(List<Option<?>> options, List<String> arguments) {
         this.originalCommandLineArguments = new ArrayList<>(arguments);
         this.options = new ArrayList<>(options);
     }
@@ -121,7 +120,7 @@ public class OptionList {
                 return problemList;
             }
 
-            arguments.addAll(parseConfigurationFiles(arguments, problemList));
+            parseConfigurationFiles(arguments, problemList);
             if (Problem.containsError(problemList)) {
                 return problemList;
             }
@@ -183,73 +182,27 @@ public class OptionList {
         }
     }
 
-    private List<String> parseConfigurationFiles(List<String> commandLineArguments, List<Problem> problemList) {
-        List<String> configFileArguments = new ArrayList<>();
-        final Path configDir;
-        int configurationDirIndex =
-                commandLineArguments.indexOf("--" + FeatJAROptions.CONFIGURATION_DIR_OPTION.getName());
-        if (configurationDirIndex < 0) {
-            configDir = Path.of("");
-        } else {
-            int argumentIndex = configurationDirIndex + 1;
-            if (argumentIndex >= commandLineArguments.size()) {
-                addProblem(
-                        problemList,
-                        Severity.ERROR,
-                        "Option %s is supplied without value, but a value is required",
-                        FeatJAROptions.CONFIGURATION_DIR_OPTION.getName());
-                return configFileArguments;
-            }
-            parseOption(FeatJAROptions.CONFIGURATION_DIR_OPTION, commandLineArguments.get(argumentIndex), problemList);
-            Result<Path> configDirValue = getResult(FeatJAROptions.CONFIGURATION_DIR_OPTION);
-            if (configDirValue.isEmpty()) {
-                problemList.addAll(configDirValue.getProblems());
-                return configFileArguments;
-            }
-            commandLineArguments
-                    .subList(configurationDirIndex, configurationDirIndex + 2)
-                    .clear();
-            configDir = configDirValue.get();
-            if (!Files.isDirectory(configDir)) {
-                addProblem(
-                        problemList,
-                        Severity.ERROR,
-                        "Specified configuration directory %s is not a directory",
-                        configDir.toString());
-                return configFileArguments;
-            }
-        }
-
-        int configurationNamesIndex =
-                commandLineArguments.indexOf("--" + FeatJAROptions.CONFIGURATION_OPTION.getName());
-        if (configurationNamesIndex >= 0) {
-            int argumentIndex = configurationNamesIndex + 1;
-            if (argumentIndex >= commandLineArguments.size()) {
+    private void parseConfigurationFiles(List<String> arguments, List<Problem> problemList) {
+        int optionIndex = arguments.indexOf("--" + FeatJAROptions.CONFIGURATION_OPTION.getName());
+        if (optionIndex >= 0) {
+            int argumentIndex = optionIndex + 1;
+            if (argumentIndex >= arguments.size()) {
                 addProblem(
                         problemList,
                         Severity.ERROR,
                         "Option %s is supplied without value, but a value is required",
                         FeatJAROptions.CONFIGURATION_OPTION.getName());
-                return configFileArguments;
+                return;
             }
-            parseOption(FeatJAROptions.CONFIGURATION_OPTION, commandLineArguments.get(argumentIndex), problemList);
-            Result<List<String>> config = getResult(FeatJAROptions.CONFIGURATION_OPTION);
-            if (config.isEmpty()) {
-                problemList.addAll(config.getProblems());
-                return configFileArguments;
+            parseOption(FeatJAROptions.CONFIGURATION_OPTION, arguments.get(argumentIndex), problemList);
+            Result<List<Path>> optionValue = getResult(FeatJAROptions.CONFIGURATION_OPTION);
+            if (optionValue.isEmpty()) {
+                problemList.addAll(optionValue.getProblems());
+                return;
             }
-            commandLineArguments
-                    .subList(configurationNamesIndex, configurationNamesIndex + 2)
-                    .clear();
+            arguments.subList(optionIndex, optionIndex + 2).clear();
 
-            List<String> configNameList = config.get();
-            ArrayList<String> reverseNameList = new ArrayList<>(configNameList.size() + 1);
-            reverseNameList.add(GENERAL_CONFIG_NAME);
-            reverseNameList.addAll(configNameList);
-            Collections.reverse(reverseNameList);
-
-            for (String name : reverseNameList) {
-                Path configPath = configDir.resolve(name + ".properties");
+            for (Path configPath : optionValue.get()) {
                 final Properties properties = new Properties();
                 try (InputStream input = Files.newInputStream(configPath)) {
                     properties.load(input);
@@ -260,8 +213,8 @@ public class OptionList {
                 }
                 try {
                     for (Entry<Object, Object> propertyEntry : properties.entrySet()) {
-                        configFileArguments.add("--" + propertyEntry.getKey().toString());
-                        configFileArguments.add(propertyEntry.getValue().toString());
+                        arguments.add("--" + propertyEntry.getKey().toString());
+                        arguments.add(propertyEntry.getValue().toString());
                     }
                 } catch (final Exception e) {
                     problemList.add(new Problem(e));
@@ -269,7 +222,6 @@ public class OptionList {
                 }
             }
         }
-        return configFileArguments;
     }
 
     private void parseRemainingArguments(LinkedList<String> arguments, List<Problem> problemList) {
@@ -336,10 +288,12 @@ public class OptionList {
             if (!listIterator.hasNext()) {
                 addProblem(
                         problemList,
-                        Severity.WARNING,
-                        "Option %s is supplied without value, but a value is required, using default value (%s)",
+                        option.getDefaultArgument().isPresent() ? Severity.WARNING : Severity.ERROR,
+                        "Option %s is supplied without value, but a value is required%s",
                         option.getName(),
-                        option.getDefaultArgument().orElse(""));
+                        option.getDefaultArgument()
+                                .map(arg -> ", using default value (" + arg + ")")
+                                .orElse(""));
                 continue;
             }
             String nextArgument = listIterator.next();
@@ -347,10 +301,12 @@ public class OptionList {
                 listIterator.previous();
                 addProblem(
                         problemList,
-                        Severity.WARNING,
-                        "Option %s is supplied without value, but a value is required, using default value (%s)",
+                        option.getDefaultArgument().isPresent() ? Severity.WARNING : Severity.ERROR,
+                        "Option %s is supplied without value, but a value is required%s",
                         option.getName(),
-                        option.getDefaultArgument().orElse(""));
+                        option.getDefaultArgument()
+                                .map(arg -> ", using default value (" + arg + ")")
+                                .orElse(""));
                 continue;
             }
             listIterator.remove();
@@ -380,11 +336,13 @@ public class OptionList {
         if (!option.validateArgument(nextArgument)) {
             addProblem(
                     problemList,
-                    Severity.WARNING,
-                    "Invalid argument %s for option %s, using default value (%s)",
+                    option.getDefaultArgument().isPresent() ? Severity.WARNING : Severity.ERROR,
+                    "Invalid argument %s for option %s%s",
                     nextArgument,
                     option.getName(),
-                    option.getDefaultArgument().orElse(""));
+                    option.getDefaultArgument()
+                            .map(arg -> ", using default value (" + arg + ")")
+                            .orElse(""));
             return Result.empty();
         }
 
@@ -393,11 +351,13 @@ public class OptionList {
             problemList.addAll(parseResult.getProblems());
             addProblem(
                     problemList,
-                    Severity.WARNING,
-                    "Could not parse argument %s for option %s, using default value (%s)%s",
+                    option.getDefaultArgument().isPresent() ? Severity.WARNING : Severity.ERROR,
+                    "Could not parse argument %s for option %s%s%s",
                     nextArgument,
                     option.getName(),
-                    option.getDefaultArgument().orElse(""),
+                    option.getDefaultArgument()
+                            .map(arg -> ", using default value (" + arg + ")")
+                            .orElse(""),
                     option.getPossibleArguments()
                             .map(list -> " (possible values: " + list.stream().collect(Collectors.joining(",")) + ")")
                             .orElse(""));
@@ -462,7 +422,7 @@ public class OptionList {
      * @param options the options to add
      * @return this option list
      */
-    public OptionList addOptions(List<Option<?>> options) {
+    public OptionParser addOptions(List<Option<?>> options) {
         this.options.addAll(options);
         return this;
     }

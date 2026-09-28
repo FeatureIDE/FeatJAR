@@ -22,7 +22,7 @@ package de.featjar.analysis.javasmt.cli;
 
 import de.featjar.analysis.AAnalysisCommand;
 import de.featjar.base.cli.Option;
-import de.featjar.base.cli.OptionList;
+import de.featjar.base.cli.OptionParser;
 import de.featjar.base.cli.Options;
 import de.featjar.base.computation.Computations;
 import de.featjar.base.computation.IComputation;
@@ -43,12 +43,12 @@ public abstract class AJavasmtAnalysisCommand<T> extends AAnalysisCommand<T> {
     protected IFormula inputFormula;
 
     @Override
-    protected IComputation<T> newComputation(OptionList optionParser) {
+    protected IComputation<T> newComputation(OptionParser optionParser) {
         inputFormula = readFromInput(optionParser, FormulaFormats.getInstance()).orElseThrow();
         return newAnalysis(
                 optionParser,
                 Computations.of(inputFormula).map(ComputeNNFFormula::new).map(ComputeCNFFormula::new));
     }
 
-    protected abstract IComputation<T> newAnalysis(OptionList optionParser, IComputation<? extends IFormula> formula);
+    protected abstract IComputation<T> newAnalysis(OptionParser optionParser, IComputation<? extends IFormula> formula);
 }

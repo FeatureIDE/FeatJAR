@@ -24,6 +24,7 @@ import com.google.inject.Inject;
 import de.featjar.base.data.Result;
 import de.featjar.gui.types.GroupNodeType;
 import de.featjar.gui.utils.CardinalityUtils;
+import de.featjar.gui.utils.CollapseUtils;
 import de.featjar.gui.utils.HandlerUtils;
 import de.featjar.gui.utils.IdentifiableResolver;
 import featJAR.FeatJARFactory;
@@ -105,6 +106,7 @@ public class ACreateGroupNodeHandler extends EMFCreateOperationHandler<CreateNod
         if (parentFeature.isEmpty()) {
             return IdentityCommand.INSTANCE;
         }
+        CollapseUtils.expand(modelState, parentFeature.get().getId());
 
         Command command = AddCommand.create(
                 modelState.getEditingDomain(),

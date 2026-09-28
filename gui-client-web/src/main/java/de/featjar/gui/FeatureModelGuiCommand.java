@@ -23,7 +23,7 @@ package de.featjar.gui;
 import de.featjar.base.FeatJAR;
 import de.featjar.base.cli.ACommand;
 import de.featjar.base.cli.Option;
-import de.featjar.base.cli.OptionList;
+import de.featjar.base.cli.OptionParser;
 import de.featjar.base.cli.Options;
 import de.featjar.base.data.Result;
 import de.featjar.base.env.HostEnvironment;
@@ -81,7 +81,7 @@ public class FeatureModelGuiCommand extends ACommand {
     }
 
     @Override
-    public int run(OptionList optionList) {
+    public int run(OptionParser optionList) {
         Result<IFeatureModel> inputFM = readFromInput(optionList, optionList.get(INPUT_FORMAT));
         if (inputFM.isEmpty()) {
             FeatJAR.log().problems(inputFM);
@@ -106,7 +106,7 @@ public class FeatureModelGuiCommand extends ACommand {
         return guiServer.run(optionList.get(PORT_OPTION)) ? FeatJAR.EXIT_SUCCESS : FeatJAR.ERROR_COMPUTING_RESULT;
     }
 
-    private int writeOutput(OptionList optionList) {
+    private int writeOutput(OptionParser optionList) {
         return writeResult(
                 optionList,
                 IO.load(CLIENT_ABSOLUTE_EMF_FILE_PATH, new EMFFeatureModelFormat()),

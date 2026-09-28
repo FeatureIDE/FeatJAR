@@ -62,7 +62,7 @@ public interface ICommand extends IHasOptions, IExtension {
      *
      * @return exit code
      */
-    int run(OptionList optionParser);
+    int run(OptionParser optionParser);
 
     /**
      * Parses arguments into an option list.
@@ -71,8 +71,8 @@ public interface ICommand extends IHasOptions, IExtension {
      * @param cmdParams the given arguments for the command
      * @return an option list containing parsed arguments
      */
-    default OptionList getShellOptions(ShellSession session, List<String> cmdParams) {
-        OptionList optionList = new OptionList();
+    default OptionParser getShellOptions(ShellSession session, List<String> cmdParams) {
+        OptionParser optionList = new OptionParser();
         optionList.parseArguments();
         return optionList;
     }

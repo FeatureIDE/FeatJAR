@@ -23,7 +23,7 @@ package de.featjar.composition.cli;
 import de.featjar.base.FeatJAR;
 import de.featjar.base.cli.ACommand;
 import de.featjar.base.cli.Option;
-import de.featjar.base.cli.OptionList;
+import de.featjar.base.cli.OptionParser;
 import de.featjar.base.cli.Options;
 import de.featjar.base.data.Problem;
 import de.featjar.base.data.Result;
@@ -85,10 +85,11 @@ public class PreprocessorCommand extends ACommand {
     public static final Option<Path> CONFIGURATION_OPTION = Options.newOption("configuration", Options.PathParser)
             .setDescription("Path to configuration file")
             .setValidator(Options.PathValidator);
+    public static final Option<Path> CONFIGURATION_OPTION =
+            Options.newOption("configuration", Options.ExistingPathParser).setDescription("Path to configuration file");
 
-    public static final Option<Path> FEATURE_MODEL_OPTION = Options.newOption("feature-model", Options.PathParser)
-            .setDescription("Path to feature model file")
-            .setValidator(Options.PathValidator);
+    public static final Option<Path> FEATURE_MODEL_OPTION =
+            Options.newOption("feature-model", Options.ExistingPathParser).setDescription("Path to feature model file");
 
     public static final Option<Mode> MODE_OPTION = Options.newEnumOption("mode", Mode.class)
             .setDefaultArgument(Mode.PROCESS.name())
@@ -108,7 +109,7 @@ public class PreprocessorCommand extends ACommand {
             .setDescription("The prefix that precedes each annotation (overrides the prefix of the annotation style)");
 
     @Override
-    public int run(OptionList optionParser) {
+    public int run(OptionParser optionParser) {
         Path in = optionParser.getResult(INPUT_OPTION).orElseThrow();
         Path out = optionParser.getResult(OUTPUT_OPTION).orElse(null);
         Charset charset = StandardCharsets.UTF_8;

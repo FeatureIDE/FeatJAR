@@ -24,7 +24,7 @@ import de.featjar.analysis.sat4j.computation.ATWiseSampleComputation;
 import de.featjar.analysis.sat4j.computation.ComputeCompleteSample;
 import de.featjar.analysis.sat4j.solver.ISelectionStrategy;
 import de.featjar.base.cli.Option;
-import de.featjar.base.cli.OptionList;
+import de.featjar.base.cli.OptionParser;
 import de.featjar.base.cli.Options;
 import de.featjar.base.computation.IComputation;
 import de.featjar.base.data.Result;
@@ -71,17 +71,15 @@ public abstract class ATWiseCommand extends ASAT4JAnalysisCommand<BooleanAssignm
      * Path option for initial fixed sample.
      */
     public static final Option<Path> INITIAL_FIXED_SAMPLE_OPTION = Options.newOption(
-                    "initial-sample", Options.PathParser)
-            .setDescription("Path to initial fixed sample file. Configurations in this sample will not be modified.")
-            .setValidator(Options.PathValidator);
+                    "initial-sample", Options.ExistingPathParser)
+            .setDescription("Path to initial fixed sample file. Configurations in this sample will not be modified.");
 
     /**
      * Path option for initial variable sample.
      */
     public static final Option<Path> INITIAL_VARIABLE_SAMPLE_OPTION = Options.newOption(
-                    "initial-variable-sample", Options.PathParser)
-            .setDescription("Path to initial variable sample file. Configurations in this sample can be modified.")
-            .setValidator(Options.PathValidator);
+                    "initial-variable-sample", Options.ExistingPathParser)
+            .setDescription("Path to initial variable sample file. Configurations in this sample can be modified.");
 
     /**
      * Strategy for completing partial configurations.
@@ -96,7 +94,7 @@ public abstract class ATWiseCommand extends ASAT4JAnalysisCommand<BooleanAssignm
 
     @Override
     public IComputation<BooleanAssignmentList> newAnalysis(
-            OptionList optionParser, IComputation<BooleanAssignmentList> formula) {
+            OptionParser optionParser, IComputation<BooleanAssignmentList> formula) {
         IComputation<BooleanAssignmentList> analysis = newTWiseAnalysis(optionParser, formula)
                 .set(ATWiseSampleComputation.CONFIGURATION_LIMIT, optionParser.get(LIMIT_OPTION))
                 .set(ATWiseSampleComputation.RANDOM_SEED, optionParser.get(RANDOM_SEED_OPTION));
@@ -139,10 +137,10 @@ public abstract class ATWiseCommand extends ASAT4JAnalysisCommand<BooleanAssignm
     }
 
     protected abstract IComputation<BooleanAssignmentList> newTWiseAnalysis(
-            OptionList optionParser, IComputation<BooleanAssignmentList> formula);
+            OptionParser optionParser, IComputation<BooleanAssignmentList> formula);
 
     @Override
-    protected IFormat<BooleanAssignmentList> getOuputFormat(OptionList optionParser) {
+    protected IFormat<BooleanAssignmentList> getOuputFormat(OptionParser optionParser) {
         return optionParser.get(FORMAT);
     }
 }
