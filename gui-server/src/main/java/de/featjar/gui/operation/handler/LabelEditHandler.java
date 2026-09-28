@@ -21,7 +21,12 @@
 package de.featjar.gui.operation.handler;
 
 import com.google.inject.Inject;
+import de.featjar.base.FeatJAR;
+import de.featjar.base.data.Result;
+import de.featjar.formula.structure.IFormula;
+import de.featjar.gui.utils.FeatureModelLabelEditValidator;
 import de.featjar.gui.utils.IdentifiableResolver;
+import featJAR.Constraint;
 import featJAR.FeatJARPackage;
 import featJAR.Identifiable;
 import java.util.Optional;
@@ -36,6 +41,8 @@ import org.eclipse.glsp.server.operations.GModelOperationHandler;
  *
  * Label IDs are derived from their owner as "semanticID_label", so the
  * suffix is stripped before the element is resolved.
+ * The text of a constraint is only applied if it is valid,
+ * see {@link FeatureModelLabelEditValidator#findConstraintProblem}.
  */
 public class LabelEditHandler extends GModelOperationHandler<ApplyLabelEditOperation> {
 
@@ -49,10 +56,28 @@ public class LabelEditHandler extends GModelOperationHandler<ApplyLabelEditOpera
                 labelId.endsWith("_label") ? labelId.substring(0, labelId.length() - "_label".length()) : labelId;
         Identifiable element = resolver.findById(semanticId).orElseThrow();
 
+        // The text the user typed in the edit box
+        String newText = operation.getText();
+
+        // a constraint is stored as text  so check that text before it is saved into the model
+        // The validator already checks while the user types and this check makes sure a bad text can
+        // never get in even if that first check was skipped.
+        if (element instanceof Constraint) {
+            //  Holds the parsed formula if the text is valid, or the problem(s) if it is not
+            Result<IFormula> result =
+                    FeatureModelLabelEditValidator.findConstraintProblem(newText, resolver.findFeatureNames());
+
+            if (result.isEmpty()) {
+                FeatJAR.log().warning("Constraint edit rejected: %s", result.printProblems());
+                return Optional.empty();
+            }
+        }
+        // Feature names and valid constraints are applied as before
+
         return Optional.of(SetCommand.create(
                 ((EMFModelState) modelState).getEditingDomain(),
                 element,
                 FeatJARPackage.Literals.IDENTIFIABLE__NAME,
-                operation.getText()));
+                newText));
     }
 }

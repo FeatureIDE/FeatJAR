@@ -23,7 +23,7 @@ package de.featjar.analysis.sat4j.cli;
 import de.featjar.analysis.sat4j.computation.CompactYASA;
 import de.featjar.analysis.sat4j.computation.YASA;
 import de.featjar.base.cli.Option;
-import de.featjar.base.cli.OptionList;
+import de.featjar.base.cli.OptionParser;
 import de.featjar.base.cli.Options;
 import de.featjar.base.computation.IComputation;
 import de.featjar.base.data.Result;
@@ -63,14 +63,12 @@ public class YASACommand extends ATWiseCommand {
             .setDescription("Start with smaller values for t.");
 
     public static final Option<Path> INCLUDE_INTERACTIONS = Options.newOption(
-                    "include-interactions", Options.PathParser)
-            .setDescription("Path to list of interactions that will be considered.")
-            .setValidator(Options.PathValidator);
+                    "include-interactions", Options.ExistingPathParser)
+            .setDescription("Path to list of interactions that will be considered.");
 
     public static final Option<Path> EXCLUDE_INTERACTIONS = Options.newOption(
-                    "exclude-interactions", Options.PathParser)
-            .setDescription("Path to list of interactions that will be ignored.")
-            .setValidator(Options.PathValidator);
+                    "exclude-interactions", Options.ExistingPathParser)
+            .setDescription("Path to list of interactions that will be ignored.");
 
     @Override
     public Optional<String> getDescription() {
@@ -79,7 +77,7 @@ public class YASACommand extends ATWiseCommand {
 
     @Override
     public IComputation<BooleanAssignmentList> newTWiseAnalysis(
-            OptionList optionParser, IComputation<BooleanAssignmentList> formula) {
+            OptionParser optionParser, IComputation<BooleanAssignmentList> formula) {
         IComputation<BooleanAssignmentList> analysis;
         if (optionParser.get(COMPACT)) {
             analysis = formula.map(CompactYASA::new)

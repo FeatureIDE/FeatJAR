@@ -20,7 +20,6 @@
  */
 package de.featjar.base.cli;
 
-import de.featjar.base.FeatJAR;
 import java.nio.file.Path;
 
 public class FeatJAROptions implements IHasOptions {
@@ -30,22 +29,15 @@ public class FeatJAROptions implements IHasOptions {
     /**
      * Option for setting the configuration file.
      */
-    public static final MultiOption<String> CONFIGURATION_OPTION =
-            Options.newListOption("config", Options.StringParser).setDescription("The names of configuration files");
-
-    /**
-     * Option for setting a directory containing configuration files.
-     */
-    public static final SingleOption<Path> CONFIGURATION_DIR_OPTION =
-            Options.newOption("config_dir", Options.PathParser).setDescription("The path to the configuration files");
+    public static final MultiOption<Path> CONFIGURATION_OPTION = Options.newListOption("config", Options.PathParser)
+            .setDescription(
+                    "The path(s) to the configuration file(s). In case multiple configuration files specify the same option, the first one takes precedence.");
 
     /**
      * Option for printing usage information.
      */
     public static final SingleOption<ICommand> COMMAND_OPTION = Options.newOption(
-                    "command", s -> FeatJAR.extensionPoint(Commands.class)
-                            .getMatchingExtension(s)
-                            .orElseThrow())
+                    "command", s -> Commands.getCommandByName(s))
             .setDescription("Classpath from command to execute");
 
     /**

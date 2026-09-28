@@ -1,10 +1,13 @@
-import { IActionDispatcher, Action } from '@eclipse-glsp/client';
+import { IActionDispatcher, Action, DeleteElementOperation, CreateNodeOperation } from '@eclipse-glsp/client';
 import {
     SetFeatureImplementationTypeAction,
     SetNodeTypeAction,
     SetCardinalityGroupNodeBoundsAction,
     SetCardinalityFeatureBoundsAction
 } from './set-type-actions';
+
+import { addFeatureBelow } from './create-feature-actions'; // added
+import { ToggleCollapseAction } from './toggle-collapse-action';
 
 interface Entry {
     label: string;
@@ -16,21 +19,37 @@ interface Entry {
  *
  * @param actionDispatcher sends the chosen action to the server
  */
+/**
+ * Right-click menu for the diagram. Originally just handled features/groups,
+ *we added the constraint stuff for #27 (add + delete constraints from the context menu).
+ */
 export function initializeNodeContextMenu(actionDispatcher: IActionDispatcher): void {
     console.log('context menu installed');
     document.addEventListener('contextmenu', (event: MouseEvent) => {
         console.log('contextmenu fired on', event.target);
         const nodeElement = (event.target as Element).closest('[data-svg-metadata-type="node"]');
+        event.preventDefault();
+        // if we didn't click on a node, we're on empty canvas:that's where "Add Constraint" should show up
         if (!nodeElement) {
+            const addEntries: Entry[] = [
+                {
+                    label: 'Add Constraint',
+                    action: CreateNodeOperation.create('constraint-node', {
+                        location: { x: event.clientX, y: event.clientY }
+                    })
+                }
+            ];
+            showMenu(event.clientX, event.clientY, addEntries, actionDispatcher);
+
             return;
         }
-        console.log('node found:', nodeElement);
-        event.preventDefault();
 
         const gModelId = nodeElement.id.replace('sprotty_', '');
         const css = nodeElement.getAttribute('class') ?? '';
         console.log('found node:', nodeElement);
-        const entries = buildEntries(gModelId, css);
+
+        // "New Feature" entry below, which needs to dispatch a SelectAction of its own.
+        const entries = buildEntries(gModelId, css, actionDispatcher);
         if (entries.length === 0) {
             return;
         }
@@ -39,7 +58,7 @@ export function initializeNodeContextMenu(actionDispatcher: IActionDispatcher): 
     });
 }
 
-function buildEntries(id: string, css: string): Entry[] {
+function buildEntries(id: string, css: string, actionDispatcher: IActionDispatcher): Entry[] {
     let entries: Entry[] = [];
 
     if (css.includes('node-')) {
@@ -49,6 +68,12 @@ function buildEntries(id: string, css: string): Entry[] {
             { label: 'AND', action: SetNodeTypeAction.create(id, 'node-and') },
             { label: 'Set Bounds', action: () => promptForBounds(id, true) }
         ];
+        const classes = css.split(/\s+/);
+        if (classes.includes('collapsed')) {
+            entries.push({ label: 'Expand Subtree', action: ToggleCollapseAction.create(id) });
+        } else if (classes.includes('collapsible')) {
+            entries.push({ label: 'Collapse Subtree', action: ToggleCollapseAction.create(id) });
+        }
 
         return entries;
     }
@@ -60,8 +85,23 @@ function buildEntries(id: string, css: string): Entry[] {
             { label: 'Make Mandatory', action: SetCardinalityFeatureBoundsAction.create(id, 1, 1) },
             { label: 'Make Optional', action: SetCardinalityFeatureBoundsAction.create(id, 0, 1) },
             // { label: 'Make Hidden', action: SetFeatureImplementationTypeAction.create(id, 'hidden') }
-            { label: 'Set Bounds', action: () => promptForBounds(id, false) }
+            { label: 'Set Bounds', action: () => promptForBounds(id, false) },
+            // New: Creates a new optional feature as a child of the right-clicked
+            // New: brings in the "add feature below" logic implemented in create-feature-actions.ts.
+            { label: 'New Feature', action: () => addFeatureBelow(id, actionDispatcher) }
         ];
+        const classes = css.split(/\s+/);
+        if (classes.includes('collapsed')) {
+            entries.push({ label: 'Expand Subtree', action: ToggleCollapseAction.create(id) });
+        } else if (classes.includes('collapsible')) {
+            entries.push({ label: 'Collapse Subtree', action: ToggleCollapseAction.create(id) });
+        }
+
+        return entries;
+    }
+    // added for #27 - right click on an existing constraint now gives a Delete option.
+    if (css.includes('constraint-node')) {
+        entries = [{ label: 'Delete', action: DeleteElementOperation.create([id]) }];
     }
 
     return entries;

@@ -23,7 +23,7 @@ package de.featjar.analysis.sat4j.cli;
 import de.featjar.analysis.ExternalConfigurationTester;
 import de.featjar.analysis.sat4j.computation.Inciident;
 import de.featjar.base.cli.Option;
-import de.featjar.base.cli.OptionList;
+import de.featjar.base.cli.OptionParser;
 import de.featjar.base.cli.Options;
 import de.featjar.base.computation.IComputation;
 import de.featjar.base.data.Result;
@@ -63,23 +63,22 @@ public class InciidentCommand extends ASAT4JAnalysisCommand<BooleanAssignmentLis
     /**
      * Path option for initial sample.
      */
-    public static final Option<Path> INITIAL_SAMPLE_OPTION = Options.newOption("initial-sample", Options.PathParser)
-            .setDescription("Path to initial sample file.")
-            .setValidator(Options.PathValidator);
+    public static final Option<Path> INITIAL_SAMPLE_OPTION = Options.newOption(
+                    "initial-sample", Options.ExistingPathParser)
+            .setDescription("Path to initial sample file.");
 
     /**
      * Path option for initial sample.
      */
-    public static final Option<Path> TESTER_EXECUTABLE = Options.newOption("verifier", Options.PathParser)
-            .setDescription("Path to initial sample file.")
-            .setValidator(Options.PathValidator);
+    public static final Option<Path> TESTER_EXECUTABLE =
+            Options.newOption("verifier", Options.ExistingPathParser).setDescription("Path to initial sample file.");
 
     public static final Option<IFormat<BooleanAssignmentList>> FORMAT = Options.newOutputFormatOption(
             BooleanAssignmentListFormats.class, new BooleanAssignmentListDimacsFormat().getName());
 
     @Override
     public IComputation<BooleanAssignmentList> newAnalysis(
-            OptionList optionParser, IComputation<BooleanAssignmentList> formula) {
+            OptionParser optionParser, IComputation<BooleanAssignmentList> formula) {
         IComputation<BooleanAssignment> analysis = formula.map(Inciident::new)
                 .set(Inciident.T, optionParser.get(T_OPTION))
                 .set(Inciident.TESTING_LIMIT, optionParser.get(LIMIT_OPTION))
@@ -100,7 +99,7 @@ public class InciidentCommand extends ASAT4JAnalysisCommand<BooleanAssignmentLis
     }
 
     @Override
-    protected IFormat<BooleanAssignmentList> getOuputFormat(OptionList optionParser) {
+    protected IFormat<BooleanAssignmentList> getOuputFormat(OptionParser optionParser) {
         return optionParser.get(FORMAT);
     }
 

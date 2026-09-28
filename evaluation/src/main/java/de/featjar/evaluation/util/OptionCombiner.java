@@ -23,7 +23,7 @@ package de.featjar.evaluation.util;
 import de.featjar.base.FeatJAR;
 import de.featjar.base.cli.MultiOption;
 import de.featjar.base.cli.Option;
-import de.featjar.base.cli.OptionList;
+import de.featjar.base.cli.OptionParser;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
@@ -37,11 +37,11 @@ import java.util.function.Function;
 @SuppressWarnings("unchecked")
 public class OptionCombiner {
 
-    private OptionList optionParser;
+    private OptionParser optionParser;
     private Option<? extends List<?>>[] options;
     private ProgressTracker progress;
 
-    public OptionCombiner(OptionList parser) {
+    public OptionCombiner(OptionParser parser) {
         this.optionParser = parser;
     }
 
