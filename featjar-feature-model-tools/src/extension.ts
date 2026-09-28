@@ -43,6 +43,7 @@ async function isSatisfiable(
 
     return result.split('\n').some(line => line.startsWith('0;'));
 }
+
 const FEATJAR_DOWNLOAD_URL = 'https://github.com/skrieter/FeatJAR-ISF-Teamproject-2026/releases/download/feat.jar/feat.jar';
 
 export async function featJarDownload(): Promise<void> {
@@ -281,9 +282,109 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 			output.show();
         }
     );
-	
+	const exportUVL = vscode.commands.registerCommand(
+		"featjar.exportUVL",async (uri: vscode.Uri) => {
+			const fileName = path.basename(
+    		uri.fsPath,
+    		path.extname(uri.fsPath)
+			);
 
-context.subscriptions.push(checkSatisfiability, openFeatJarGui, uvlEditorProvider, modelTest, countConfigurations, coreDeadFeatures, testCommand);
+		const outputPath = path.join(
+    	path.dirname(uri.fsPath),
+    	'export',
+    	`${fileName}.uvl`
+);
+			const result = await executeInExtensionShell([
+            'convert-model',
+            '--input',
+            uri.fsPath,
+			'--output',
+			outputPath,
+            '--output-format',
+            'UVL'
+        ]);
+		});
+	const exportXML = vscode.commands.registerCommand(
+		"featjar.exportXML",async (uri: vscode.Uri) => {
+			const fileName = path.basename(
+    		uri.fsPath,
+    		path.extname(uri.fsPath)
+			);
+
+		const outputPath = path.join(
+    	path.dirname(uri.fsPath),
+    	'export',
+    	`${fileName}.xml`
+);
+			const result = await executeInExtensionShell([
+            'convert-model',
+            '--input',
+            uri.fsPath,
+			'--output',
+			outputPath,
+            '--output-format',
+            'FeatureIDE'
+        ]);
+		});
+	const exportDIMACS = vscode.commands.registerCommand(
+		"featjar.exportDIMACS",async (uri: vscode.Uri) => {
+			const fileName = path.basename(
+    	uri.fsPath,
+    	path.extname(uri.fsPath)
+		);
+
+		const outputPath = path.join(
+    	path.dirname(uri.fsPath),
+    	'export',
+    	`${fileName}.dimacs`
+);
+			const result =await executeInExtensionShell([
+            'convert-model',
+            '--input',
+            uri.fsPath,
+			'--output',
+			outputPath,
+            '--output-format',
+            'DIMACS'
+        ]);
+		}
+	);
+	const exportTeX = vscode.commands.registerCommand(
+		"featjar.exportTeX",async (uri: vscode.Uri) => {
+			const fileName = path.basename(
+    uri.fsPath,
+    path.extname(uri.fsPath)
+);
+
+const outputPath = path.join(
+    path.dirname(uri.fsPath),
+    'export',
+    `${fileName}.tex`
+);
+			const result =await executeInExtensionShell([
+            'convert-model',
+            '--input',
+            uri.fsPath,
+			'--output',
+			outputPath,
+            '--output-format',
+            'LaTeX'
+        ]);
+		});
+
+context.subscriptions.push(
+	checkSatisfiability,
+	openFeatJarGui,
+	uvlEditorProvider, 
+	modelTest, 
+	countConfigurations, 
+	coreDeadFeatures, 
+	testCommand,
+	exportUVL,
+	exportXML,
+	exportDIMACS,
+	exportTeX
+);
 }
 
 export function deactivate(): void {
