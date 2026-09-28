@@ -14,20 +14,33 @@
   "contributes": {
     "commands": [
       {
-        "command": "featjar-extension.helloWorld",
-        "title": "Hello World"
-      },
-      {
-        "command": "featjar-extension.hellovscode",
-        "title": "Hello VSCode"
-      },
-      {
         "command": "featjar-extension.checkSatisfiability",
         "title": "Check Satisfiability"
       },
        {
         "command": "featjar-extension.openGui",
         "title": "FeatJAR: Open GUI"
+      },
+      {
+        "command": "featjar-extension.TestCommand",
+        "title": "FeatJAR: Test command"
+      },
+      {
+        "command": "featjar-extension.countConfigurations",
+       "title": "Count Configurations"
+      },
+      {
+        "command": "featjar-extension.coreDeadFeatures",
+       "title": "Count Core/Dead Features"
+      },
+      {
+        "command": "featjar-extension.modelTest",
+       "title": "model stats "
+      },
+      {
+        "command": "featjar-extension.refreshUvlFiles",
+        "title": "Refresh UVL Files",
+        "icon": "$(refresh)"
       }
     ],
     "menus": {
@@ -40,7 +53,30 @@
           "command": "featjar-extension.openGui",
           "when": "resourceExtname == .uvl"
         }
-      ]
+      ],
+      "view/item/context": [
+    {
+        "command": "featjar-extension.checkSatisfiability",
+        "when": "view == uvlFiles"
+    },
+    {
+        "command": "featjar-extension.countConfigurations",
+        "when": "view == uvlFiles"
+    },{
+        "command": "featjar-extension.coreDeadFeatures",
+        "when": "view == uvlFiles"
+    },{
+        "command": "featjar-extension.modelTest",
+        "when": "view == uvlFiles"
+    }
+    ],
+    "view/title": [
+    {
+        "command": "featjar-extension.refreshUvlFiles",
+        "when": "view == uvlFiles",
+        "group": "navigation"
+    }
+]
     },
     "customEditors": [
       {
@@ -53,7 +89,25 @@
         ],
         "priority": "default"
       }
-    ]
+    ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "featjarBar",
+          "title": "FeatJar",
+          "icon": "resources/treeICON.svg"
+        }
+      ]
+    },
+    "views": {
+      "featjarBar": [
+        {
+          "id": "uvlFiles",
+          "name": "UVL Files",
+          "icon": "resources/treeICON.svg"
+        }
+      ]
+    }
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",
