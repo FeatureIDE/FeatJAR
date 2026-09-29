@@ -24,7 +24,7 @@ import de.featjar.analysis.sat4j.PreprocessorAnalyzer;
 import de.featjar.base.FeatJAR;
 import de.featjar.base.cli.ACommand;
 import de.featjar.base.cli.Option;
-import de.featjar.base.cli.OptionList;
+import de.featjar.base.cli.OptionParser;
 import de.featjar.base.cli.Options;
 import de.featjar.base.io.IO;
 import de.featjar.formula.io.FormulaFormats;
@@ -55,12 +55,11 @@ public class PreprocessorAnalyzerCommand extends ACommand {
             .setDefaultArgument("#")
             .setDescription("The prefix that precedes each annotation");
 
-    public static final Option<Path> FEATURE_MODEL_OPTION = Options.newOption("feature-model", Options.PathParser)
-            .setDescription("Path to feature model file")
-            .setValidator(Options.PathValidator);
+    public static final Option<Path> FEATURE_MODEL_OPTION =
+            Options.newOption("feature-model", Options.ExistingPathParser).setDescription("Path to feature model file");
 
     @Override
-    public int run(OptionList optionParser) {
+    public int run(OptionParser optionParser) {
         Path in = optionParser.getResult(INPUT_OPTION).orElseThrow();
         Path out = optionParser.getResult(OUTPUT_OPTION).orElse(null);
         Charset charset = StandardCharsets.UTF_8;
@@ -110,7 +109,7 @@ public class PreprocessorAnalyzerCommand extends ACommand {
     }
 
     private Stream<String> detectDeadCode(
-            Path in, Charset charset, PreprocessorAnalyzer preprocessor, OptionList optionParser) throws IOException {
+            Path in, Charset charset, PreprocessorAnalyzer preprocessor, OptionParser optionParser) throws IOException {
         Path featureModelPath = optionParser.getResult(FEATURE_MODEL_OPTION).orElseThrow();
         IFormula featureModel =
                 IO.load(featureModelPath, FormulaFormats.getInstance()).orElseThrow();
@@ -120,7 +119,7 @@ public class PreprocessorAnalyzerCommand extends ACommand {
     }
 
     private Stream<String> printSuperfluousAnnotations(
-            Path in, Charset charset, PreprocessorAnalyzer preprocessor, OptionList optionParser) throws IOException {
+            Path in, Charset charset, PreprocessorAnalyzer preprocessor, OptionParser optionParser) throws IOException {
         Path featureModelPath = optionParser.getResult(FEATURE_MODEL_OPTION).orElseThrow();
         IFormula featureModel =
                 IO.load(featureModelPath, FormulaFormats.getInstance()).orElseThrow();

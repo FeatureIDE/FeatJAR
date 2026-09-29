@@ -82,9 +82,6 @@ public class PreprocessorCommand extends ACommand {
         }
     }
 
-    public static final Option<Path> CONFIGURATION_OPTION = Options.newOption("configuration", Options.PathParser)
-            .setDescription("Path to configuration file")
-            .setValidator(Options.PathValidator);
     public static final Option<Path> CONFIGURATION_OPTION =
             Options.newOption("configuration", Options.ExistingPathParser).setDescription("Path to configuration file");
 
