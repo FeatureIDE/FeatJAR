@@ -24,6 +24,12 @@ class PreprocessorValidateTest {
                 .toList();
     }
 
+    private List<String> checkSyntax(String... lines) {
+        return preprocessor.checkSyntax(Stream.of(lines)).stream()
+                .map(p -> String.format("line %d: %s", p.getLineNumber(), p.getMessage()))
+                .toList();
+    }
+
     @Test
     void emptyInputProducesNoDiagnostics() {
         assertTrue(validate().isEmpty());
@@ -135,5 +141,37 @@ class PreprocessorValidateTest {
         List<String> problems = validate("// this is a normal comment", "int A = 1;", "if (A) {  }");
 
         assertTrue(problems.isEmpty());
+    }
+
+    @Test
+    void validAnnotationSyntaxProducesNoProblems() {
+        List<String> problems = checkSyntax("//#if A", "//#elif B", "//#else", "//#endif");
+
+        assertTrue(problems.isEmpty());
+    }
+
+    @Test
+    void missingIfConditionIsReportedBySyntaxCheck() {
+        List<String> problems = checkSyntax("//#if");
+
+        assertEquals(1, problems.size());
+        assertEquals("line 1: Invalid annotation syntax: missing condition after 'if'", problems.get(0));
+    }
+
+    @Test
+    void invalidAnnotationNameIsReportedBySyntaxCheck() {
+        List<String> problems = checkSyntax("code", "//#unknown A");
+
+        assertEquals(1, problems.size());
+        assertEquals("line 2: Invalid annotation syntax: unknown annotation keyword 'unknown'", problems.get(0));
+    }
+
+    @Test
+    void syntaxCheckReportsMultipleProblems() {
+        List<String> problems = checkSyntax("//#if A", "//#else extra", "normal code", "//#elif");
+
+        assertEquals(2, problems.size());
+        assertEquals("line 2: Invalid annotation syntax: unexpected content after 'else'", problems.get(0));
+        assertEquals("line 4: Invalid annotation syntax: missing condition after 'elif'", problems.get(1));
     }
 }
