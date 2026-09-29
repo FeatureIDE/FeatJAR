@@ -194,6 +194,94 @@ export function openGui(uri: vscode.Uri) {
 	});
 }
 
+export function exportUVL(uri: vscode.Uri) {
+	const fileName = path.basename(
+    		uri.fsPath,
+    		path.extname(uri.fsPath)
+			);
+
+		const outputPath = path.join(
+    	path.dirname(uri.fsPath),
+    	'export',
+    	`${fileName}.uvl`
+);
+			const result = executeInExtensionShell([
+            'convert-model',
+            '--input',
+            uri.fsPath,
+			'--output',
+			outputPath,
+            '--output-format',
+            'UVL'
+        ]);
+}
+
+export function exportXML(uri: vscode.Uri) {
+	const fileName = path.basename(
+    		uri.fsPath,
+    		path.extname(uri.fsPath)
+			);
+
+		const outputPath = path.join(
+    	path.dirname(uri.fsPath),
+    	'export',
+    	`${fileName}.xml`
+);
+			const result = executeInExtensionShell([
+            'convert-model',
+            '--input',
+            uri.fsPath,
+			'--output',
+			outputPath,
+            '--output-format',
+            'XML'
+        ]);
+}
+
+export function exportDIMACS(uri: vscode.Uri) {
+	const fileName = path.basename(
+    		uri.fsPath,
+    		path.extname(uri.fsPath)
+			);
+
+		const outputPath = path.join(
+    	path.dirname(uri.fsPath),
+    	'export',
+    	`${fileName}.dimacs`
+);
+			const result = executeInExtensionShell([
+            'convert-model',
+            '--input',
+            uri.fsPath,
+			'--output',
+			outputPath,
+            '--output-format',
+            'DIMACS'
+        ]);
+}
+export function exportTeX(uri: vscode.Uri) {
+	const fileName = path.basename(
+
+    	uri.fsPath,
+    	path.extname(uri.fsPath)
+		);	
+
+		const outputPath = path.join(
+    	path.dirname(uri.fsPath),
+    	'export',
+    	`${fileName}.tex`
+);
+			const result = executeInExtensionShell([
+            'convert-model',
+            '--input',
+            uri.fsPath,
+			'--output',
+			outputPath,
+            '--output-format',
+            'LaTeX'
+        ]);
+}
+
 export function shutdownExtensionShell(): void {
 	extensionShell?.stdin.write('SHUTDOWN\n');
 }

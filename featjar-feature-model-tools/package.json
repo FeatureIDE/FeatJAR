@@ -22,10 +22,6 @@
         "title": "FeatJAR: Open GUI"
       },
       {
-        "command": "featjar-extension.TestCommand",
-        "title": "FeatJAR: Test command"
-      },
-      {
         "command": "featjar-extension.countConfigurations",
        "title": "Count Configurations"
       },
@@ -41,8 +37,32 @@
         "command": "featjar-extension.refreshUvlFiles",
         "title": "Refresh UVL Files",
         "icon": "$(refresh)"
-      }
+      },
+      {
+            "command": "featjar.exportUVL",
+            "title": "UVL"
+        },
+        {
+            "command": "featjar.exportXML",
+            "title": "XML"
+        },
+        {
+            "command": "featjar.exportDIMACS",
+            "title": "DIMACS"
+        },
+        {
+            "command": "featjar.exportTeX",
+            "title": "TeX"
+        }
     ],
+
+    "submenus": [
+        {
+            "id": "featjar.exportMenu",
+            "label": "FeatJAR: Export as"
+        }
+    ],
+
     "menus": {
       "explorer/context": [
         {
@@ -52,6 +72,30 @@
         {
           "command": "featjar-extension.openGui",
           "when": "resourceExtname == .uvl"
+        },
+        {
+          "submenu": "featjar.exportMenu",
+          "when": "resourceExtname == .uvl || resourceExtname == .xml || resourceExtname == .dimacs",
+          "group": "featjar"
+        }
+      ],
+
+      "featjar.exportMenu": [
+         {
+          "command": "featjar.exportUVL",
+          "when": "resourceExtname != .uvl"
+         },
+        {
+        "command": "featjar.exportXML",
+        "when": "resourceExtname != .xml"
+        },
+        {
+        "command": "featjar.exportDIMACS",
+        "when": "resourceExtname != .dimacs"
+        },
+        {
+        "command": "featjar.exportTeX",
+        "when": "resourceExtname != .tex"
         }
       ],
       "view/item/context": [
@@ -68,7 +112,11 @@
     },{
         "command": "featjar-extension.modelTest",
         "when": "view == uvlFiles"
-    }
+    },{
+        "submenu": "featjar.exportMenu",
+        "when": "resourceExtname == .uvl || resourceExtname == .xml || resourceExtname == .dimacs",
+        "group": "featjar"
+      }
     ],
     "view/title": [
     {

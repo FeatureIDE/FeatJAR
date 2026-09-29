@@ -9,8 +9,18 @@ import {
 	printModelStats,
 	shutdownExtensionShell,
 	startExtensionShell,
+	exportUVL,
+	exportXML,
+	exportDIMACS,
+	exportTeX
 } from './extension-functions';
 import { registerSidebar } from './sidebar';
+
+// AI-assisted (isSatisfiable function ): Added a satisfiability check before computing core/dead features
+// to prevent the analysis from running on unsatisfiable models.
+
+const FEATJAR_DOWNLOAD_URL = 'https://github.com/skrieter/FeatJAR-ISF-Teamproject-2026/releases/download/feat.jar/feat.jar';
+
 
 export async function activate(context: vscode.ExtensionContext): Promise<void> {
 	await featJarDownload();
@@ -105,9 +115,37 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
             output.show();
         },
     );
-	
+	const exportUVLCommand = vscode.commands.registerCommand(
+		"featjar.exportUVL",async (uri: vscode.Uri) => {
+			await exportUVL(uri);
+		});
+	const exportXMLCommand = vscode.commands.registerCommand(
+		"featjar.exportXML",async (uri: vscode.Uri) => {
+			await exportXML(uri);
+		});
+	const exportDIMACSCommand = vscode.commands.registerCommand(
+		"featjar.exportDIMACS",async (uri: vscode.Uri) => {
+			await exportDIMACS(uri);
+		}
+		
+	);
+	const exportTeXCommand = vscode.commands.registerCommand(
+		"featjar.exportTeX",async (uri: vscode.Uri) => {
+			await exportTeX(uri);
+		});
 
-context.subscriptions.push(checkSatisfiability, openFeatJarGui, uvlEditorProvider, modelTest, countConfigurationsCommand, coreDeadFeatures, testCommand);
+context.subscriptions.push(
+	checkSatisfiability,
+	openFeatJarGui,
+	uvlEditorProvider, 
+	modelTest, 
+	countConfigurationsCommand, 
+	coreDeadFeatures, 
+	exportUVLCommand,
+	exportXMLCommand,
+	exportDIMACSCommand,
+	exportTeXCommand
+);
 }
 
 export function deactivate(): void {
