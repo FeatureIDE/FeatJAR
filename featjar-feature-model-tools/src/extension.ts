@@ -107,7 +107,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
     );
 	
 
-context.subscriptions.push(checkSatisfiability, openFeatJarGui, uvlEditorProvider, modelTest, countConfigurationsCommand, coreDeadFeatures);
+context.subscriptions.push(checkSatisfiability, openFeatJarGui, uvlEditorProvider, modelTest, countConfigurationsCommand, coreDeadFeatures, testCommand);
 }
 
 export function deactivate(): void {

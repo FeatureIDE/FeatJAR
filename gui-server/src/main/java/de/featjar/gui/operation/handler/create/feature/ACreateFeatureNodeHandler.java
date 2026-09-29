@@ -26,6 +26,7 @@ import de.featjar.gui.types.CardinalityType;
 import de.featjar.gui.types.FeatureImplementationTypes;
 import de.featjar.gui.utils.AttributeKeysUtils;
 import de.featjar.gui.utils.CardinalityUtils;
+import de.featjar.gui.utils.CollapseUtils;
 import de.featjar.gui.utils.HandlerUtils;
 import featJAR.FeatJARFactory;
 import featJAR.FeatJARPackage;
@@ -113,6 +114,7 @@ public abstract class ACreateFeatureNodeHandler extends EMFCreateOperationHandle
                     FeatJARPackage.Literals.GROUP_NODE__FEATURE_LIST,
                     newFeature);
         } else if (selection.get() instanceof Feature parentFeature) {
+            CollapseUtils.expand(modelState, parentFeature.getId());
             // A feature was selected, insert an AND group between parent and new feature
             GroupNode andGroup = parentFeature.getGroupNodeList().stream()
                     .filter(g -> CardinalityUtils.isAnd(g.getCardinality()))

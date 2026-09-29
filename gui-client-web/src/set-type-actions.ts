@@ -49,6 +49,28 @@ export interface SetCardinalityGroupNodeBoundsAction extends Action {
     lowerBound: number;
     upperBound: number;
 }
+export interface SetFeatureColorAction extends Action {
+    kind: typeof SetFeatureColorAction.KIND;
+    elementId: string;
+    color: string;
+}
+export interface ToggleShowAttributesAction extends Action {
+    kind: typeof ToggleShowAttributesAction.KIND;
+    enabled: boolean;
+}
+
+export namespace ToggleShowAttributesAction {
+    export const KIND = 'toggleShowAttributes';
+    export function create(enabled: boolean): ToggleShowAttributesAction {
+        return { kind: KIND, enabled };
+    }
+}
+export namespace SetFeatureColorAction {
+    export const KIND = 'setFeatureColor';
+    export function create(elementId: string, color: string): SetFeatureColorAction {
+        return { kind: KIND, elementId, color };
+    }
+}
 export namespace SetCardinalityGroupNodeBoundsAction {
     export const KIND = 'setCardinalityGroupNodeBounds';
     export function create(elementId: string, lowerBound: number, upperBound: number): SetCardinalityGroupNodeBoundsAction {

@@ -44,7 +44,7 @@ import java.util.Base64;
  * processes requests serially and emits exactly one response per request on standard output.
  *
  * <p>Request format: {@code RUN<TAB>argument...}. The special request {@code SHUTDOWN} closes the session.
- * Responses are {@code READY}, {@code RESULT<TAB>base64-output}, and {@code BYE}.
+ * Responses are {@code READY} and {@code RESULT<TAB>base64-output}.
  *
  * @author FeatJAR-Development-Team
  */
@@ -82,8 +82,6 @@ public final class ExtensionShell {
             String line;
             while ((line = input.readLine()) != null) {
                 if (SHUTDOWN_REQUEST.equals(line)) {
-                    protocolOutput.println("BYE");
-                    protocolOutput.flush();
                     return FeatJAR.EXIT_SUCCESS;
                 }
 

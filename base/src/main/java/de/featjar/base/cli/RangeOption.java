@@ -36,7 +36,11 @@ public class RangeOption extends SingleOption<List<Integer>> {
      * @param name the name
      */
     protected RangeOption(String name) {
-        super(name, s -> IntStream.rangeClosed(1, Integer.parseInt(s)).boxed().toList(), "");
+        super(
+                name,
+                Options.parser(s ->
+                        IntStream.rangeClosed(1, Integer.parseInt(s)).boxed().toList()),
+                "");
     }
 
     @Override

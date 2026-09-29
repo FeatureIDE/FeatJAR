@@ -23,7 +23,7 @@ package de.featjar.analysis.ddnnife.cli;
 import de.featjar.analysis.ddnnife.computation.ComputeCoreDeadDdnnife;
 import de.featjar.analysis.ddnnife.computation.ComputeDdnnifeWrapper;
 import de.featjar.base.cli.Option;
-import de.featjar.base.cli.OptionList;
+import de.featjar.base.cli.OptionParser;
 import de.featjar.base.cli.Options;
 import de.featjar.base.computation.IComputation;
 import de.featjar.base.io.format.IFormat;
@@ -43,13 +43,13 @@ public class CoreCommand extends ADdnnifeAnalysisCommand<BooleanAssignmentList> 
     }
 
     @Override
-    public IComputation<BooleanAssignmentList> newAnalysis(OptionList optionParser, ComputeDdnnifeWrapper ddnnife) {
+    public IComputation<BooleanAssignmentList> newAnalysis(OptionParser optionParser, ComputeDdnnifeWrapper ddnnife) {
         return ddnnife.map(ComputeCoreDeadDdnnife::new)
                 .mapResult(CoreCommand.class, "group", a -> new BooleanAssignmentList(variableMap, a));
     }
 
     @Override
-    protected IFormat<BooleanAssignmentList> getOuputFormat(OptionList optionParser) {
+    protected IFormat<BooleanAssignmentList> getOuputFormat(OptionParser optionParser) {
         return optionParser.get(FORMAT);
     }
 

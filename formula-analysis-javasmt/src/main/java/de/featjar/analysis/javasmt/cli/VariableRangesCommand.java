@@ -24,7 +24,7 @@ import de.featjar.analysis.javasmt.computation.ComputeJavaSMTFormula;
 import de.featjar.analysis.javasmt.computation.ComputeMaximalVariableRange;
 import de.featjar.analysis.javasmt.computation.ComputeMinimalVariableRange;
 import de.featjar.base.cli.Option;
-import de.featjar.base.cli.OptionList;
+import de.featjar.base.cli.OptionParser;
 import de.featjar.base.cli.Options;
 import de.featjar.base.computation.IComputation;
 import de.featjar.formula.structure.IFormula;
@@ -45,7 +45,7 @@ public class VariableRangesCommand extends AJavasmtAnalysisCommand<Map<Variable,
 
     @Override
     public IComputation<Map<Variable, Object>> newAnalysis(
-            OptionList optionParser, IComputation<? extends IFormula> formula) {
+            OptionParser optionParser, IComputation<? extends IFormula> formula) {
         Boolean min = optionParser.get(MIN);
         if (min) {
             return formula.map(ComputeJavaSMTFormula::new)
