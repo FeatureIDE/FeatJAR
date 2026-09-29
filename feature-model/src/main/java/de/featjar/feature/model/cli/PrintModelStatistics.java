@@ -22,7 +22,7 @@ package de.featjar.feature.model.cli;
 
 import de.featjar.base.cli.ACommand;
 import de.featjar.base.cli.Option;
-import de.featjar.base.cli.OptionList;
+import de.featjar.base.cli.OptionParser;
 import de.featjar.base.cli.Options;
 import de.featjar.base.computation.Computations;
 import de.featjar.base.io.DataTreeFormats;
@@ -75,7 +75,7 @@ public class PrintModelStatistics extends ACommand {
     }
 
     @Override
-    public int run(OptionList optionParser) {
+    public int run(OptionParser optionParser) {
         return writeObject(
                 optionParser,
                 collectStats(

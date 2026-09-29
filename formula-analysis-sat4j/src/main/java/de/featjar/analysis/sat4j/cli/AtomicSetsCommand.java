@@ -22,7 +22,7 @@ package de.featjar.analysis.sat4j.cli;
 
 import de.featjar.analysis.sat4j.computation.ComputeAtomicSetsSAT4J;
 import de.featjar.base.cli.Option;
-import de.featjar.base.cli.OptionList;
+import de.featjar.base.cli.OptionParser;
 import de.featjar.base.cli.Options;
 import de.featjar.base.computation.IComputation;
 import de.featjar.base.io.format.IFormat;
@@ -57,7 +57,7 @@ public class AtomicSetsCommand extends ASAT4JAnalysisCommand<BooleanAssignmentLi
 
     @Override
     public IComputation<BooleanAssignmentList> newAnalysis(
-            OptionList optionParser, IComputation<BooleanAssignmentList> formula) {
+            OptionParser optionParser, IComputation<BooleanAssignmentList> formula) {
         return formula.map(ComputeAtomicSetsSAT4J::new)
                 .set(ComputeAtomicSetsSAT4J.OMIT_CORE, optionParser.get(OMIT_CORE))
                 .set(ComputeAtomicSetsSAT4J.OMIT_SINGLE_SETS, optionParser.get(OMIT_SINGLE_SETS))
@@ -65,7 +65,7 @@ public class AtomicSetsCommand extends ASAT4JAnalysisCommand<BooleanAssignmentLi
     }
 
     @Override
-    protected IFormat<BooleanAssignmentList> getOuputFormat(OptionList optionParser) {
+    protected IFormat<BooleanAssignmentList> getOuputFormat(OptionParser optionParser) {
         return optionParser.get(FORMAT);
     }
 

@@ -22,8 +22,15 @@ package de.featjar.gui.utils;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import de.featjar.base.data.Problem;
+import de.featjar.base.data.Result;
+import featJAR.Feature;
+import featJAR.FeatureModel;
+import featJAR.GroupNode;
 import featJAR.Identifiable;
+import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.glsp.server.emf.notation.EMFNotationModelState;
 
@@ -33,7 +40,7 @@ import org.eclipse.glsp.server.emf.notation.EMFNotationModelState;
  * the ID of the semantic model also as GModel ID. in the whole project is no distinction
  *
  * IDs that do not belong to a semantic element, such
- * as the graph root or the constraint box, resolve to an empty result.
+ * as the graph root or the constraint box, resolve to an empty {@link Result} carrying a problem.
  */
 @Singleton
 public class IdentifiableResolver {
@@ -45,13 +52,48 @@ public class IdentifiableResolver {
      * Resolves a GModel ID to its semantic element and returns it.
      *
      * @param id the semantic ID of the searched element
-     * @return the identifiable object or an empty {@link Optional} if nothing is found.
+     * @return the identifiable object or an empty {@link Result}carying a problem  if nothing is found.
      */
-    public Optional<Identifiable> findById(final String id) {
+    public Result<Identifiable> findById(final String id) {
         if (id == null || id.isBlank()) {
-            return Optional.empty();
+            return Result.empty(new Problem("No element ID given"));
         }
         EObject found = modelState.getSemanticModel().eResource().getEObject(id);
-        return found instanceof Identifiable identifiable ? Optional.of(identifiable) : Optional.empty();
+        return found instanceof Identifiable identifiable
+                ? Result.of(identifiable)
+                : Result.empty(new Problem("No element found for ID: " + id));
+    }
+    /**
+     * Collects the names of all features from the semantic model.
+     *
+     *to check the references of a constraint:
+     * {@link FeatureModelLabelEditValidator#findConstraintProblem(String, Set)}.
+     * @return the names of all features, possibly empty
+     */
+    public Set<String> findFeatureNames() {
+        Set<String> names = new HashSet<>();
+
+        // If no model is loaded yet, we return the empty set
+        Optional<FeatureModel> model = modelState.getSemanticModel(FeatureModel.class);
+        if (model.isPresent()) {
+
+            // the  model can have several root features so we go through all of them
+            for (Feature root : model.get().getRoots()) {
+                collectFeatureNames(root, names);
+            }
+        }
+        return names;
+    }
+
+    /* Walks down the tree: feature -> its group nodes -> the features of each group node */
+    private void collectFeatureNames(final Feature feature, final Set<String> names) {
+        if (feature.getName() != null) {
+            names.add(feature.getName());
+        }
+        for (GroupNode group : feature.getGroupNodeList()) {
+            for (Feature child : group.getFeatureList()) {
+                collectFeatureNames(child, names);
+            }
+        }
     }
 }

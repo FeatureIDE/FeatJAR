@@ -21,16 +21,18 @@
 package de.featjar.gui.types;
 
 /**
- * Contains all label for that are used for the internal representation as well as CSS types.
+ * Contains all label for that are used for the internal representation as well
+ * as CSS types.
  */
 public class FeatureModelLables {
+    public static final String ATTRIBUTE_LABEL = "label-attribute";
     public static final String ROOT_FEATURE = "feature-root";
     public static final String EDITABLE_LABEL = "label-heading";
     public static final String CONSTRAINT_NODE = "constraint-node";
     public static final String CONSTRAINT_LABEL = "constraint-label";
     public static final String CONSTRAINT_TITLE = "constraint-title";
     public static final String CONSTRAINT_BOX = "constraint-box";
-    //    public static final String CONSTRAINT = DefaultTypes.EDGE;
+    // public static final String CONSTRAINT = DefaultTypes.EDGE;
     public static final String EDGE_CARDINALITY_LABEL = "label-edge-cardinality";
     public static final String NODE_CARDINALITY_LABEL = "label-node-cardinality";
 }

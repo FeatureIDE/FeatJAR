@@ -20,8 +20,10 @@
  */
 package de.featjar.gui.io;
 
+import de.featjar.base.data.IAttribute;
 import de.featjar.base.data.Result;
 import de.featjar.base.tree.Trees;
+import de.featjar.feature.model.FeatureModelAttributes;
 import de.featjar.feature.model.FeatureTree.Group;
 import de.featjar.feature.model.IConstraint;
 import de.featjar.feature.model.IFeatureModel;
@@ -31,6 +33,7 @@ import de.featjar.formula.io.textual.ExpressionSerializer.Notation;
 import de.featjar.formula.io.textual.ShortSymbols;
 import de.featjar.gui.types.AttributeKeys;
 import de.featjar.gui.types.FeatureImplementationTypes;
+import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -120,6 +123,7 @@ public class EMFFeatureModelWriter {
                     .append(EMFFeatureModelFormat.VALUE)
                     .append("=\"\"/>\n");
         }
+        writeCustomAttributes(tree, depth + 1);
 
         writeFeatureCardinality(tree, depth + 1);
 
@@ -128,6 +132,45 @@ public class EMFFeatureModelWriter {
         }
 
         sb.append(indent(depth)).append("</").append(tag).append(">\n");
+    }
+
+    /**
+     * Writes the feature's own custom attributes (e.g. from a UVL file's
+     * {@code {key value}} block), skipping the abstract/hidden
+     */
+    private void writeCustomAttributes(IFeatureTree tree, int depth) {
+        Map<IAttribute<?>, Object> attributes =
+                tree.getFeature().getAttributes().orElse(Map.of());
+
+        for (Map.Entry<IAttribute<?>, Object> entry : attributes.entrySet()) {
+            IAttribute<?> attribute = entry.getKey();
+            if (attribute.equals(FeatureModelAttributes.ABSTRACT) || attribute.equals(FeatureModelAttributes.HIDDEN)) {
+                continue;
+            }
+
+            String value = attribute.serialize(entry.getValue());
+
+            sb.append(indent(depth))
+                    .append("<")
+                    .append(EMFFeatureModelFormat.ATTRIBUTES)
+                    .append(" ")
+                    .append(EMFFeatureModelFormat.KEY)
+                    .append("=\"")
+                    .append(escapeXml(attribute.getSimpleName()))
+                    .append("\"")
+                    .append(" ")
+                    .append(EMFFeatureModelFormat.VALUE)
+                    .append("=\"")
+                    .append(escapeXml(value))
+                    .append("\"/>\n");
+        }
+    }
+
+    private String escapeXml(String value) {
+        return value.replace("&", "&amp;")
+                .replace("\"", "&quot;")
+                .replace("<", "&lt;")
+                .replace(">", "&gt;");
     }
 
     private void writeGroupNode(IFeatureTree tree, int depth) {

@@ -22,10 +22,6 @@
         "title": "FeatJAR: Open GUI"
       },
       {
-        "command": "featjar-extension.TestCommand",
-        "title": "FeatJAR: Test command"
-      },
-      {
         "command": "featjar-extension.countConfigurations",
        "title": "Count Configurations"
       },

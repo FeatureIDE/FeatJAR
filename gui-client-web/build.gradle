@@ -56,7 +56,7 @@ clean.doFirst {
     delete "${rootDir}/lib/"
     delete "${rootDir}/node_modules/"
     delete "${rootDir}/yarn.lock"
-    delete "${rootDir}/*.tsbuildinfo"
+    delete "${rootDir}/tsconfig.tsbuildinfo"
     delete "${rootDir}/app/bundle.js"
     delete "${rootDir}/app/bundle.js.map"
     
