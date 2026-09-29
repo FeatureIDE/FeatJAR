@@ -25,6 +25,11 @@ import de.featjar.formula.structure.connective.BiImplies;
 import de.featjar.formula.structure.connective.Implies;
 import de.featjar.formula.structure.connective.Not;
 import de.featjar.formula.structure.connective.Or;
+import de.featjar.formula.structure.predicate.Equals;
+import de.featjar.formula.structure.predicate.GreaterEqual;
+import de.featjar.formula.structure.predicate.GreaterThan;
+import de.featjar.formula.structure.predicate.LessEqual;
+import de.featjar.formula.structure.predicate.LessThan;
 
 /**
  * Symbols for a short textual representation. Best used for serialization since
@@ -39,10 +44,17 @@ public class ShortSymbols extends Symbols {
 
     private ShortSymbols() {
         super(false);
+
         setSymbol(Not.class, "-");
         setSymbol(And.class, "&");
         setSymbol(Or.class, "|");
         setSymbol(Implies.class, "=>");
         setSymbol(BiImplies.class, "<=>");
+
+        setSymbol(GreaterThan.class, ">");
+        setSymbol(LessThan.class, "<");
+        setSymbol(GreaterEqual.class, ">=");
+        setSymbol(LessEqual.class, "<=");
+        setSymbol(Equals.class, "=");
     }
 }

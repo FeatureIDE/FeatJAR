@@ -33,8 +33,15 @@ import de.featjar.formula.structure.connective.BiImplies;
 import de.featjar.formula.structure.connective.Implies;
 import de.featjar.formula.structure.connective.Not;
 import de.featjar.formula.structure.connective.Or;
+import de.featjar.formula.structure.predicate.Equals;
+import de.featjar.formula.structure.predicate.GreaterEqual;
+import de.featjar.formula.structure.predicate.GreaterThan;
+import de.featjar.formula.structure.predicate.LessEqual;
+import de.featjar.formula.structure.predicate.LessThan;
 import de.featjar.formula.structure.predicate.Literal;
+import de.featjar.formula.structure.term.ITerm;
 import de.featjar.formula.structure.term.value.Constant;
+import de.featjar.formula.structure.term.value.Variable;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -171,14 +178,34 @@ public class ExpressionParser {
                     if (value == Literal.class || value == Not.class) {
                         checkNoOperandBefore(expression, token);
                         expression = parseOperand(token, iterator);
+
                     } else if (value == And.class) {
                         expression = new And(leftOperand(expression, token), rightOperand(token, iterator));
+
                     } else if (value == Or.class) {
                         expression = new Or(leftOperand(expression, token), rightOperand(token, iterator));
+
                     } else if (value == Implies.class) {
                         expression = new Implies(leftOperand(expression, token), rightOperand(token, iterator));
+
                     } else if (value == BiImplies.class) {
                         expression = new BiImplies(leftOperand(expression, token), rightOperand(token, iterator));
+
+                    } else if (value == GreaterThan.class) {
+                        expression = new GreaterThan(leftTerm(expression, token), rightTerm(token, iterator));
+
+                    } else if (value == LessThan.class) {
+                        expression = new LessThan(leftTerm(expression, token), rightTerm(token, iterator));
+
+                    } else if (value == GreaterEqual.class) {
+                        expression = new GreaterEqual(leftTerm(expression, token), rightTerm(token, iterator));
+
+                    } else if (value == LessEqual.class) {
+                        expression = new LessEqual(leftTerm(expression, token), rightTerm(token, iterator));
+
+                    } else if (value == Equals.class) {
+                        expression = new Equals(leftTerm(expression, token), rightTerm(token, iterator));
+
                     } else {
                         throw new ParseException(
                                 String.format("Unsupported operator '%s'.", text(token)),
@@ -238,6 +265,48 @@ public class ExpressionParser {
                 }
                 throw missingOperand(token);
         }
+    }
+
+    private ITerm leftTerm(IExpression expression, Token operator) throws ParseException {
+        return toTerm(expression, operator);
+    }
+
+    private ITerm rightTerm(Token operator, ListIterator<Token> iterator) throws ParseException {
+        IExpression right = iterator.hasNext() ? parseSubExpression(iterator) : null;
+
+        if (right == null) {
+            throw missingOperand(operator);
+        }
+
+        return toTerm(right, operator);
+    }
+
+    private ITerm toTerm(IExpression expression, Token operator) throws ParseException {
+        if (expression instanceof Constant) {
+            Constant constant = (Constant) expression;
+
+            if (constant.getValue() instanceof Integer) {
+                return new Constant(((Integer) constant.getValue()).longValue());
+            }
+
+            return constant;
+        }
+
+        if (expression instanceof Variable) {
+            return (Variable) expression;
+        }
+
+        if (expression instanceof Literal) {
+            Literal literal = (Literal) expression;
+
+            return new Variable(literal.getVariable().getName(), Long.class);
+        }
+
+        if (expression instanceof ITerm) {
+            return (ITerm) expression;
+        }
+
+        throw missingOperand(operator);
     }
 
     private boolean isUnaryOperator(Token token) {
