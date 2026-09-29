@@ -1,0 +1,8 @@
+features
+    Root
+        optional
+            A
+
+constraints
+    A
+    !A
