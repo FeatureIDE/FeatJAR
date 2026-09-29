@@ -16,8 +16,7 @@ import {
 } from './extension-functions';
 import { registerSidebar } from './sidebar';
 
-// AI-assisted (isSatisfiable function ): Added a satisfiability check before computing core/dead features
-// to prevent the analysis from running on unsatisfiable models.
+
 
 const FEATJAR_DOWNLOAD_URL = 'https://github.com/skrieter/FeatJAR-ISF-Teamproject-2026/releases/download/feat.jar/feat.jar';
 

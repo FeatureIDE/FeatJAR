@@ -52,3 +52,38 @@ satisfiable.
 
 5. In the new Extension Development Host window, open a `.uvl` file or run a
    FeatJAR command from the Command Palette with `Ctrl+Shift+P`.
+
+
+## Testing
+
+The extension uses the VS Code Extension Test framework.
+
+Before running the tests, make sure that the current FeatJAR build is
+available at:
+
+~/.featjar-bin/feat.jar
+
+Run all tests with:
+
+    npm test
+
+The tests are located in:
+
+    src/test/
+
+Test UVL models are located in:
+
+    resources/
+
+The integration tests start the FeatJAR ExtensionShell and test the
+communication between the VS Code extension and FeatJAR.
+
+Currently tested functionality includes:
+
+- satisfiability checking
+- unsatisfiability checking
+- configuration counting
+- core/dead feature analysis
+
+When adding a new FeatJAR command, corresponding tests should be added
+to `src/test/extension.test.ts`.

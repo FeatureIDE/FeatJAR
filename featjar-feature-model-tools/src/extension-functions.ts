@@ -23,7 +23,6 @@ export function featJarPath(): string {
 
 export async function checkSatisfiable(uri: vscode.Uri): Promise<boolean | undefined> {
     const result = await executeInExtensionShell(['solutions-sat4j', '--input', uri.fsPath, '--limit', '1', '--format', 'SimpleCSV',]);
-
     if (isErrorResult(result)) {
         return;
     }
@@ -116,7 +115,6 @@ export function startExtensionShell(jarPath: string): Promise<void> {
 		['-cp', jarPath, 'de.featjar.base.shell.ExtensionShell'],
 		{ windowsHide: true, stdio: 'pipe' },
 	);
-
 	extensionShell.stdout.setEncoding('utf8');
 	extensionShell.stdout.on('data', (data: string) => readShellOutput(data));
 
@@ -139,6 +137,7 @@ export function startExtensionShell(jarPath: string): Promise<void> {
 }
 
 function readShellOutput(data: string): void {
+	
 	shellOutputBuffer += data;
 
 	let lineBreakIndex: number;
@@ -159,6 +158,7 @@ function readShellOutput(data: string): void {
 			const fields = line.split('\t', 2);
 			const resolveCommand = pendingCommands.shift();
 			resolveCommand?.(Buffer.from(fields[1], 'base64url').toString('utf8'));
+			
 		}
 	}
 }
