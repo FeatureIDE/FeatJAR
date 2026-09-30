@@ -414,4 +414,114 @@ public class PreprocessorTest extends Common {
     private static List<String> preprocess(Preprocessor preprocessor, List<String> lines, Assignment assignment) {
         return preprocessor.preprocess(lines.stream(), assignment).collect(Collectors.toList());
     }
+
+    @Test
+    public void renameFeatureInIfAnnotation() {
+        Preprocessor preprocessor = new Preprocessor(Preprocessor.Style.CPP);
+
+        List<String> result = preprocessor
+                .renameFeatureAnnotations(Stream.of("#if A", "foo();", "#endif"), "A", "RenamedA")
+                .toList();
+
+        assertEquals(List.of("#if RenamedA", "foo();", "#endif"), result);
+    }
+
+    @Test
+    public void renameFeatureInComplexCondition() {
+        Preprocessor preprocessor = new Preprocessor(Preprocessor.Style.CPP);
+
+        List<String> result = preprocessor
+                .renameFeatureAnnotations(Stream.of("#if A && B"), "A", "RenamedA")
+                .toList();
+
+        assertEquals(List.of("#if RenamedA && B"), result);
+    }
+
+    @Test
+    public void renameAllOccurrencesOfFeature() {
+        Preprocessor preprocessor = new Preprocessor(Preprocessor.Style.CPP);
+
+        List<String> result = preprocessor
+                .renameFeatureAnnotations(Stream.of("#if A || (B && A)"), "A", "RenamedA")
+                .toList();
+
+        assertEquals(List.of("#if RenamedA || (B && RenamedA)"), result);
+    }
+
+    @Test
+    public void renameFeatureInElifAnnotation() {
+        Preprocessor preprocessor = new Preprocessor(Preprocessor.Style.CPP);
+
+        List<String> result = preprocessor
+                .renameFeatureAnnotations(Stream.of("#if B", "foo();", "#elif A", "bar();", "#endif"), "A", "RenamedA")
+                .toList();
+
+        assertEquals(List.of("#if B", "foo();", "#elif RenamedA", "bar();", "#endif"), result);
+    }
+
+    @Test
+    public void similarFeatureNamesAreNotRenamed() {
+        Preprocessor preprocessor = new Preprocessor(Preprocessor.Style.CPP);
+
+        List<String> result = preprocessor
+                .renameFeatureAnnotations(Stream.of("#if A || AA || FeatureA"), "A", "RenamedA")
+                .toList();
+
+        assertEquals(List.of("#if RenamedA || AA || FeatureA"), result);
+    }
+
+    @Test
+    public void sourceCodeOutsideAnnotationsIsNotRenamed() {
+        Preprocessor preprocessor = new Preprocessor(Preprocessor.Style.CPP);
+
+        List<String> result = preprocessor
+                .renameFeatureAnnotations(Stream.of("int A = 5;", "System.out.println(A);"), "A", "RenamedA")
+                .toList();
+
+        assertEquals(List.of("int A = 5;", "System.out.println(A);"), result);
+    }
+
+    @Test
+    public void elseAndEndifRemainUnchanged() {
+        Preprocessor preprocessor = new Preprocessor(Preprocessor.Style.CPP);
+
+        List<String> result = preprocessor
+                .renameFeatureAnnotations(Stream.of("#else", "#endif"), "A", "RenamedA")
+                .toList();
+
+        assertEquals(List.of("#else", "#endif"), result);
+    }
+
+    @Test
+    public void annotationFormattingIsPreserved() {
+        Preprocessor preprocessor = new Preprocessor(Preprocessor.Style.CPP);
+
+        List<String> result = preprocessor
+                .renameFeatureAnnotations(Stream.of("#if   A && B"), "A", "RenamedA")
+                .toList();
+
+        assertEquals(List.of("#if   RenamedA && B"), result);
+    }
+
+    @Test
+    public void renameWorksForAntennaStyle() {
+        Preprocessor preprocessor = new Preprocessor(Preprocessor.Style.ANTENNA);
+
+        List<String> result = preprocessor
+                .renameFeatureAnnotations(Stream.of("//#if A && B"), "A", "RenamedA")
+                .toList();
+
+        assertEquals(List.of("//#if RenamedA && B"), result);
+    }
+
+    @Test
+    public void sameFeatureNameProducesNoChange() {
+        Preprocessor preprocessor = new Preprocessor(Preprocessor.Style.CPP);
+
+        List<String> result = preprocessor
+                .renameFeatureAnnotations(Stream.of("#if A"), "A", "A")
+                .toList();
+
+        assertEquals(List.of("#if A"), result);
+    }
 }
