@@ -57,7 +57,8 @@ public class PreprocessorCommand extends ACommand {
         CHECK_STRUCTURE,
         FIND_UNKNOWN_FEATURES,
         PRINT_PRESENCE_CONDITIONS,
-        CHECK_SYNTAX
+        CHECK_SYNTAX,
+        RENAME_FEATURE
     }
 
     public static enum MissingVariables {
@@ -105,6 +106,14 @@ public class PreprocessorCommand extends ACommand {
     public static final Option<String> PREFIX_OPTION = Options.newOption("annotation-prefix", Options.StringParser)
             .setDescription("The prefix that precedes each annotation (overrides the prefix of the annotation style)");
 
+    public static final Option<String> OLD_FEATURE_NAME_OPTION = Options.newOption(
+                    "old-feature-name", Options.StringParser)
+            .setDescription("Current feature name to rename in annotations");
+
+    public static final Option<String> NEW_FEATURE_NAME_OPTION = Options.newOption(
+                    "new-feature-name", Options.StringParser)
+            .setDescription("New feature name to use in annotations");
+
     @Override
     public int run(OptionParser optionParser) {
         Path in = optionParser.getResult(INPUT_OPTION).orElseThrow();
@@ -134,6 +143,14 @@ public class PreprocessorCommand extends ACommand {
                             optionParser.getResult(MISSING_VARIABLES_OPTION).orElseThrow(),
                             charset,
                             preprocessor);
+                    break;
+                case RENAME_FEATURE:
+                    stream = renameFeature(
+                            in,
+                            charset,
+                            preprocessor,
+                            optionParser.getResult(OLD_FEATURE_NAME_OPTION).orElseThrow(),
+                            optionParser.getResult(NEW_FEATURE_NAME_OPTION).orElseThrow());
                     break;
                 case PRINT_VARIABLES:
                     stream = printVariableNames(in, charset, preprocessor);
@@ -189,6 +206,13 @@ public class PreprocessorCommand extends ACommand {
 
         FeatJAR.log().problems(problems);
         return (problems.isEmpty() ? 0 : 1);
+    }
+
+    private Stream<String> renameFeature(
+            Path in, Charset charset, Preprocessor preprocessor, String oldFeatureName, String newFeatureName)
+            throws IOException {
+
+        return preprocessor.renameFeatureAnnotations(Files.lines(in, charset), oldFeatureName, newFeatureName);
     }
 
     private Stream<String> preprocess(
