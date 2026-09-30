@@ -40,8 +40,7 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-/***
- * added the unit test
+/**
  * Tests {@link Preprocessor#computePresenceConditions(java.util.stream.Stream)}.
  */
 public class PreprocessorTest extends Common {
@@ -70,6 +69,7 @@ public class PreprocessorTest extends Common {
                 "  System.out.println(\"\");",
                 "//#endif",
                 "  System.out.println(\"\");");
+
         assertEquals(
                 List.of("false", "A", "false", "A && B", "A && B", "false", "A && !B", "false", "A", "false", "true"),
                 presenceConditions(lines));
@@ -128,6 +128,7 @@ public class PreprocessorTest extends Common {
     public void mungeStyle() {
         List<String> lines = List.of("/*if[A]*/", "a", "/*else[A]*/", "b", "/*end[A]*/", "c");
         Preprocessor preprocessor = new Preprocessor(Preprocessor.Style.MUNGE);
+
         assertEquals(List.of("false", "A", "false", "!A", "false", "true"), presenceConditions(preprocessor, lines));
         assertEquals(List.of("b", "c"), preprocess(preprocessor, lines, new Assignment("A", false)));
         assertEquals(List.of("A"), preprocessor.extractVariableNames(lines.stream()));
@@ -146,8 +147,10 @@ public class PreprocessorTest extends Common {
     public void customStyle() {
         Preprocessor.Style style = new Preprocessor.Style(
                 "<!--", "-->", "IF", "ELSEIF", "ELSE", "END", " ", "", false, JavaSymbols.INSTANCE);
+
         List<String> lines = List.of("<!-- IF A -->", "a", "<!-- ELSEIF B -->", "b", "<!-- END -->");
         Preprocessor preprocessor = new Preprocessor(style);
+
         assertEquals(List.of("false", "A", "false", "!A && B", "false"), presenceConditions(preprocessor, lines));
         assertEquals(List.of("b"), preprocess(preprocessor, lines, new Assignment("A", false, "B", true)));
         assertEquals(List.of(), preprocessor.checkSyntax(lines.stream()));
@@ -167,12 +170,15 @@ public class PreprocessorTest extends Common {
                 "] DONE ",
                 false,
                 JavaSymbols.INSTANCE);
+
         Preprocessor preprocessor = new Preprocessor(style);
+
         List<String> annotations = List.of(
                 "< start >IF FEATURE WHEN [A] DONE < end >",
                 "< start >ELIF FEATURE WHEN [B] DONE < end >",
                 "< start >ELSE BRANCH< end >",
                 "< start >END BLOCK< end >");
+
         assertEquals(annotations, preprocessor.extractAnnotations(annotations.stream()));
         assertEquals(List.of("A", "B"), preprocessor.extractVariableNames(annotations.stream()));
         assertEquals(List.of(), preprocessor.checkSyntax(annotations.stream()));
@@ -180,11 +186,13 @@ public class PreprocessorTest extends Common {
 
         for (String text : List.of(
                 "< start >", "< end >", "IF FEATURE", "ELIF FEATURE", "ELSE BRANCH", "END BLOCK", "WHEN [", "] DONE")) {
+
             for (String whitespace : List.of("  ", "\t")) {
                 List<String> changedAnnotations = annotations.stream()
                         .filter(line -> line.contains(text))
                         .map(line -> line.replace(text, text.replace(" ", whitespace)))
                         .collect(Collectors.toList());
+
                 assertEquals(
                         List.of(),
                         preprocessor.extractAnnotations(changedAnnotations.stream()),
@@ -196,12 +204,16 @@ public class PreprocessorTest extends Common {
     @Test
     public void conditionSeparatorMatchesWhitespaceLiterally() {
         Preprocessor preprocessor = new Preprocessor(Preprocessor.Style.CPP);
+
         List<ParseProblem> problems = preprocessor.checkSyntax(Stream.of("#if\tA", "#elif\tB"));
+
         assertEquals(2, problems.size());
+
         for (int i = 0; i < problems.size(); i++) {
             assertEquals(Severity.ERROR, problems.get(i).getSeverity());
             assertEquals(i + 1, problems.get(i).getLineNumber());
         }
+
         assertEquals(List.of(), preprocessor.extractAnnotations(Stream.of("#if\tA", "#elif\tB")));
     }
 
@@ -209,15 +221,20 @@ public class PreprocessorTest extends Common {
     public void wrongStyleRecognizesNoAnnotations() {
         List<Preprocessor.Style> styles =
                 List.of(Preprocessor.Style.CPP, Preprocessor.Style.ANTENNA, Preprocessor.Style.MUNGE);
+
         List<List<String>> files = List.of(
                 List.of("#if A", "a", "#else", "b", "#endif"),
                 List.of("//#if A", "a", "//#else", "b", "//#endif"),
                 List.of("/*if[A]*/", "a", "/*else[A]*/", "b", "/*end[A]*/"));
+
         for (int i = 0; i < styles.size(); i++) {
             Preprocessor preprocessor = new Preprocessor(styles.get(i));
+
             for (int j = 0; j < files.size(); j++) {
                 if (i == j) continue;
+
                 List<String> lines = files.get(j);
+
                 assertEquals(List.of(), preprocessor.extractAnnotations(lines.stream()));
                 assertEquals(List.of(), preprocessor.extractVariableNames(lines.stream()));
                 assertEquals(List.of(), preprocessor.checkSyntax(lines.stream()));
@@ -233,13 +250,17 @@ public class PreprocessorTest extends Common {
     public void wrongStyleWithSamePrefixReportsSyntaxErrors() {
         List<String> lines = List.of("/*if[A]*/", "a", "/*else[A]*/", "b", "/*end[A]*/");
         Preprocessor preprocessor = new Preprocessor(Preprocessor.Style.CPP.withPrefix("/*"));
+
         List<ParseProblem> problems = preprocessor.checkSyntax(lines.stream());
+
         assertEquals(3, problems.size());
+
         for (int i = 0; i < problems.size(); i++) {
             assertEquals(Severity.ERROR, problems.get(i).getSeverity());
             assertEquals(2 * i + 1, problems.get(i).getLineNumber());
             assertTrue(problems.get(i).getMessage().startsWith("Invalid annotation syntax:"));
         }
+
         assertEquals(List.of(), preprocessor.extractAnnotations(lines.stream()));
     }
 
@@ -247,11 +268,14 @@ public class PreprocessorTest extends Common {
     public void wrongStyleReportsUnbalancedAnnotations() {
         List<String> lines = List.of("#if A", "a", "//#endif");
         Preprocessor preprocessor = new Preprocessor(Preprocessor.Style.ANTENNA);
+
         List<Problem> problems = preprocessor.checkStructure(lines.stream());
+
         assertEquals(1, problems.size());
         assertTrue(problems.get(0).getMessage().startsWith("#endif without #if"));
         assertEquals(Severity.ERROR, problems.get(0).getSeverity());
         assertEquals(3, ((ParseProblem) problems.get(0)).getLineNumber());
+
         assertThrows(IllegalArgumentException.class, () -> preprocessor.computePresenceConditions(lines.stream()));
     }
 
@@ -259,7 +283,9 @@ public class PreprocessorTest extends Common {
     public void wrongStyleReportsMissingEndif() {
         List<String> lines = List.of("#if A", "a", "//#endif");
         Preprocessor preprocessor = new Preprocessor(Preprocessor.Style.CPP);
+
         List<Problem> problems = preprocessor.checkStructure(lines.stream());
+
         assertEquals(1, problems.size());
         assertTrue(problems.get(0).getMessage().startsWith("#if has no matching #endif"));
         assertEquals(Severity.ERROR, problems.get(0).getSeverity());
@@ -270,13 +296,16 @@ public class PreprocessorTest extends Common {
     public void prefixAndSuffixWithSymbolCharacters() {
         Preprocessor.Style style =
                 new Preprocessor.Style("(*", "*)", "if", "elif", "else", "endif", " ", "", false, JavaSymbols.INSTANCE);
+
         List<String> lines = List.of("(* if !(A && B) *)", "a", "(* elif A || B *)", "b", "(* endif *)");
         Preprocessor preprocessor = new Preprocessor(style);
+
         assertEquals(List.of("A", "B"), preprocessor.extractVariableNames(lines.stream()));
         assertEquals(List.of("a"), preprocess(preprocessor, lines, new Assignment("A", false, "B", false)));
         assertEquals(List.of("b"), preprocess(preprocessor, lines, new Assignment("A", true, "B", true)));
 
         List<String> negationPrefix = List.of("!if !A", "a", "!endif");
+
         assertEquals(
                 List.of("a"),
                 preprocess(new Preprocessor("!", JavaSymbols.INSTANCE), negationPrefix, new Assignment("A", false)));
@@ -287,7 +316,9 @@ public class PreprocessorTest extends Common {
         for (String delimiter : List.of("!", "&&", "||", "==", "(", ")")) {
             Preprocessor.Style style = new Preprocessor.Style(
                     delimiter, delimiter, "if", "elif", "else", "endif", " ", "", false, JavaSymbols.INSTANCE);
+
             Preprocessor preprocessor = new Preprocessor(style);
+
             List<String> lines = List.of(
                     delimiter + "if !(A && B) || C" + delimiter,
                     "a",
@@ -295,14 +326,17 @@ public class PreprocessorTest extends Common {
                     "b",
                     delimiter + "endif" + delimiter,
                     "c");
+
             assertEquals(List.of("A", "B", "C"), preprocessor.extractVariableNames(lines.stream()), delimiter);
             assertEquals(List.of(), preprocessor.checkSyntax(lines.stream()), delimiter);
             assertEquals(List.of(), preprocessor.validate(lines.stream()), delimiter);
             assertEquals(List.of(), preprocessor.checkStructure(lines.stream()), delimiter);
+
             assertEquals(
                     List.of("a", "c"),
                     preprocess(preprocessor, lines, new Assignment("A", false, "B", true, "C", false)),
                     delimiter);
+
             assertEquals(
                     List.of("b", "c"),
                     preprocess(preprocessor, lines, new Assignment("A", true, "B", true, "C", false)),
@@ -314,16 +348,22 @@ public class PreprocessorTest extends Common {
     public void emptyPrefixIsRejected() {
         IllegalArgumentException constructorException =
                 assertThrows(IllegalArgumentException.class, () -> new Preprocessor("", JavaSymbols.INSTANCE));
+
         assertEquals("annotation prefix must not be empty", constructorException.getMessage());
+
         IllegalArgumentException styleException = assertThrows(
                 IllegalArgumentException.class,
                 () -> new Preprocessor.Style(
                         "", "", "if", "elif", "else", "endif", " ", "", false, JavaSymbols.INSTANCE));
+
         assertEquals("annotation prefix must not be empty", styleException.getMessage());
+
         for (Preprocessor.Style style :
                 List.of(Preprocessor.Style.CPP, Preprocessor.Style.ANTENNA, Preprocessor.Style.MUNGE)) {
+
             IllegalArgumentException prefixException =
                     assertThrows(IllegalArgumentException.class, () -> style.withPrefix(""));
+
             assertEquals("annotation prefix must not be empty", prefixException.getMessage());
         }
     }
@@ -392,6 +432,83 @@ public class PreprocessorTest extends Common {
                 unknownFeatures("//#if A", "a();", "//#endif", "//#if !A", "b();", "//#endif"));
     }
 
+    @Test
+    public void renameFeatureInIfAnnotation() {
+        Preprocessor preprocessor = new Preprocessor(Preprocessor.Style.CPP);
+
+        List<String> result = preprocessor
+                .renameFeatureAnnotations(Stream.of("#if A", "a", "#endif"), "A", "RenamedA")
+                .toList();
+
+        assertEquals(List.of("#if RenamedA", "a", "#endif"), result);
+    }
+
+    @Test
+    public void renameFeatureInElifAnnotation() {
+        Preprocessor preprocessor = new Preprocessor(Preprocessor.Style.CPP);
+
+        List<String> result = preprocessor
+                .renameFeatureAnnotations(Stream.of("#if B", "a", "#elif A", "b", "#endif"), "A", "RenamedA")
+                .toList();
+
+        assertEquals(List.of("#if B", "a", "#elif RenamedA", "b", "#endif"), result);
+    }
+
+    @Test
+    public void renameAllOccurrencesOfFeature() {
+        Preprocessor preprocessor = new Preprocessor(Preprocessor.Style.CPP);
+
+        List<String> result = preprocessor
+                .renameFeatureAnnotations(Stream.of("#if A || (B && A)"), "A", "RenamedA")
+                .toList();
+
+        assertEquals(List.of("#if RenamedA || B && RenamedA"), result);
+    }
+
+    @Test
+    public void similarFeatureNamesAreNotRenamed() {
+        Preprocessor preprocessor = new Preprocessor(Preprocessor.Style.CPP);
+
+        List<String> result = preprocessor
+                .renameFeatureAnnotations(Stream.of("#if A || AA || FeatureA"), "A", "RenamedA")
+                .toList();
+
+        assertEquals(List.of("#if RenamedA || (AA || FeatureA)"), result);
+    }
+
+    @Test
+    public void sourceCodeOutsideAnnotationsIsNotRenamed() {
+        Preprocessor preprocessor = new Preprocessor(Preprocessor.Style.CPP);
+
+        List<String> result = preprocessor
+                .renameFeatureAnnotations(Stream.of("int A = 5;", "#if B"), "A", "RenamedA")
+                .toList();
+
+        assertEquals(List.of("int A = 5;", "#if B"), result);
+    }
+
+    @Test
+    public void renamedAnnotationIsSerializedCorrectly() {
+        Preprocessor preprocessor = new Preprocessor(Preprocessor.Style.CPP);
+
+        List<String> result = preprocessor
+                .renameFeatureAnnotations(Stream.of("#if   A && B"), "A", "RenamedA")
+                .toList();
+
+        assertEquals(List.of("#if RenamedA && B"), result);
+    }
+
+    @Test
+    public void sameFeatureNameProducesNoChange() {
+        Preprocessor preprocessor = new Preprocessor(Preprocessor.Style.CPP);
+
+        List<String> result = preprocessor
+                .renameFeatureAnnotations(Stream.of("#if A"), "A", "A")
+                .toList();
+
+        assertEquals(List.of("#if A"), result);
+    }
+
     private static List<String> unknownFeatures(String... lines) {
         return new Preprocessor("//#", JavaSymbols.INSTANCE)
                 .findUnknownFeatures(Stream.of(lines), loadFormula("GPL/model.xml")).stream()
@@ -404,124 +521,17 @@ public class PreprocessorTest extends Common {
     }
 
     private static List<String> presenceConditions(Preprocessor preprocessor, List<String> lines) {
+
         ExpressionSerializer serializer = new ExpressionSerializer();
         serializer.setSymbols(JavaSymbols.INSTANCE);
+
         return preprocessor.computePresenceConditions(lines.stream()).stream()
                 .map(pc -> Trees.traverse(pc, serializer).orElseThrow())
                 .collect(Collectors.toList());
     }
 
     private static List<String> preprocess(Preprocessor preprocessor, List<String> lines, Assignment assignment) {
+
         return preprocessor.preprocess(lines.stream(), assignment).collect(Collectors.toList());
-    }
-
-    @Test
-    public void renameFeatureInIfAnnotation() {
-        Preprocessor preprocessor = new Preprocessor(Preprocessor.Style.CPP);
-
-        List<String> result = preprocessor
-                .renameFeatureAnnotations(Stream.of("#if A", "foo();", "#endif"), "A", "RenamedA")
-                .toList();
-
-        assertEquals(List.of("#if RenamedA", "foo();", "#endif"), result);
-    }
-
-    @Test
-    public void renameFeatureInComplexCondition() {
-        Preprocessor preprocessor = new Preprocessor(Preprocessor.Style.CPP);
-
-        List<String> result = preprocessor
-                .renameFeatureAnnotations(Stream.of("#if A && B"), "A", "RenamedA")
-                .toList();
-
-        assertEquals(List.of("#if RenamedA && B"), result);
-    }
-
-    @Test
-    public void renameAllOccurrencesOfFeature() {
-        Preprocessor preprocessor = new Preprocessor(Preprocessor.Style.CPP);
-
-        List<String> result = preprocessor
-                .renameFeatureAnnotations(Stream.of("#if A || (B && A)"), "A", "RenamedA")
-                .toList();
-
-        assertEquals(List.of("#if RenamedA || (B && RenamedA)"), result);
-    }
-
-    @Test
-    public void renameFeatureInElifAnnotation() {
-        Preprocessor preprocessor = new Preprocessor(Preprocessor.Style.CPP);
-
-        List<String> result = preprocessor
-                .renameFeatureAnnotations(Stream.of("#if B", "foo();", "#elif A", "bar();", "#endif"), "A", "RenamedA")
-                .toList();
-
-        assertEquals(List.of("#if B", "foo();", "#elif RenamedA", "bar();", "#endif"), result);
-    }
-
-    @Test
-    public void similarFeatureNamesAreNotRenamed() {
-        Preprocessor preprocessor = new Preprocessor(Preprocessor.Style.CPP);
-
-        List<String> result = preprocessor
-                .renameFeatureAnnotations(Stream.of("#if A || AA || FeatureA"), "A", "RenamedA")
-                .toList();
-
-        assertEquals(List.of("#if RenamedA || AA || FeatureA"), result);
-    }
-
-    @Test
-    public void sourceCodeOutsideAnnotationsIsNotRenamed() {
-        Preprocessor preprocessor = new Preprocessor(Preprocessor.Style.CPP);
-
-        List<String> result = preprocessor
-                .renameFeatureAnnotations(Stream.of("int A = 5;", "System.out.println(A);"), "A", "RenamedA")
-                .toList();
-
-        assertEquals(List.of("int A = 5;", "System.out.println(A);"), result);
-    }
-
-    @Test
-    public void elseAndEndifRemainUnchanged() {
-        Preprocessor preprocessor = new Preprocessor(Preprocessor.Style.CPP);
-
-        List<String> result = preprocessor
-                .renameFeatureAnnotations(Stream.of("#else", "#endif"), "A", "RenamedA")
-                .toList();
-
-        assertEquals(List.of("#else", "#endif"), result);
-    }
-
-    @Test
-    public void annotationFormattingIsPreserved() {
-        Preprocessor preprocessor = new Preprocessor(Preprocessor.Style.CPP);
-
-        List<String> result = preprocessor
-                .renameFeatureAnnotations(Stream.of("#if   A && B"), "A", "RenamedA")
-                .toList();
-
-        assertEquals(List.of("#if   RenamedA && B"), result);
-    }
-
-    @Test
-    public void renameWorksForAntennaStyle() {
-        Preprocessor preprocessor = new Preprocessor(Preprocessor.Style.ANTENNA);
-
-        List<String> result = preprocessor
-                .renameFeatureAnnotations(Stream.of("//#if A && B"), "A", "RenamedA")
-                .toList();
-
-        assertEquals(List.of("//#if RenamedA && B"), result);
-    }
-
-    @Test
-    public void sameFeatureNameProducesNoChange() {
-        Preprocessor preprocessor = new Preprocessor(Preprocessor.Style.CPP);
-
-        List<String> result = preprocessor
-                .renameFeatureAnnotations(Stream.of("#if A"), "A", "A")
-                .toList();
-
-        assertEquals(List.of("#if A"), result);
     }
 }

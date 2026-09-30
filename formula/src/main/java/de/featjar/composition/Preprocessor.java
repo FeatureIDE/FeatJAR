@@ -25,7 +25,9 @@ import de.featjar.base.data.Problem;
 import de.featjar.base.data.Problem.Severity;
 import de.featjar.base.data.Result;
 import de.featjar.base.io.format.ParseProblem;
+import de.featjar.base.tree.Trees;
 import de.featjar.formula.assignment.Assignment;
+import de.featjar.formula.io.textual.ExpressionSerializer;
 import de.featjar.formula.io.textual.JavaSymbols;
 import de.featjar.formula.io.textual.Symbols;
 import de.featjar.formula.structure.IExpression;
@@ -525,6 +527,7 @@ public class Preprocessor {
         if (oldFeatureName.isEmpty()) {
             throw new IllegalArgumentException("old feature name must not be empty");
         }
+
         if (newFeatureName.isEmpty()) {
             throw new IllegalArgumentException("new feature name must not be empty");
         }
@@ -533,12 +536,10 @@ public class Preprocessor {
             return lines;
         }
 
-        Pattern featurePattern = Pattern.compile("(?<!\\w)" + Pattern.quote(oldFeatureName) + "(?!\\w)");
-
-        return lines.map(line -> renameFeatureInAnnotation(line, featurePattern, newFeatureName));
+        return lines.map(line -> renameFeatureInAnnotation(line, oldFeatureName, newFeatureName));
     }
 
-    private String renameFeatureInAnnotation(String line, Pattern featurePattern, String newFeatureName) {
+    private String renameFeatureInAnnotation(String line, String oldFeatureName, String newFeatureName) {
 
         Matcher matcher = annotationPattern.matcher(line);
 
@@ -558,19 +559,35 @@ public class Preprocessor {
 
         String condition = matcher.group(conditionGroup);
 
-        String renamedCondition =
-                featurePattern.matcher(condition).replaceAll(Matcher.quoteReplacement(newFeatureName));
+        Result<IExpression> parse = annotationParser.parse(condition);
 
-        if (condition.equals(renamedCondition)) {
+        if (!parse.isPresent()) {
             return line;
         }
+
+        IExpression expression = parse.get();
+
+        List<Variable> variablesToRename = expression
+                .getVariableStream()
+                .filter(variable -> variable.getName().equals(oldFeatureName))
+                .toList();
+
+        if (variablesToRename.isEmpty()) {
+            return line;
+        }
+
+        variablesToRename.forEach(variable -> variable.setName(newFeatureName));
+
+        ExpressionSerializer serializer = new ExpressionSerializer();
+        serializer.setSymbols(getSymbols());
+
+        String renamedCondition = Trees.traverse(expression, serializer).orElseThrow();
 
         int conditionStart = matcher.start(conditionGroup);
         int conditionEnd = matcher.end(conditionGroup);
 
         return line.substring(0, conditionStart) + renamedCondition + line.substring(conditionEnd);
     }
-
     /**
      * {@return a problem for each annotation with a syntactically invalid condition, including its line number}
      *
