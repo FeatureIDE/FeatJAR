@@ -508,6 +508,70 @@ public class Preprocessor {
     }
 
     /**
+     * Renames all occurrences of a feature in {@code #if} and {@code #elif}
+     * annotation conditions.
+     *
+     * @param lines the line stream
+     * @param oldFeatureName the current feature name
+     * @param newFeatureName the new feature name
+     * @return a stream containing the lines with renamed feature annotations
+     */
+    public Stream<String> renameFeatureAnnotations(Stream<String> lines, String oldFeatureName, String newFeatureName) {
+
+        Objects.requireNonNull(lines);
+        Objects.requireNonNull(oldFeatureName);
+        Objects.requireNonNull(newFeatureName);
+
+        if (oldFeatureName.isEmpty()) {
+            throw new IllegalArgumentException("old feature name must not be empty");
+        }
+        if (newFeatureName.isEmpty()) {
+            throw new IllegalArgumentException("new feature name must not be empty");
+        }
+
+        if (oldFeatureName.equals(newFeatureName)) {
+            return lines;
+        }
+
+        Pattern featurePattern = Pattern.compile("(?<!\\w)" + Pattern.quote(oldFeatureName) + "(?!\\w)");
+
+        return lines.map(line -> renameFeatureInAnnotation(line, featurePattern, newFeatureName));
+    }
+
+    private String renameFeatureInAnnotation(String line, Pattern featurePattern, String newFeatureName) {
+
+        Matcher matcher = annotationPattern.matcher(line);
+
+        if (!matcher.matches()) {
+            return line;
+        }
+
+        String conditionGroup;
+
+        if (matcher.group(IF_GROUP) != null) {
+            conditionGroup = IF_CONDITION_GROUP;
+        } else if (matcher.group(ELIF_GROUP) != null) {
+            conditionGroup = ELIF_CONDITION_GROUP;
+        } else {
+            return line;
+        }
+
+        String condition = matcher.group(conditionGroup);
+
+        String renamedCondition =
+                featurePattern.matcher(condition).replaceAll(Matcher.quoteReplacement(newFeatureName));
+
+        if (condition.equals(renamedCondition)) {
+            return line;
+        }
+
+        int conditionStart = matcher.start(conditionGroup);
+        int conditionEnd = matcher.end(conditionGroup);
+
+        return line.substring(0, conditionStart) + renamedCondition + line.substring(conditionEnd);
+    }
+
+    /**
      * {@return a problem for each annotation with a syntactically invalid condition, including its line number}
      *
      * @param lines the line stream
