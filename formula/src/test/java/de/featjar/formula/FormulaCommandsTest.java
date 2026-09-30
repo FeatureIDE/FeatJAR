@@ -62,28 +62,31 @@ public class FormulaCommandsTest {
                 Files.readString(tempFile));
     }
 
-    @Test
-    void printFormulaWorksCorrectly() throws IOException {
-        Path tempFile = Files.createTempFile("featJarTest", ".txt");
-        int exitCode = FeatJAR.runTest(
-                "print",
-                "--input",
-                "../formula/src/testFixtures/resources/GPL/model.xml",
-                "--tab",
-                "TAB",
-                "--notation",
-                "PREFIX",
-                "--format",
-                "de.featjar.formula.io.textual.JavaSymbols",
-                "--newline",
-                "NEWLINE",
-                "--enforce-parentheses",
-                "--enquote-whitespace",
-                "--overwrite",
-                "--output",
-                tempFile.toString());
-        Assertions.assertEquals(0, exitCode);
-        Assertions.assertEquals(
-                Files.readString(Path.of("./src/test/resources/testPrintCommand")), Files.readString(tempFile));
-    }
+@Test
+void printFormulaWorksCorrectly() throws IOException {
+    Path tempFile = Files.createTempFile("featJarTest", ".txt");
+
+    int exitCode = FeatJAR.runTest(
+            "print",
+            "--input",
+            "../formula/src/testFixtures/resources/GPL/model.xml",
+            "--tab",
+            "TAB",
+            "--notation",
+            "PREFIX",
+            "--symbols",
+            "JavaSymbols",
+            "--newline",
+            "NEWLINE",
+            "--enforce-parentheses",
+            "--enquote-whitespace",
+            "--overwrite",
+            "--output",
+            tempFile.toString());
+
+    Assertions.assertEquals(0, exitCode);
+    Assertions.assertEquals(
+            Files.readString(Path.of("./src/test/resources/testPrintCommand")),
+            Files.readString(tempFile));
+}
 }

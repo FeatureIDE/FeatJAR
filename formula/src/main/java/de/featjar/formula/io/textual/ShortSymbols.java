@@ -43,18 +43,18 @@ public class ShortSymbols extends Symbols {
     public static final Symbols INSTANCE = new ShortSymbols();
 
     private ShortSymbols() {
-        super(false);
+    super(false);
 
-        setSymbol(Not.class, "-");
-        setSymbol(And.class, "&");
-        setSymbol(Or.class, "|");
-        setSymbol(Implies.class, "=>");
-        setSymbol(BiImplies.class, "<=>");
+    setSymbol(Not.class, "-");
+    setSymbol(And.class, "&");
+    setSymbol(Or.class, "|");
+    setSymbol(Implies.class, "=>");
+    setSymbol(BiImplies.class, "<=>");
 
-        setSymbol(GreaterThan.class, ">");
-        setSymbol(LessThan.class, "<");
-        setSymbol(GreaterEqual.class, ">=");
-        setSymbol(LessEqual.class, "<=");
-        setSymbol(Equals.class, "=");
-    }
+    setSymbol(GreaterThan.class, ">", 7, true);
+    setSymbol(LessThan.class, "<", 7, true);
+    setSymbol(GreaterEqual.class, ">=", 7, true);
+    setSymbol(LessEqual.class, "<=", 7, true);
+    setSymbol(Equals.class, "=", 7, true);
+}
 }

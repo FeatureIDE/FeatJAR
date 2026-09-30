@@ -76,24 +76,30 @@ public class PrintCommand extends ACommand {
     /**
      * Defines the symbols.
      */
-    public static final Option<Symbols> SYMBOLS_OPTION = Options.newOption("symbols", arg -> {
-                try {
-                    return Result.of(
-                            (Symbols) Class.forName(arg).getField("INSTANCE").get(null));
-                } catch (IllegalAccessException | NoSuchFieldException | ClassNotFoundException e) {
-                    return Result.empty(e);
-                }
-            })
-            .setPossibleArguments(List.of(
-                    "JavaSymbols",
-                    "LaTexSymbols",
-                    "LogicalSymbols",
-                    "PropositionalModelSymbols",
-                    "ShortSymbols",
-                    "TextualSymbols",
-                    "UVLSymbols"))
-            .setDescription("Defines the symbols.")
-            .setDefaultArgument(ShortSymbols.class.getName());
+public static final Option<Symbols> SYMBOLS_OPTION = Options.newOption("symbols", arg -> {
+            try {
+                String className = arg.contains(".")
+                        ? arg
+                        : "de.featjar.formula.io.textual." + arg;
+
+                return Result.of(
+                        (Symbols) Class.forName(className)
+                                .getField("INSTANCE")
+                                .get(null));
+            } catch (IllegalAccessException | NoSuchFieldException | ClassNotFoundException e) {
+                return Result.empty(e);
+            }
+        })
+        .setPossibleArguments(List.of(
+                "JavaSymbols",
+                "LaTexSymbols",
+                "LogicalSymbols",
+                "PropositionalModelSymbols",
+                "ShortSymbols",
+                "TextualSymbols",
+                "UVLSymbols"))
+        .setDescription("Defines the symbols.")
+        .setDefaultArgument("ShortSymbols");
 
     /**
      * Defines the new line string.
