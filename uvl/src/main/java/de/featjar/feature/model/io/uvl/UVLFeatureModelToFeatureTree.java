@@ -55,11 +55,11 @@ import de.vill.model.Attribute;
 import de.vill.model.Feature;
 import de.vill.model.FeatureType;
 import de.vill.model.Group;
-import de.vill.model.building.VariableReference;
 import de.vill.model.constraint.AndConstraint;
 import de.vill.model.constraint.Constraint;
 import de.vill.model.constraint.EqualEquationConstraint;
 import de.vill.model.constraint.EquivalenceConstraint;
+import de.vill.model.constraint.ExpressionConstraint;
 import de.vill.model.constraint.GreaterEqualsEquationConstraint;
 import de.vill.model.constraint.GreaterEquationConstraint;
 import de.vill.model.constraint.ImplicationConstraint;
@@ -253,128 +253,107 @@ public class UVLFeatureModelToFeatureTree {
 
     private static IExpression parseUVLConstraintRecursively(
             Constraint uvlConstraint, List<DefLiteral> dependenciesList) throws UVLConversionException {
-        switch (uvlConstraint) {
-            case LiteralConstraint literalConstraint:
-                VariableReference variableReference = literalConstraint.getReference();
+        return switch (uvlConstraint) {
+            case LiteralConstraint literalConstraint -> {
+                if (literalConstraint.getReference() instanceof Feature uvlFeature) {
+                    yield new Literal(uvlFeature.getFeatureName());
+                }
+                throw new UVLConversionException(
+                        literalConstraint.getReference().getClass().getSimpleName() + " is not supported.");
+            }
+            case ParenthesisConstraint parenthesisConstraint ->
+                parseUVLConstraintRecursively(parenthesisConstraint.getContent(), dependenciesList);
+            case ImplicationConstraint implicationConstraint ->
+                new Implies(parseBooleanChildren(dependenciesList, implicationConstraint));
+            case NotConstraint notConstraint ->
+                new Not((IFormula) parseUVLConstraintRecursively(notConstraint.getContent(), dependenciesList));
+            case AndConstraint andConstraint -> new And(parseBooleanChildren(dependenciesList, andConstraint));
+            case OrConstraint orConstraint -> new Or(parseBooleanChildren(dependenciesList, orConstraint));
+            case EquivalenceConstraint equivalenceConstraint ->
+                new BiImplies(parseBooleanChildren(dependenciesList, equivalenceConstraint));
+            case EqualEquationConstraint equalConstraint ->
+                new Equals(parseNonBooleanChildren(dependenciesList, equalConstraint));
+            case LowerEqualsEquationConstraint lowerEqualsConstraint ->
+                new LessEqual(parseNonBooleanChildren(dependenciesList, lowerEqualsConstraint));
+            case GreaterEqualsEquationConstraint greaterEqualConstraint ->
+                new GreaterEqual(parseNonBooleanChildren(dependenciesList, greaterEqualConstraint));
+            case NotEqualsEquationConstraint notEqualsConstraint ->
+                new NotEquals(parseNonBooleanChildren(dependenciesList, notEqualsConstraint));
+            case LowerEquationConstraint lowerConstraint ->
+                new LessThan(parseNonBooleanChildren(dependenciesList, lowerConstraint));
+            case GreaterEquationConstraint greaterConstraint ->
+                new GreaterThan(parseNonBooleanChildren(dependenciesList, greaterConstraint));
+            default ->
+                throw new UVLConversionException(uvlConstraint.getClass().getSimpleName() + " is not supported.");
+        };
+    }
 
-                if (variableReference instanceof Feature uvlFeature) {
-                    return new Literal(uvlFeature.getFeatureName());
-                }
-                break;
-            case ParenthesisConstraint parenthesisConstraint:
-                return parseUVLConstraintRecursively(parenthesisConstraint.getContent(), dependenciesList);
-            case ImplicationConstraint implicationConstraint:
-                return new Implies(
-                        (IFormula) parseUVLConstraintRecursively(implicationConstraint.getLeft(), dependenciesList),
-                        (IFormula) parseUVLConstraintRecursively(implicationConstraint.getRight(), dependenciesList));
-            case NotConstraint notConstraint:
-                return new Not((IFormula) parseUVLConstraintRecursively(notConstraint.getContent(), dependenciesList));
-            case AndConstraint andConstraint:
-                List<IFormula> parsedAndChildren = new ArrayList<>();
-                for (Constraint child : andConstraint.getChildren()) {
-                    parsedAndChildren.add((IFormula) parseUVLConstraintRecursively(child, dependenciesList));
-                }
-                return new And(parsedAndChildren.toArray(IFormula[]::new));
-            case OrConstraint orConstraint:
-                List<IFormula> parsedOrChildren = new ArrayList<>();
-                for (Constraint child : orConstraint.getChildren()) {
-                    parsedOrChildren.add((IFormula) parseUVLConstraintRecursively(child, dependenciesList));
-                }
-                return new Or(parsedOrChildren.toArray(IFormula[]::new));
-            case EqualEquationConstraint equalConstraint:
-                return new Equals(
-                        parseExpressionConstraint(equalConstraint.getLeft(), dependenciesList),
-                        parseExpressionConstraint(equalConstraint.getRight(), dependenciesList));
-            case EquivalenceConstraint equivalenceConstraint:
-                return new BiImplies(
-                        (IFormula) parseUVLConstraintRecursively(equivalenceConstraint.getLeft(), dependenciesList),
-                        (IFormula) parseUVLConstraintRecursively(equivalenceConstraint.getRight(), dependenciesList));
-            case LowerEqualsEquationConstraint lowerEqualsConstraint:
-                return new LessEqual(
-                        parseExpressionConstraint(lowerEqualsConstraint.getLeft(), dependenciesList),
-                        parseExpressionConstraint(lowerEqualsConstraint.getRight(), dependenciesList));
-            case GreaterEqualsEquationConstraint greaterEqualConstraint:
-                return new GreaterEqual(
-                        parseExpressionConstraint(greaterEqualConstraint.getLeft(), dependenciesList),
-                        parseExpressionConstraint(greaterEqualConstraint.getRight(), dependenciesList));
-            case NotEqualsEquationConstraint notEqualsConstraint:
-                return new NotEquals(
-                        parseExpressionConstraint(notEqualsConstraint.getLeft(), dependenciesList),
-                        parseExpressionConstraint(notEqualsConstraint.getRight(), dependenciesList));
-            case LowerEquationConstraint lowerConstraint:
-                return new LessThan(
-                        parseExpressionConstraint(lowerConstraint.getLeft(), dependenciesList),
-                        parseExpressionConstraint(lowerConstraint.getRight(), dependenciesList));
-            case GreaterEquationConstraint greaterConstraint:
-                return new GreaterThan(
-                        parseExpressionConstraint(greaterConstraint.getLeft(), dependenciesList),
-                        parseExpressionConstraint(greaterConstraint.getRight(), dependenciesList));
-            default:
-                break;
+    private static List<IFormula> parseBooleanChildren(List<DefLiteral> dependenciesList, Constraint constraint)
+            throws UVLConversionException {
+        List<Constraint> constraintSubParts = constraint.getConstraintSubParts();
+        List<IFormula> children = new ArrayList<>(constraintSubParts.size());
+        for (Constraint child : constraintSubParts) {
+            children.add((IFormula) parseUVLConstraintRecursively(child, dependenciesList));
         }
+        return children;
+    }
 
-        throw new UVLConversionException(uvlConstraint.getClass().getSimpleName() + " is not supported.");
+    private static List<ITerm> parseNonBooleanChildren(
+            List<DefLiteral> dependenciesList, ExpressionConstraint constraint) throws UVLConversionException {
+        List<Expression> constraintSubParts = constraint.getExpressionSubParts();
+        List<ITerm> children = new ArrayList<>(constraintSubParts.size());
+        for (Expression child : constraintSubParts) {
+            children.add(parseExpressionConstraint(child, dependenciesList));
+        }
+        return children;
     }
 
     private static ITerm parseExpressionConstraint(Expression expression, List<DefLiteral> dependenciesList)
             throws UVLConversionException {
-        if (expression instanceof LiteralExpression) {
-            LiteralExpression literalExpression = (LiteralExpression) expression;
-            VariableReference content = literalExpression.getContent();
-
-            if (content instanceof Feature) {
-                Feature uvlFeature = (Feature) content;
-                String variableName = uvlFeature.getFeatureName();
-                Class<?> variableType = getFeatureType(uvlFeature);
-                Variable variable = new Variable(variableName, variableType);
-                if (variableType != Boolean.class) {
-                    dependenciesList.add(new DefLiteral(variable));
-                }
-                return variable;
-            } else if (content instanceof Attribute) {
-                Attribute<?> uvlAttribute = (Attribute<?>) content;
-                return new Constant(uvlAttribute.getValue());
+        return switch (expression) {
+            case ParenthesisExpression parenthesisExpression ->
+                parseExpressionConstraint(parenthesisExpression.getContent(), dependenciesList);
+            case NumberExpression numberExpression -> new Constant(numberExpression.getNumber());
+            case StringExpression stringExpression -> new Constant(stringExpression.getString(), String.class);
+            case LengthAggregateFunctionExpression lenghtAggregateExpression -> {
+                Variable variable =
+                        new Variable(lenghtAggregateExpression.getReference().getIdentifier(), String.class);
+                dependenciesList.add(new DefLiteral(variable));
+                yield new StringLength(variable);
             }
-        } else if (expression instanceof ParenthesisExpression) {
-            ParenthesisExpression parenthesisExpression = (ParenthesisExpression) expression;
-            return parseExpressionConstraint(parenthesisExpression.getContent(), dependenciesList);
-        } else if (expression instanceof NumberExpression) {
-            NumberExpression numberExpression = (NumberExpression) expression;
-            return new Constant(numberExpression.getNumber());
-        } else if (expression instanceof StringExpression) {
-            StringExpression stringExpression = (StringExpression) expression;
-            return new Constant(stringExpression.getString(), String.class);
-        } else if (expression instanceof AddExpression) {
-            AddExpression addExpression = (AddExpression) expression;
-            return new IntegerAdd(
-                    parseExpressionConstraint(addExpression.getLeft(), dependenciesList),
-                    parseExpressionConstraint(addExpression.getRight(), dependenciesList));
-        } else if (expression instanceof SubExpression) {
-            SubExpression subExpression = (SubExpression) expression;
-            return new IntegerAdd(
-                    parseExpressionConstraint(subExpression.getLeft(), dependenciesList),
-                    new IntegerMultiply(
-                            new Constant(-1l), parseExpressionConstraint(subExpression.getRight(), dependenciesList)));
-        } else if (expression instanceof MulExpression) {
-            MulExpression mulExpression = (MulExpression) expression;
-            return new IntegerMultiply(
-                    parseExpressionConstraint(mulExpression.getLeft(), dependenciesList),
-                    parseExpressionConstraint(mulExpression.getRight(), dependenciesList));
-        } else if (expression instanceof DivExpression) {
-            DivExpression divExpression = (DivExpression) expression;
-            return new IntegerDivide(
-                    parseExpressionConstraint(divExpression.getLeft(), dependenciesList),
-                    parseExpressionConstraint(divExpression.getRight(), dependenciesList));
-        } else if (expression instanceof LengthAggregateFunctionExpression) {
-            LengthAggregateFunctionExpression lenghtAggregateExpression =
-                    (LengthAggregateFunctionExpression) expression;
-            String variableName = lenghtAggregateExpression.getReference().getIdentifier();
-            Variable variable = new Variable(variableName, String.class);
-            dependenciesList.add(new DefLiteral(variable));
-            return new StringLength(variable);
-        }
-
-        throw new UVLConversionException(expression.getClass().getSimpleName() + " is not supported.");
+            case LiteralExpression literalExpression ->
+                switch (literalExpression.getContent()) {
+                    case Attribute<?> uvlAttribute -> new Constant(uvlAttribute.getValue());
+                    case Feature uvlFeature -> {
+                        Class<?> variableType = getFeatureType(uvlFeature);
+                        Variable variable = new Variable(uvlFeature.getFeatureName(), variableType);
+                        if (variableType != Boolean.class) {
+                            dependenciesList.add(new DefLiteral(variable));
+                        }
+                        yield variable;
+                    }
+                    default -> throw new UVLConversionException(literalExpression.getContent() + " is not supported.");
+                };
+            case AddExpression addExpression ->
+                new IntegerAdd(
+                        parseExpressionConstraint(addExpression.getLeft(), dependenciesList),
+                        parseExpressionConstraint(addExpression.getRight(), dependenciesList));
+            case SubExpression subExpression ->
+                new IntegerAdd(
+                        parseExpressionConstraint(subExpression.getLeft(), dependenciesList),
+                        new IntegerMultiply(
+                                new Constant(-1l),
+                                parseExpressionConstraint(subExpression.getRight(), dependenciesList)));
+            case MulExpression mulExpression ->
+                new IntegerMultiply(
+                        parseExpressionConstraint(mulExpression.getLeft(), dependenciesList),
+                        parseExpressionConstraint(mulExpression.getRight(), dependenciesList));
+            case DivExpression divExpression ->
+                new IntegerDivide(
+                        parseExpressionConstraint(divExpression.getLeft(), dependenciesList),
+                        parseExpressionConstraint(divExpression.getRight(), dependenciesList));
+            default -> throw new UVLConversionException(expression.getClass().getSimpleName() + " is not supported.");
+        };
     }
 
     /**
