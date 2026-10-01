@@ -435,7 +435,8 @@ public final class FeatJAR extends IO implements AutoCloseable {
         if (optionInput.isHelp()) {
             FeatJAR.log().plainMessage("This is FeatJAR!");
             FeatJAR.log()
-                    .plainMessage(OptionParser.printHelp(optionInput.getCommand().orElse(null)));
+                    .plainMessage(
+                            OptionParser.printHelp(optionInput.getCommand().orElse(null)));
         } else if (optionInput.isVersion()) {
             FeatJAR.log().plainMessage(FeatJAR.LIBRARY_NAME + ", development version");
         } else {

@@ -42,7 +42,8 @@ public class SolutionCountCommand extends ASAT4JAnalysisCommand<BigInteger> {
     }
 
     @Override
-    public IComputation<BigInteger> newAnalysis(OptionParser optionParser, IComputation<BooleanAssignmentList> formula) {
+    public IComputation<BigInteger> newAnalysis(
+            OptionParser optionParser, IComputation<BooleanAssignmentList> formula) {
         return formula.map(ComputeSolutionCountSAT4J::new);
     }
 
