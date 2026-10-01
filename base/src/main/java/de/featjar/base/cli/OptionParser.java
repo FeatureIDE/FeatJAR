@@ -556,8 +556,7 @@ public class OptionParser {
             } else {
                 configuration.logConfig.logToSystemOut(Log.Verbosity.MESSAGE);
             }
-        }
-        if (get(LogOptions.DEBUG_OPTION)) {
+        } else if (get(LogOptions.DEBUG_OPTION)) {
             if (get(LogOptions.PROGRESS_OPTION)) {
                 configuration.useProgressThread = true;
                 configuration.logConfig.logToSystemOut(
