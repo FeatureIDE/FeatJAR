@@ -22,7 +22,7 @@ package de.featjar.analysis.cadical.cli;
 
 import de.featjar.analysis.AAnalysisCommand;
 import de.featjar.base.cli.Option;
-import de.featjar.base.cli.OptionList;
+import de.featjar.base.cli.OptionParser;
 import de.featjar.base.cli.Options;
 import de.featjar.base.computation.Computations;
 import de.featjar.base.computation.IComputation;
@@ -47,7 +47,7 @@ public abstract class ACadicalAnalysisCommand<T> extends AAnalysisCommand<T> {
     protected VariableMap variableMap;
 
     @Override
-    protected IComputation<T> newComputation(OptionList optionParser) {
+    protected IComputation<T> newComputation(OptionParser optionParser) {
         inputFormula = readFromInput(optionParser, FormulaFormats.getInstance()).orElseThrow();
         return newAnalysis(
                 optionParser,
@@ -60,5 +60,5 @@ public abstract class ACadicalAnalysisCommand<T> extends AAnalysisCommand<T> {
     }
 
     protected abstract IComputation<T> newAnalysis(
-            OptionList optionParser, IComputation<BooleanAssignmentList> formula);
+            OptionParser optionParser, IComputation<BooleanAssignmentList> formula);
 }

@@ -118,7 +118,7 @@ public class Reference extends ANonTerminalExpression implements IConnective, IU
 
     @Override
     public Optional<?> evaluate(List<?> values) {
-        return Optional.of(values.get(0));
+        return Optional.ofNullable(values.get(0));
     }
 
     @Override

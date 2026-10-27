@@ -21,25 +21,32 @@
 package de.featjar.formula.visitor;
 
 import static de.featjar.formula.structure.Expressions.reference;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import de.featjar.base.tree.Trees;
 import de.featjar.base.tree.visitor.ITreeVisitor;
+import de.featjar.formula.structure.IExpression;
 import de.featjar.formula.structure.IFormula;
 
 public class VisitorTest {
-    public static void traverseAndAssertSameFormula(IFormula oldFormula, ITreeVisitor<IFormula, ?> treeVisitor) {
+
+    @SuppressWarnings("unchecked")
+    public static <T extends IExpression> void traverseAndAssertSameFormula(
+            IFormula oldFormula, ITreeVisitor<T, ?> treeVisitor) {
         oldFormula = reference(oldFormula);
         IFormula newFormula = (IFormula) oldFormula.cloneTree();
-        assertTrue(Trees.traverse(newFormula, treeVisitor).getProblems().isEmpty());
+        assertTrue(Trees.traverse((T) newFormula, treeVisitor).getProblems().isEmpty());
         assertEquals(oldFormula, newFormula);
     }
 
-    public static void traverseAndAssertFormulaEquals(
-            IFormula oldFormula, ITreeVisitor<IFormula, ?> treeVisitor, IFormula assertFormula) {
+    @SuppressWarnings("unchecked")
+    public static <T extends IExpression> void traverseAndAssertFormulaEquals(
+            IFormula oldFormula, ITreeVisitor<T, ?> treeVisitor, IFormula assertFormula) {
         oldFormula = reference(oldFormula);
-        IFormula newFormula = (IFormula) oldFormula.cloneTree();
-        assertTrue(Trees.traverse(newFormula, treeVisitor).getProblems().isEmpty());
+        IFormula newFormula = oldFormula.cloneTree();
+        assertTrue(Trees.traverse((T) newFormula, treeVisitor).getProblems().isEmpty());
         assertNotEquals(oldFormula, newFormula);
         assertEquals(reference(assertFormula), newFormula);
     }

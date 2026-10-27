@@ -23,7 +23,7 @@ package de.featjar.analysis.ddnnife.cli;
 import de.featjar.analysis.ddnnife.computation.ComputeDdnnifeWrapper;
 import de.featjar.analysis.ddnnife.computation.ComputeTWiseSampleDdnnife;
 import de.featjar.base.cli.Option;
-import de.featjar.base.cli.OptionList;
+import de.featjar.base.cli.OptionParser;
 import de.featjar.base.cli.Options;
 import de.featjar.base.computation.IComputation;
 import de.featjar.base.io.format.IFormat;
@@ -47,14 +47,14 @@ public class TWiseCommand extends ADdnnifeAnalysisCommand<BooleanAssignmentList>
     }
 
     @Override
-    public IComputation<BooleanAssignmentList> newAnalysis(OptionList optionParser, ComputeDdnnifeWrapper formula) {
+    public IComputation<BooleanAssignmentList> newAnalysis(OptionParser optionParser, ComputeDdnnifeWrapper formula) {
         return formula.map(ComputeTWiseSampleDdnnife::new)
                 .set(ComputeTWiseSampleDdnnife.T, optionParser.get(T_OPTION))
                 .set(ComputeTWiseSampleDdnnife.RANDOM_SEED, optionParser.get(RANDOM_SEED_OPTION));
     }
 
     @Override
-    protected IFormat<BooleanAssignmentList> getOuputFormat(OptionList optionParser) {
+    protected IFormat<BooleanAssignmentList> getOuputFormat(OptionParser optionParser) {
         return optionParser.get(FORMAT);
     }
 

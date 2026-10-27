@@ -54,7 +54,7 @@ public class ComputeNNFFormula extends AComputation<IFormula> {
                 : getVariables(formula);
         if (variables.isEmpty()) throw new IllegalArgumentException("requires at least one variable");
         Variable variable = variables.get(0);
-        return Reference.mutateClone(formula, reference -> Trees.traverse(reference, new ConnectiveSimplifier())
+        return Reference.mutateClone(formula, reference -> Trees.traverse(reference, new ConnectiveReplacer())
                 .mapResult(_void -> Trees.traverse(reference, new DeMorganApplier()))
                 .mapResult(_void -> Trees.traverse(reference, new TrueFalseSimplifier()))
                 .mapResult(_void -> Trees.traverse(reference, new TrueFalseRemover(variable)))

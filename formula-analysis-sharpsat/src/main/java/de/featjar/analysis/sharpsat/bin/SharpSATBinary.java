@@ -41,8 +41,8 @@ public class SharpSATBinary extends ABinary {
     public Optional<String> getExecutableName() {
         final OperatingSystem os = HostEnvironment.OPERATING_SYSTEM;
         return switch (os) {
-            case WINDOWS -> Optional.of("sharpsat");
-            case MAC_OS, LINUX -> Optional.of("sharpsat");
+            case WINDOWS -> Optional.of("sharpSAT.exe");
+            case MAC_OS, LINUX -> Optional.of("sharpSAT");
             case UNKNOWN -> Optional.empty();
             default -> throw new IllegalStateException("Unexpected value" + os);
         };

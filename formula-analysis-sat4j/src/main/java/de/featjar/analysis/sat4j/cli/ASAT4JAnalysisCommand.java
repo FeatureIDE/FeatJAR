@@ -22,7 +22,7 @@ package de.featjar.analysis.sat4j.cli;
 
 import de.featjar.analysis.AAnalysisCommand;
 import de.featjar.base.cli.Option;
-import de.featjar.base.cli.OptionList;
+import de.featjar.base.cli.OptionParser;
 import de.featjar.base.cli.Options;
 import de.featjar.base.computation.Computations;
 import de.featjar.base.computation.IComputation;
@@ -49,16 +49,15 @@ public abstract class ASAT4JAnalysisCommand<T> extends AAnalysisCommand<T> {
     /**
      * Timeout option for canceling running computations.
      */
-    public static final Option<Duration> SAT_TIMEOUT_OPTION = Options.newOption(
-                    "solver_timeout", s -> Duration.ofMillis(Long.parseLong(s)))
-            .setDescription("Timeout in milliseconds")
-            .setValidator(timeout -> !timeout.isNegative())
-            .setDefaultArgument("0");
+    public static final Option<Duration> SAT_TIMEOUT_OPTION = //
+            Options.newOption("solver_timeout", Options.TimeoutParser)
+                    .setDescription("Timeout in milliseconds")
+                    .setDefaultArgument("0");
 
     protected VariableMap variableMap;
 
     @Override
-    protected IComputation<T> newComputation(OptionList optionParser) {
+    protected IComputation<T> newComputation(OptionParser optionParser) {
         Path inputPath = optionParser.getResult(INPUT_OPTION).orElseThrow();
         IComputation<BooleanAssignmentList> computation = IO.load(
                         inputPath, BooleanAssignmentGroupsFormats.getInstance())
@@ -74,5 +73,5 @@ public abstract class ASAT4JAnalysisCommand<T> extends AAnalysisCommand<T> {
     }
 
     protected abstract IComputation<T> newAnalysis(
-            OptionList optionParser, IComputation<BooleanAssignmentList> formula);
+            OptionParser optionParser, IComputation<BooleanAssignmentList> formula);
 }

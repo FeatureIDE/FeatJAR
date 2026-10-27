@@ -45,9 +45,8 @@ public abstract class ACommand implements ICommand {
     /**
      * Input option for loading files.
      */
-    public static final Option<Path> INPUT_OPTION = Options.newOption("input", Options.PathParser)
-            .setDescription("Path to input file(s)")
-            .setValidator(Options.PathValidator);
+    public static final Option<Path> INPUT_OPTION =
+            Options.newOption("input", Options.ExistingPathParser).setDescription("Path to input file(s)");
 
     /**
      * Output option for saving files.
@@ -80,7 +79,7 @@ public abstract class ACommand implements ICommand {
         return Options.getAllOptions(getClass());
     }
 
-    protected final <T> Result<T> readFromInput(OptionList optionParser, IFormatSupplier<T> formatSupplier) {
+    protected final <T> Result<T> readFromInput(OptionParser optionParser, IFormatSupplier<T> formatSupplier) {
         return IO.load(
                 optionParser.getResult(INPUT_OPTION).orElseThrow(),
                 formatSupplier,
@@ -89,7 +88,7 @@ public abstract class ACommand implements ICommand {
                         : new IOMapperOptions[0]);
     }
 
-    protected final <T> int writeResult(OptionList optionParser, Result<T> result, IFormat<T> ouputFormat) {
+    protected final <T> int writeResult(OptionParser optionParser, Result<T> result, IFormat<T> ouputFormat) {
         if (result.isEmpty()) {
             FeatJAR.log().problems(result, Verbosity.ERROR);
             return FeatJAR.ERROR_COMPUTING_RESULT;
@@ -97,7 +96,7 @@ public abstract class ACommand implements ICommand {
         return writeObject(optionParser, result.get(), ouputFormat);
     }
 
-    protected <T> int writeObject(OptionList optionParser, T output, IFormat<T> ouputFormat) {
+    protected <T> int writeObject(OptionParser optionParser, T output, IFormat<T> ouputFormat) {
         try {
             write(optionParser, output, ouputFormat);
             return FeatJAR.EXIT_SUCCESS;
@@ -113,7 +112,7 @@ public abstract class ACommand implements ICommand {
      * @param ouputFormat format to store the result in
      * @param optionParser the option list
      */
-    private <T> void write(OptionList optionParser, T output, IFormat<T> outputFormat) throws IOException {
+    private <T> void write(OptionParser optionParser, T output, IFormat<T> outputFormat) throws IOException {
         Path outputPath = optionParser.getResult(OUTPUT_OPTION).orElse(null);
 
         if (outputPath == null) {

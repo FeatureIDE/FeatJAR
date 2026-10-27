@@ -40,7 +40,7 @@ import java.util.stream.Collectors;
  *
  * @author Sebastian Krieter
  */
-public class ConnectiveSimplifier implements ITreeVisitor<IFormula, Void> {
+public class ConnectiveReplacer implements ITreeVisitor<IFormula, Void> {
 
     private boolean fail;
 

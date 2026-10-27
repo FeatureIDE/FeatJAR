@@ -27,7 +27,7 @@ import de.featjar.base.io.input.AInput;
  *
  * @author Sebastian Krieter
  */
-public class ParseException extends Exception {
+public class ParseException extends Exception implements IParseError {
 
     private static final long serialVersionUID = -6948189323221248464L;
 
@@ -66,10 +66,12 @@ public class ParseException extends Exception {
         this.position = position;
     }
 
+    @Override
     public int getLineNumber() {
         return lineNumber;
     }
 
+    @Override
     public int getPosition() {
         return position;
     }

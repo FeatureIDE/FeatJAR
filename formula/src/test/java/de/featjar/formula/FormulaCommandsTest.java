@@ -65,6 +65,7 @@ public class FormulaCommandsTest {
     @Test
     void printFormulaWorksCorrectly() throws IOException {
         Path tempFile = Files.createTempFile("featJarTest", ".txt");
+
         int exitCode = FeatJAR.runTest(
                 "print",
                 "--input",
@@ -73,8 +74,8 @@ public class FormulaCommandsTest {
                 "TAB",
                 "--notation",
                 "PREFIX",
-                "--format",
-                "de.featjar.formula.io.textual.JavaSymbols",
+                "--symbols",
+                "JavaSymbols",
                 "--newline",
                 "NEWLINE",
                 "--enforce-parentheses",
@@ -82,6 +83,7 @@ public class FormulaCommandsTest {
                 "--overwrite",
                 "--output",
                 tempFile.toString());
+
         Assertions.assertEquals(0, exitCode);
         Assertions.assertEquals(
                 Files.readString(Path.of("./src/test/resources/testPrintCommand")), Files.readString(tempFile));

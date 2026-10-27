@@ -22,7 +22,7 @@ package de.featjar.analysis.ganak.cli;
 
 import de.featjar.analysis.ganak.computation.AGanakAnalysis;
 import de.featjar.analysis.ganak.computation.ComputeSolutionGanak;
-import de.featjar.base.cli.OptionList;
+import de.featjar.base.cli.OptionParser;
 import de.featjar.base.computation.IComputation;
 import de.featjar.formula.assignment.BooleanAssignmentList;
 import java.util.Optional;
@@ -39,7 +39,7 @@ public class SolutionCommand extends AGanakAnalysisCommand<Boolean> {
     }
 
     @Override
-    public AGanakAnalysis<Boolean> newAnalysis(OptionList optionParser, IComputation<BooleanAssignmentList> formula) {
+    public AGanakAnalysis<Boolean> newAnalysis(OptionParser optionParser, IComputation<BooleanAssignmentList> formula) {
         return formula.map(ComputeSolutionGanak::new);
     }
 

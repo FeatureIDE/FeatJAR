@@ -32,9 +32,10 @@ import java.util.Objects;
 public abstract class ATerminalExpression extends ALeafNode<IExpression> implements IExpression {
     @Override
     public boolean equalsNode(IExpression other) {
-        return (getClass() == other.getClass())
-                && Objects.equals(getName(), other.getName())
-                && Objects.equals(getType(), other.getType());
+        return this == other
+                || ((getClass() == other.getClass())
+                        && Objects.equals(getName(), other.getName())
+                        && Objects.equals(getType(), other.getType()));
     }
 
     @Override

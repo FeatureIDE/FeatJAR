@@ -276,16 +276,16 @@ public class ExpressionSerializer implements IInOrderTreeVisitor<IExpression, St
                     sb.append('(');
                     break;
                 case INFIX:
-                    if (!isInfix(node)) {
+                    if (isInfix(node)) {
+                        if (needsParentheses(path, node)) {
+                            sb.append('(');
+                        }
+                    } else {
                         sb.append(symbols.getSymbol(node));
                         if (needsParentheses(path, node)) {
                             sb.append('(');
                         } else if (symbols.isTextual()) {
                             sb.append(' ');
-                        }
-                    } else {
-                        if (needsParentheses(path, node)) {
-                            sb.append('(');
                         }
                     }
                     break;

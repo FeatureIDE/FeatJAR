@@ -64,7 +64,7 @@ public class Result<T> implements Supplier<T> {
      * @param object the computed object to wrap
      * @param problems the problems occurred during computation
      */
-    protected Result(T object, List<Problem> problems) {
+    protected Result(T object, List<? extends Problem> problems) {
         this.object = object;
         problems = problems == null
                 ? null
@@ -180,7 +180,7 @@ public class Result<T> implements Supplier<T> {
      * @param problems the problems
      * @param <T>      the type of the result's object
      */
-    public static <T> Result<T> empty(List<Problem> problems) {
+    public static <T> Result<T> empty(List<? extends Problem> problems) {
         return new Result<>(null, problems);
     }
 

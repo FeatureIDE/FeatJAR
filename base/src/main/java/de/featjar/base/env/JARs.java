@@ -20,11 +20,17 @@
  */
 package de.featjar.base.env;
 
+import de.featjar.base.data.Result;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Collections;
 
 /**
  * Utilities for handling Java archives.
@@ -58,5 +64,22 @@ public class JARs {
         URL url = ClassLoader.getSystemClassLoader().getResource(resourceName);
         if (url == null) throw new IOException("no resource found at " + resourceName);
         return url;
+    }
+
+    public static Result<Path> getResourcePath(String resourceName) {
+        URL resource = ClassLoader.getSystemClassLoader().getResource(resourceName);
+        if (resource == null) {
+            return Result.empty(new FileNotFoundException(resourceName));
+        }
+        try {
+            URI uri = resource.toURI();
+            return Result.of(
+                    "jar".equals(uri.getScheme())
+                            ? FileSystems.newFileSystem(uri, Collections.emptyMap(), null)
+                                    .getPath(resourceName)
+                            : Path.of(uri));
+        } catch (URISyntaxException | IOException e) {
+            return Result.empty(e);
+        }
     }
 }

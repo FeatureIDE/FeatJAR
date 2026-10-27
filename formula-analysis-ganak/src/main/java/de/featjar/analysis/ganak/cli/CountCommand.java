@@ -23,7 +23,7 @@ package de.featjar.analysis.ganak.cli;
 import de.featjar.analysis.ganak.computation.AGanakAnalysis;
 import de.featjar.analysis.ganak.computation.ComputeCountSolutionGanak;
 import de.featjar.base.cli.MultiOption;
-import de.featjar.base.cli.OptionList;
+import de.featjar.base.cli.OptionParser;
 import de.featjar.base.cli.Options;
 import de.featjar.base.computation.IComputation;
 import de.featjar.base.data.Result;
@@ -60,7 +60,7 @@ public class CountCommand extends AGanakAnalysisCommand<BigInteger> {
 
     @Override
     public AGanakAnalysis<BigInteger> newAnalysis(
-            OptionList optionParser, IComputation<BooleanAssignmentList> formula) {
+            OptionParser optionParser, IComputation<BooleanAssignmentList> formula) {
         // already compute cnf in order to obtain the VariableMap
         formula.computeResult();
 
@@ -75,7 +75,7 @@ public class CountCommand extends AGanakAnalysisCommand<BigInteger> {
     }
 
     private BooleanAssignment getVariableIndices(
-            OptionList optionParser, final MultiOption<String> literalsSliceOption) {
+            OptionParser optionParser, final MultiOption<String> literalsSliceOption) {
         return new BooleanAssignment(optionParser.getResult(literalsSliceOption).orElse(List.of()).stream()
                 .map(variableMap::get)
                 .filter(Result::isPresent)

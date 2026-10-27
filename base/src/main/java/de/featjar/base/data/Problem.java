@@ -68,7 +68,7 @@ public class Problem {
      * @param problemList the list of problems
      * @return the {@link Problem} wrapped in an {@link Optional}
      */
-    public static Optional<Problem> getFirstError(List<Problem> problemList) {
+    public static Optional<? extends Problem> getFirstError(List<? extends Problem> problemList) {
         return problemList.stream()
                 .filter(p -> p.getSeverity() == Severity.ERROR)
                 .findFirst();

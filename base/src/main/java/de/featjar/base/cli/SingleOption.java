@@ -20,10 +20,10 @@
  */
 package de.featjar.base.cli;
 
+import de.featjar.base.data.Result;
 import java.util.Collection;
 import java.util.Objects;
 import java.util.function.Function;
-import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 /**
@@ -38,12 +38,7 @@ public class SingleOption<T> extends AOption<T> {
     /**
      * A parser that parses a string into the type of the option.
      */
-    protected final Function<String, T> parser;
-
-    /**
-     * A validator that check whether a given value is valid.
-     */
-    protected Predicate<T> validator;
+    protected final Function<String, Result<T>> parser;
 
     /**
      * Creates an option.
@@ -51,19 +46,8 @@ public class SingleOption<T> extends AOption<T> {
      * @param name   the name of the option
      * @param parser the parser for the option's value
      */
-    protected SingleOption(String name, Function<String, T> parser) {
-        this(name, parser, null, null, null);
-    }
-
-    /**
-     * Creates an option.
-     *
-     * @param name   the name of the option
-     * @param parser the parser for the option's value
-     * @param validator the validator for the option's value
-     */
-    protected SingleOption(String name, Function<String, T> parser, Predicate<T> validator) {
-        this(name, parser, validator, null, null);
+    protected SingleOption(String name, Function<String, Result<T>> parser) {
+        this(name, parser, null, null);
     }
 
     /**
@@ -73,8 +57,8 @@ public class SingleOption<T> extends AOption<T> {
      * @param parser the parser for the option's value
      * @param possibleValues the possibleValues for the option
      */
-    protected SingleOption(String name, Function<String, T> parser, Collection<String> possibleValues) {
-        this(name, parser, null, possibleValues, null);
+    protected SingleOption(String name, Function<String, Result<T>> parser, Collection<String> possibleValues) {
+        this(name, parser, possibleValues, null);
     }
 
     /**
@@ -82,10 +66,10 @@ public class SingleOption<T> extends AOption<T> {
      *
      * @param name   the name of the option
      * @param parser the parser for the option's value
-     * @param defaultValue the default value in case no other is provided or can be parsed
+     * @param defaultArgument the default value in case no other is provided or can be parsed
      */
-    protected SingleOption(String name, Function<String, T> parser, String defaultValue) {
-        this(name, parser, null, null, defaultValue);
+    protected SingleOption(String name, Function<String, Result<T>> parser, String defaultArgument) {
+        this(name, parser, null, defaultArgument);
     }
 
     /**
@@ -94,43 +78,15 @@ public class SingleOption<T> extends AOption<T> {
      * @param name   the name of the option
      * @param parser the parser for the option's value
      * @param possibleValues the possibleValues for the option
-     * @param defaultValue the default value in case no other is provided or can be parsed
-     */
-    protected SingleOption(
-            String name, Function<String, T> parser, Collection<String> possibleValues, String defaultValue) {
-        this(name, parser, null, possibleValues, defaultValue);
-    }
-
-    /**
-     * Creates an option.
-     *
-     * @param name   the name of the option
-     * @param parser the parser for the option's value
-     * @param validator the validator for the option's value
-     * @param defaultValue the default value in case no other is provided or can be parsed
-     */
-    protected SingleOption(String name, Function<String, T> parser, Predicate<T> validator, String defaultValue) {
-        this(name, parser, validator, null, defaultValue);
-    }
-
-    /**
-     * Creates an option.
-     *
-     * @param name   the name of the option
-     * @param parser the parser for the option's value
-     * @param validator the validator for the option's value
-     * @param possibleValues the possibleValues for the option
-     * @param defaultValue the default value in case no other is provided or can be parsed
+     * @param defaultArgument the default value in case no other is provided or can be parsed
      */
     protected SingleOption(
             String name,
-            Function<String, T> parser,
-            Predicate<T> validator,
+            Function<String, Result<T>> parser,
             Collection<String> possibleValues,
-            String defaultValue) {
-        super(name, defaultValue);
+            String defaultArgument) {
+        super(name, defaultArgument);
         this.parser = Objects.requireNonNull(parser);
-        this.validator = validator == null ? t -> true : validator;
         setPossibleArguments(possibleValues);
     }
 
@@ -138,18 +94,8 @@ public class SingleOption<T> extends AOption<T> {
      * {@return this option's parser}
      */
     @Override
-    public Function<String, T> getParser() {
+    public Function<String, Result<T>> getParser() {
         return parser;
-    }
-
-    @Override
-    public Predicate<T> getValidator() {
-        return validator;
-    }
-
-    public SingleOption<T> setValidator(Predicate<T> validator) {
-        this.validator = validator;
-        return this;
     }
 
     @Override

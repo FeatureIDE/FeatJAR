@@ -22,7 +22,7 @@ package de.featjar.feature.model.cli;
 
 import de.featjar.base.cli.ACommand;
 import de.featjar.base.cli.Option;
-import de.featjar.base.cli.OptionList;
+import de.featjar.base.cli.OptionParser;
 import de.featjar.base.cli.Options;
 import de.featjar.base.computation.Computations;
 import de.featjar.base.data.Result;
@@ -61,7 +61,7 @@ public class PrintConfigurationStatistics extends ACommand {
     }
 
     @Override
-    public int run(OptionList optionParser) {
+    public int run(OptionParser optionParser) {
         return writeResult(
                 optionParser,
                 readFromInput(optionParser, BooleanAssignmentListFormats.getInstance())

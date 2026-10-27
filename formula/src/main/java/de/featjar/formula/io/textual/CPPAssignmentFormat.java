@@ -37,12 +37,14 @@ import java.util.stream.Collectors;
  */
 public class CPPAssignmentFormat implements IFormat<Assignment> {
 
-    private static final Pattern cs = Pattern.compile("#define\\s+(\\S+)(\\s+(.*))?");
+    private static final Pattern cs = Pattern.compile("#(define|undef)\\s+(\\S+)(\\s+(.*))?");
 
     @Override
     public Result<String> serialize(Assignment valueAssignment) {
         return Result.of(valueAssignment.getAll().entrySet().stream()
-                .map(e -> e.getValue() == Boolean.TRUE ? String.format("#define %s", e.getKey()) : null)
+                .map(e -> e.getValue() == Boolean.TRUE
+                        ? String.format("#define %s", e.getKey())
+                        : e.getValue() == Boolean.FALSE ? String.format("#undef %s", e.getKey()) : null)
                 .filter(Objects::nonNull)
                 .collect(Collectors.joining("\n")));
     }
@@ -55,8 +57,7 @@ public class CPPAssignmentFormat implements IFormat<Assignment> {
                 .getLineStream()
                 .map(cs::matcher)
                 .filter(m -> m.matches())
-                .map(m -> m.group(1))
-                .forEach(variable -> variableValuePairs.put(variable, Boolean.TRUE));
+                .forEach(m -> variableValuePairs.put(m.group(2), m.group(1).equals("define")));
         return Result.of(new Assignment(variableValuePairs));
     }
 

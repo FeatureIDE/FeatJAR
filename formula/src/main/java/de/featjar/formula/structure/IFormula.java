@@ -22,20 +22,30 @@ package de.featjar.formula.structure;
 
 import static de.featjar.base.computation.Computations.async;
 
+import de.featjar.analysis.RuntimeContradictionException;
 import de.featjar.base.computation.IComputation;
 import de.featjar.base.data.Result;
+import de.featjar.base.log.Log.Verbosity;
+import de.featjar.base.tree.Trees;
+import de.featjar.formula.assignment.Assignment;
 import de.featjar.formula.computation.ComputeCNFFormula;
 import de.featjar.formula.computation.ComputeDNFFormula;
 import de.featjar.formula.computation.ComputeNNFFormula;
 import de.featjar.formula.structure.connective.AQuantifier;
 import de.featjar.formula.structure.connective.IConnective;
+import de.featjar.formula.structure.connective.Or;
 import de.featjar.formula.structure.predicate.IPredicate;
+import de.featjar.formula.structure.predicate.Literal;
 import de.featjar.formula.structure.term.value.Variable;
 import de.featjar.formula.visitor.ANormalFormTester;
 import de.featjar.formula.visitor.CNFTester;
 import de.featjar.formula.visitor.DNFTester;
+import de.featjar.formula.visitor.EvaluationSimplifier;
+import de.featjar.formula.visitor.ExpressionReplacer;
 import de.featjar.formula.visitor.NNFTester;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.Objects;
 
 /**
  * A well-formed formula.
@@ -74,6 +84,10 @@ public interface IFormula extends IExpression {
 
     default Class<?> getType() {
         return Boolean.class;
+    }
+
+    default IFormula cloneTree() {
+        return Trees.clone((IFormula) this);
     }
 
     private boolean isNormalForm(FormulaNormalForm formulaNormalForm, boolean isStrict) {
@@ -165,6 +179,32 @@ public interface IFormula extends IExpression {
     @Override
     default LinkedHashSet<String> getVariableNames() {
         return IExpression.super.getVariableNames();
+    }
+
+    default Assignment getImpliedAssignment(Assignment assignment) {
+        IFormula cnf = toCNF().orElseLog(Verbosity.WARNING);
+        if (cnf != null) {
+            Trees.traverse(cnf, ExpressionReplacer.insertKnownVariables(assignment));
+            Trees.traverse(cnf, new EvaluationSimplifier());
+            LinkedHashMap<String, Object> tempAssignment = new LinkedHashMap<>(assignment.getAll());
+            for (IExpression child : cnf.getChildren()) {
+                if (child instanceof Or clause && clause.getChildrenCount() == 1) {
+                    Literal literal = (Literal) clause.getFirstChild().get();
+                    String name = literal.getVariable().getName();
+                    Boolean value = Boolean.valueOf(literal.isPositive());
+                    Object assignedValue = tempAssignment.get(name);
+                    if (assignedValue != null) {
+                        if (!Objects.equals(assignedValue, value)) {
+                            throw new RuntimeContradictionException(name);
+                        }
+                    } else {
+                        tempAssignment.put(name, value);
+                    }
+                }
+            }
+            return new Assignment(tempAssignment);
+        }
+        return assignment;
     }
 
     // TODO: mutate/analyze analogous to FeatureModel?

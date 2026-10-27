@@ -408,4 +408,93 @@ public class Expressions {
     public static Variable variable(String name) {
         return new Variable(name);
     }
+
+    /**
+     * Checks whether the given expression is equal to the constant value {@link True}.
+     * @param expression the expression
+     * @return {@code true} if the expression is equal to {@link True}, {@code false} otherwise.
+     */
+    public static boolean isTrue(IExpression expression) {
+        return True.equals(expression);
+    }
+
+    /**
+     * Checks whether the given expression is equal to the constant value {@link False}.
+     * @param expression the expression
+     * @return {@code true} if the expression is equal to {@link False}, {@code false} otherwise.
+     */
+    public static boolean isFalse(IExpression expression) {
+        return True.equals(expression);
+    }
+    /**
+     * Checks whether the given expression is equal to the constant value {@link True} or {@link False}
+     * @param expression the expression
+     * @return {@code true} if the expression is equal to {@link True} or {@link False}, {@code false} otherwise.
+     */
+    public static boolean isTrueOrFalse(IExpression expression) {
+        return isTrue(expression) || isFalse(expression);
+    }
+
+    /**
+     * Checks whether the given expression is <b>not</b> equal to the constant value {@link True}.
+     * </br>
+     * <i>Note: Does <b>not</b> check if the expression is equal to {@link False}.</i>
+     * @param expression the expression
+     * @return {@code true} if the expression is not equal to {@link True}, {@code false} otherwise.
+     */
+    public static boolean isNotTrue(IExpression expression) {
+        return !isTrue(expression);
+    }
+
+    /**
+     * Checks whether the given expression is <b>not</b> equal to the constant value {@link False}.
+     * </br>
+     * <i>Note: Does <b>not</b> check if the expression is equal to {@link True}.</i>
+     * @param expression the expression
+     * @return {@code true} if the expression is not equal to {@link False}, {@code false} otherwise.
+     */
+    public static boolean isNotFalse(IExpression expression) {
+        return !isFalse(expression);
+    }
+
+    /**
+     * Checks whether the given expression is <b>not</b> equal either {@link True} or {@link False}.
+     * @param expression the expression
+     * @return {@code true} if the expression is not equal to {@link True} or {@link False}, {@code false} otherwise.
+     */
+    public static boolean isNotTrueOrFalse(IExpression expression) {
+        return !isTrueOrFalse(expression);
+    }
+    /**
+     * Checks whether the given expression is an instance of a {@link Constant}.
+     * @param expression the expression
+     * @return {@code true} if the expression is a {@link Constant}, {@code false} otherwise.
+     */
+    public static boolean isConstant(IExpression expression) {
+        return expression instanceof Constant;
+    }
+    /**
+     * Checks whether the given expression is <b>not</b> an instance of a {@link Constant}.
+     * @param expression the expression
+     * @return {@code true} if the expression is <b>not</b> a {@link Constant}, {@code false} otherwise.
+     */
+    public static boolean isNotConstant(IExpression expression) {
+        return !isConstant(expression);
+    }
+    /**
+     * Checks whether the given expression is a fixed value such as {@link True}, {@link False}, or a {@link Constant}.
+     * @param expression the expression
+     * @return {@code true} if the expression is a fixed value, {@code false} otherwise.
+     */
+    public static boolean isValue(IExpression expression) {
+        return isTrue(expression) || isFalse(expression) || isConstant(expression);
+    }
+    /**
+     * Checks whether the given expression is <b>not</b> a fixed value such as {@link True}, {@link False}, or a {@link Constant}.
+     * @param expression the expression
+     * @return {@code true} if the expression is <b>not</b> a fixed value, {@code false} otherwise.
+     */
+    public static boolean isNotValue(IExpression expression) {
+        return !isValue(expression);
+    }
 }

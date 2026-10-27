@@ -22,7 +22,7 @@ package de.featjar.formula.cli;
 
 import de.featjar.base.cli.ACommand;
 import de.featjar.base.cli.Option;
-import de.featjar.base.cli.OptionList;
+import de.featjar.base.cli.OptionParser;
 import de.featjar.base.cli.Options;
 import de.featjar.base.io.format.IFormat;
 import de.featjar.base.io.format.IFormatSupplier;
@@ -58,7 +58,7 @@ public class ConvertFormulaFormatCommand extends ACommand {
     }
 
     @Override
-    public int run(OptionList optionParser) {
+    public int run(OptionParser optionParser) {
         return writeResult(
                 optionParser,
                 readFromInput(optionParser, optionParser.get(INPUT_FORMAT)),

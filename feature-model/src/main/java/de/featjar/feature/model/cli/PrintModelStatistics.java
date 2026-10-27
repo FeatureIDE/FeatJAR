@@ -22,7 +22,7 @@ package de.featjar.feature.model.cli;
 
 import de.featjar.base.cli.ACommand;
 import de.featjar.base.cli.Option;
-import de.featjar.base.cli.OptionList;
+import de.featjar.base.cli.OptionParser;
 import de.featjar.base.cli.Options;
 import de.featjar.base.computation.Computations;
 import de.featjar.base.io.DataTreeFormats;
@@ -75,7 +75,7 @@ public class PrintModelStatistics extends ACommand {
     }
 
     @Override
-    public int run(OptionList optionParser) {
+    public int run(OptionParser optionParser) {
         return writeObject(
                 optionParser,
                 collectStats(
@@ -97,6 +97,8 @@ public class PrintModelStatistics extends ACommand {
             DataTree<?> treeData = DataTree.of("FeatureTree");
             data.addChild(treeData);
             treeData.addChild(
+                    DataTree.ofValue("NumberOfFeatures", model.getFeatures().size()));
+            treeData.addChild(
                     Computations.of(model).map(ComputeFeatureTreeMaxDepth::new).compute());
             treeData.addChild(Computations.of(model)
                     .map(ComputeFeatureTreeNumberOfBranches::new)
@@ -114,6 +116,8 @@ public class PrintModelStatistics extends ACommand {
         if (scope == AnalysesScope.ALL || scope == AnalysesScope.CONSTRAINT_RELATED) {
             DataTree<?> constraintData = DataTree.of("CrossTreeConstraints");
             data.addChild(constraintData);
+            constraintData.addChild(DataTree.ofValue(
+                    "NumberOfConstraints", model.getConstraints().size()));
             constraintData.addChild(Computations.of(model)
                     .map(ComputeConstraintNumberOfAtoms::new)
                     .compute());

@@ -23,7 +23,7 @@ package de.featjar.base;
 import de.featjar.base.cli.FeatJAROptions;
 import de.featjar.base.cli.ICommand;
 import de.featjar.base.cli.LogOptions;
-import de.featjar.base.cli.OptionList;
+import de.featjar.base.cli.OptionParser;
 import de.featjar.base.cli.Options;
 import de.featjar.base.computation.Cache;
 import de.featjar.base.computation.FallbackCache;
@@ -414,7 +414,7 @@ public final class FeatJAR extends IO implements AutoCloseable {
     }
 
     private int runAfterInitialization(boolean configure, String... arguments) {
-        OptionList optionInput = new OptionList(arguments);
+        OptionParser optionInput = new OptionParser(arguments);
         optionInput.addOptions(Options.getAllOptions(FeatJAROptions.class));
         optionInput.addOptions(Options.getAllOptions(LogOptions.class));
 
@@ -427,14 +427,16 @@ public final class FeatJAR extends IO implements AutoCloseable {
         if (Problem.containsError(problems)) {
             FeatJAR.log().problems(problems);
             FeatJAR.log()
-                    .plainMessage(OptionList.printHelp(optionInput.getCommand().orElse(null)));
+                    .plainMessage(
+                            "Type \"commands\" to show all available commands or \"help\" to print usage information");
             return FeatJAR.ERROR_COMPUTING_RESULT;
         }
 
         if (optionInput.isHelp()) {
             FeatJAR.log().plainMessage("This is FeatJAR!");
             FeatJAR.log()
-                    .plainMessage(OptionList.printHelp(optionInput.getCommand().orElse(null)));
+                    .plainMessage(
+                            OptionParser.printHelp(optionInput.getCommand().orElse(null)));
         } else if (optionInput.isVersion()) {
             FeatJAR.log().plainMessage(FeatJAR.LIBRARY_NAME + ", development version");
         } else {
@@ -442,12 +444,18 @@ public final class FeatJAR extends IO implements AutoCloseable {
             FeatJAR.log().problems(problems);
             if (optionalCommand.isEmpty()) {
                 FeatJAR.log().error("No command provided");
-                FeatJAR.log().plainMessage(OptionList.printAvailableCommands());
+                FeatJAR.log()
+                        .plainMessage(
+                                "Type \"commands\" to show all available commands or \"help\" to print usage information");
                 return FeatJAR.ERROR_COMPUTING_RESULT;
             } else {
                 ICommand command = optionalCommand.get();
                 FeatJAR.log().debug("Running command %s", command.getIdentifier());
-                return command.run(optionInput);
+                try {
+                    return command.run(optionInput);
+                } catch (Exception e) {
+                    FeatJAR.log().error(e);
+                }
             }
         }
         return 0;

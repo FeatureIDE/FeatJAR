@@ -25,7 +25,7 @@ import de.featjar.base.FeatJAR;
 import de.featjar.base.cli.ACommand;
 import de.featjar.base.cli.MultiOption;
 import de.featjar.base.cli.Option;
-import de.featjar.base.cli.OptionList;
+import de.featjar.base.cli.OptionParser;
 import de.featjar.base.cli.Options;
 import de.featjar.base.computation.Computations;
 import de.featjar.base.computation.IComputation;
@@ -70,17 +70,15 @@ public class ProjectionCommand extends ACommand {
     /**
      * Timeout in seconds.
      */
-    public static final Option<Duration> TIMEOUT_OPTION = Options.newOption(
-                    "timeout", s -> Duration.ofSeconds(Long.parseLong(s)))
+    public static final Option<Duration> TIMEOUT_OPTION = Options.newOption("timeout", Options.TimeoutParser)
             .setDescription("Timeout in seconds.")
-            .setValidator(timeout -> !timeout.isNegative())
             .setDefaultArgument("0");
 
     public static final Option<IFormat<BooleanAssignmentList>> OUTPUT_FORMAT = Options.newOutputFormatOption(
             BooleanAssignmentListFormats.class, new BooleanAssignmentListGroupedCSVFormat().getName());
 
     @Override
-    public int run(OptionList optionParser) {
+    public int run(OptionParser optionParser) {
         List<String> projectLiterals =
                 optionParser.getResult(LITERALS_PROJECT_OPTION).orElse(List.of());
         Set<String> sliceLiterals = new LinkedHashSet<>(

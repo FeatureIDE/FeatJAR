@@ -79,7 +79,7 @@ public class Trees {
      * @param <R> the type of result
      * @param <T> the type of tree
      */
-    public static <R, T extends ITree<?>> Result<R> traverse(T node, ITreeVisitor<T, R> visitor) {
+    public static <I extends T, R, T extends ITree<?>> Result<R> traverse(I node, ITreeVisitor<T, R> visitor) {
         visitor.reset();
         try {
             if (visitor.isInorder()) {

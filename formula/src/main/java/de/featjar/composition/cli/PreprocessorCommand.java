@@ -23,14 +23,19 @@ package de.featjar.composition.cli;
 import de.featjar.base.FeatJAR;
 import de.featjar.base.cli.ACommand;
 import de.featjar.base.cli.Option;
-import de.featjar.base.cli.OptionList;
+import de.featjar.base.cli.OptionParser;
 import de.featjar.base.cli.Options;
+import de.featjar.base.data.Problem;
 import de.featjar.base.data.Result;
 import de.featjar.base.io.IO;
+import de.featjar.base.tree.Trees;
 import de.featjar.composition.Preprocessor;
 import de.featjar.formula.assignment.Assignment;
+import de.featjar.formula.io.FormulaFormats;
 import de.featjar.formula.io.textual.CPPAssignmentFormat;
+import de.featjar.formula.io.textual.ExpressionSerializer;
 import de.featjar.formula.io.textual.JavaSymbols;
+import de.featjar.formula.structure.IFormula;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -48,7 +53,12 @@ public class PreprocessorCommand extends ACommand {
     public static enum Mode {
         PROCESS,
         PRINT_VARIABLES,
-        PRINT_ANNOTATIONS
+        PRINT_ANNOTATIONS,
+        CHECK_STRUCTURE,
+        FIND_UNKNOWN_FEATURES,
+        PRINT_PRESENCE_CONDITIONS,
+        CHECK_SYNTAX,
+        RENAME_FEATURE
     }
 
     public static enum MissingVariables {
@@ -57,9 +67,27 @@ public class PreprocessorCommand extends ACommand {
         FALSE
     }
 
-    public static final Option<Path> CONFIGURATION_OPTION = Options.newOption("configuration", Options.PathParser)
-            .setDescription("Path to configuration file")
-            .setValidator(Options.PathValidator);
+    public static enum AnnotationStyle {
+        CPP(Preprocessor.Style.CPP),
+        ANTENNA(Preprocessor.Style.ANTENNA),
+        MUNGE(Preprocessor.Style.MUNGE);
+
+        private final Preprocessor.Style style;
+
+        private AnnotationStyle(Preprocessor.Style style) {
+            this.style = style;
+        }
+
+        public Preprocessor.Style getStyle() {
+            return style;
+        }
+    }
+
+    public static final Option<Path> CONFIGURATION_OPTION =
+            Options.newOption("configuration", Options.ExistingPathParser).setDescription("Path to configuration file");
+
+    public static final Option<Path> FEATURE_MODEL_OPTION =
+            Options.newOption("feature-model", Options.ExistingPathParser).setDescription("Path to feature model file");
 
     public static final Option<Mode> MODE_OPTION = Options.newEnumOption("mode", Mode.class)
             .setDefaultArgument(Mode.PROCESS.name())
@@ -70,24 +98,43 @@ public class PreprocessorCommand extends ACommand {
             .setDefaultArgument(MissingVariables.IGNORE.name())
             .setDescription("How to deal with variables in the processed file that do not appear in the given config");
 
+    public static final Option<AnnotationStyle> STYLE_OPTION = Options.newEnumOption(
+                    "annotation-style", AnnotationStyle.class)
+            .setDefaultArgument(AnnotationStyle.CPP.name())
+            .setDescription("The syntax of the annotations (CPP: #if A, ANTENNA: //#if A, MUNGE: /*if[A]*/)");
+
     public static final Option<String> PREFIX_OPTION = Options.newOption("annotation-prefix", Options.StringParser)
-            .setDefaultArgument("#")
-            .setDescription("The prefix that precedes each annotation");
+            .setDescription("The prefix that precedes each annotation (overrides the prefix of the annotation style)");
+
+    public static final Option<String> OLD_FEATURE_NAME_OPTION = Options.newOption(
+                    "old-feature-name", Options.StringParser)
+            .setDescription("Current feature name to rename in annotations");
+
+    public static final Option<String> NEW_FEATURE_NAME_OPTION = Options.newOption(
+                    "new-feature-name", Options.StringParser)
+            .setDescription("New feature name to use in annotations");
 
     @Override
-    public int run(OptionList optionParser) {
+    public int run(OptionParser optionParser) {
         Path in = optionParser.getResult(INPUT_OPTION).orElseThrow();
         Path out = optionParser.getResult(OUTPUT_OPTION).orElse(null);
         Charset charset = StandardCharsets.UTF_8;
-        String annotationPrefix = optionParser.getResult(PREFIX_OPTION).orElseThrow();
+        Preprocessor.Style style =
+                optionParser.getResult(STYLE_OPTION).orElseThrow().getStyle();
+        Result<String> annotationPrefix = optionParser.getResult(PREFIX_OPTION);
+        if (annotationPrefix.isPresent()) {
+            style = style.withPrefix(annotationPrefix.get());
+        }
 
-        Preprocessor preprocessor = new Preprocessor(annotationPrefix, JavaSymbols.INSTANCE);
+        Preprocessor preprocessor = new Preprocessor(style);
 
         Mode mode = optionParser.getResult(MODE_OPTION).orElseThrow();
 
         Stream<String> stream = null;
         try {
             switch (mode) {
+                case CHECK_STRUCTURE:
+                    return checkStructure(in, charset, preprocessor);
                 case PROCESS:
                     stream = preprocess(
                             in,
@@ -97,11 +144,29 @@ public class PreprocessorCommand extends ACommand {
                             charset,
                             preprocessor);
                     break;
+                case RENAME_FEATURE:
+                    stream = renameFeature(
+                            in,
+                            charset,
+                            preprocessor,
+                            optionParser.getResult(OLD_FEATURE_NAME_OPTION).orElseThrow(),
+                            optionParser.getResult(NEW_FEATURE_NAME_OPTION).orElseThrow());
+                    break;
                 case PRINT_VARIABLES:
                     stream = printVariableNames(in, charset, preprocessor);
                     break;
                 case PRINT_ANNOTATIONS:
                     stream = printAnnotations(in, charset, preprocessor);
+                    break;
+                case PRINT_PRESENCE_CONDITIONS:
+                    stream = printPresenceConditions(in, charset, preprocessor);
+                    break;
+                case CHECK_SYNTAX:
+                    stream = detectInvalidSyntax(in, charset, preprocessor);
+                    break;
+                case FIND_UNKNOWN_FEATURES:
+                    stream = findUnknownFeatures(
+                            in, optionParser.getResult(FEATURE_MODEL_OPTION).orElseThrow(), charset, preprocessor);
                     break;
                 default:
                     return 1;
@@ -131,6 +196,23 @@ public class PreprocessorCommand extends ACommand {
             stream.forEach(FeatJAR.log()::plainMessage);
         }
         return 0;
+    }
+
+    private int checkStructure(Path file, Charset charset, Preprocessor preprocessor) throws IOException {
+        List<Problem> problems;
+        try (Stream<String> lines = Files.lines(file, charset)) {
+            problems = preprocessor.checkStructure(lines);
+        }
+
+        FeatJAR.log().problems(problems);
+        return (problems.isEmpty() ? 0 : 1);
+    }
+
+    private Stream<String> renameFeature(
+            Path in, Charset charset, Preprocessor preprocessor, String oldFeatureName, String newFeatureName)
+            throws IOException {
+
+        return preprocessor.renameFeatureAnnotations(Files.lines(in, charset), oldFeatureName, newFeatureName);
     }
 
     private Stream<String> preprocess(
@@ -189,6 +271,31 @@ public class PreprocessorCommand extends ACommand {
 
     private Stream<String> printAnnotations(Path in, Charset charset, Preprocessor preprocessor) throws IOException {
         return preprocessor.extractAnnotations(Files.lines(in, charset)).stream();
+    }
+
+    private Stream<String> printPresenceConditions(Path in, Charset charset, Preprocessor preprocessor)
+            throws IOException {
+        ExpressionSerializer serializer = new ExpressionSerializer();
+        serializer.setSymbols(JavaSymbols.INSTANCE);
+        return preprocessor.computePresenceConditions(Files.lines(in, charset)).stream()
+                .map(formula -> Trees.traverse(formula, serializer).orElseThrow());
+    }
+
+    private Stream<String> detectInvalidSyntax(Path in, Charset charset, Preprocessor preprocessor) throws IOException {
+
+        return preprocessor.checkSyntax(Files.lines(in, charset)).stream()
+                .map(problem -> String.format("Line %d: %s", problem.getLineNumber(), problem.getMessage()));
+    }
+
+    private Stream<String> findUnknownFeatures(
+            Path in, Path featureModelPath, Charset charset, Preprocessor preprocessor) throws IOException {
+        Result<IFormula> featureModel = IO.load(featureModelPath, FormulaFormats.getInstance());
+        if (featureModel.isEmpty()) {
+            FeatJAR.log().problems(featureModel);
+            return Stream.empty();
+        }
+        return preprocessor.findUnknownFeatures(Files.lines(in, charset), featureModel.get()).stream()
+                .map(problem -> String.format("line %d: %s", problem.getLineNumber(), problem.getMessage()));
     }
 
     @Override

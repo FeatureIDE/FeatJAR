@@ -36,7 +36,7 @@ import java.util.function.Function;
  */
 public class TreeNodeReplacer<T extends ITree<T>> implements ITreeVisitor<T, Void> {
 
-    private Function<T, ? extends T> function;
+    protected Function<T, ? extends T> function;
 
     public Function<T, ? extends T> getFunction() {
         return function;

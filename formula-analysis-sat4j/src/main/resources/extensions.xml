@@ -9,6 +9,7 @@
 		<extension id="de.featjar.analysis.sat4j.cli.SolutionCountCommand" />
 		<extension id="de.featjar.analysis.sat4j.cli.SolutionsCommand" />
 		<extension id="de.featjar.analysis.sat4j.cli.TWiseCommand" />
+		<extension id="de.featjar.analysis.sat4j.cli.PreprocessorAnalyzerCommand" />
 		<extension id="de.featjar.analysis.sat4j.cli.TWiseCoverageCommand" />
 		<extension id="de.featjar.analysis.sat4j.cli.YASACommand" />
 	</point>
