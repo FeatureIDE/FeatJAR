@@ -78,4 +78,9 @@ public class ParseProblem extends Problem {
     public int getLineNumber() {
         return lineNumber;
     }
+
+    @Override
+    public String toString() {
+        return severity + ": L." + lineNumber + ": " + getMessage();
+    }
 }

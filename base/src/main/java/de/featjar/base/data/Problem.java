@@ -172,7 +172,7 @@ public class Problem {
 
     @Override
     public String toString() {
-        return severity + ": " + getMessage() + "\n";
+        return severity + ": " + getMessage();
     }
 
     /**

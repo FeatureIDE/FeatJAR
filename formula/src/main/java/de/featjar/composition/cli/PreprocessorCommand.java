@@ -25,60 +25,44 @@ import de.featjar.base.cli.ACommand;
 import de.featjar.base.cli.Option;
 import de.featjar.base.cli.OptionParser;
 import de.featjar.base.cli.Options;
-import de.featjar.base.data.Problem;
 import de.featjar.base.data.Result;
 import de.featjar.base.io.IO;
+import de.featjar.base.io.format.ParseProblem;
 import de.featjar.base.tree.Trees;
-import de.featjar.composition.Preprocessor;
+import de.featjar.composition.PreprocessorStream;
+import de.featjar.composition.Style;
 import de.featjar.formula.assignment.Assignment;
-import de.featjar.formula.io.FormulaFormats;
 import de.featjar.formula.io.textual.CPPAssignmentFormat;
 import de.featjar.formula.io.textual.ExpressionSerializer;
-import de.featjar.formula.io.textual.JavaSymbols;
-import de.featjar.formula.structure.IFormula;
-import java.io.BufferedWriter;
+import de.featjar.formula.io.textual.ExpressionSerializer.Notation;
+import de.featjar.formula.io.textual.ShortSymbols;
 import java.io.IOException;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.StandardOpenOption;
-import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
 public class PreprocessorCommand extends ACommand {
 
     public static enum Mode {
+        CHECK,
         PROCESS,
         PRINT_VARIABLES,
         PRINT_ANNOTATIONS,
-        CHECK_STRUCTURE,
-        FIND_UNKNOWN_FEATURES,
         PRINT_PRESENCE_CONDITIONS,
-        CHECK_SYNTAX,
-        RENAME_FEATURE
-    }
-
-    public static enum MissingVariables {
-        IGNORE,
-        TRUE,
-        FALSE
     }
 
     public static enum AnnotationStyle {
-        CPP(Preprocessor.Style.CPP),
-        ANTENNA(Preprocessor.Style.ANTENNA),
-        MUNGE(Preprocessor.Style.MUNGE);
+        CPP(Style.CPP),
+        ANTENNA(Style.ANTENNA),
+        MUNGE(Style.MUNGE);
 
-        private final Preprocessor.Style style;
+        private final Style style;
 
-        private AnnotationStyle(Preprocessor.Style style) {
+        private AnnotationStyle(Style style) {
             this.style = style;
         }
 
-        public Preprocessor.Style getStyle() {
+        public Style getStyle() {
             return style;
         }
     }
@@ -90,18 +74,18 @@ public class PreprocessorCommand extends ACommand {
             Options.newOption("feature-model", Options.ExistingPathParser).setDescription("Path to feature model file");
 
     public static final Option<Mode> MODE_OPTION = Options.newEnumOption("mode", Mode.class)
-            .setDefaultArgument(Mode.PROCESS.name())
+            .setDefaultArgument(Mode.CHECK.name())
             .setDescription("Mode of operation");
 
-    public static final Option<MissingVariables> MISSING_VARIABLES_OPTION = Options.newEnumOption(
-                    "missing-variables", MissingVariables.class)
-            .setDefaultArgument(MissingVariables.IGNORE.name())
-            .setDescription("How to deal with variables in the processed file that do not appear in the given config");
+    public static final Option<PreprocessorStream.UndeterminedMode> MISSING_VARIABLES_OPTION = Options.newEnumOption(
+                    "undetermined", PreprocessorStream.UndeterminedMode.class)
+            .setDefaultArgument(PreprocessorStream.UndeterminedMode.WARNING.name())
+            .setDescription("How to deal with undetermined variables");
 
     public static final Option<AnnotationStyle> STYLE_OPTION = Options.newEnumOption(
                     "annotation-style", AnnotationStyle.class)
             .setDefaultArgument(AnnotationStyle.CPP.name())
-            .setDescription("The syntax of the annotations (CPP: #if A, ANTENNA: //#if A, MUNGE: /*if[A]*/)");
+            .setDescription("The syntax of the annotations");
 
     public static final Option<String> PREFIX_OPTION = Options.newOption("annotation-prefix", Options.StringParser)
             .setDescription("The prefix that precedes each annotation (overrides the prefix of the annotation style)");
@@ -117,185 +101,49 @@ public class PreprocessorCommand extends ACommand {
     @Override
     public int run(OptionParser optionParser) {
         Path in = optionParser.getResult(INPUT_OPTION).orElseThrow();
-        Path out = optionParser.getResult(OUTPUT_OPTION).orElse(null);
-        Charset charset = StandardCharsets.UTF_8;
-        Preprocessor.Style style =
-                optionParser.getResult(STYLE_OPTION).orElseThrow().getStyle();
+        Style style = optionParser.getResult(STYLE_OPTION).orElseThrow().getStyle();
         Result<String> annotationPrefix = optionParser.getResult(PREFIX_OPTION);
         if (annotationPrefix.isPresent()) {
             style = style.withPrefix(annotationPrefix.get());
         }
-
-        Preprocessor preprocessor = new Preprocessor(style);
-
         Mode mode = optionParser.getResult(MODE_OPTION).orElseThrow();
 
-        Stream<String> stream = null;
-        try {
-            switch (mode) {
-                case CHECK_STRUCTURE:
-                    return checkStructure(in, charset, preprocessor);
-                case PROCESS:
-                    stream = preprocess(
-                            in,
-                            out,
-                            optionParser.getResult(CONFIGURATION_OPTION).orElseThrow(),
-                            optionParser.getResult(MISSING_VARIABLES_OPTION).orElseThrow(),
-                            charset,
-                            preprocessor);
-                    break;
-                case RENAME_FEATURE:
-                    stream = renameFeature(
-                            in,
-                            charset,
-                            preprocessor,
-                            optionParser.getResult(OLD_FEATURE_NAME_OPTION).orElseThrow(),
-                            optionParser.getResult(NEW_FEATURE_NAME_OPTION).orElseThrow());
-                    break;
-                case PRINT_VARIABLES:
-                    stream = printVariableNames(in, charset, preprocessor);
-                    break;
-                case PRINT_ANNOTATIONS:
-                    stream = printAnnotations(in, charset, preprocessor);
-                    break;
-                case PRINT_PRESENCE_CONDITIONS:
-                    stream = printPresenceConditions(in, charset, preprocessor);
-                    break;
-                case CHECK_SYNTAX:
-                    stream = detectInvalidSyntax(in, charset, preprocessor);
-                    break;
-                case FIND_UNKNOWN_FEATURES:
-                    stream = findUnknownFeatures(
-                            in, optionParser.getResult(FEATURE_MODEL_OPTION).orElseThrow(), charset, preprocessor);
-                    break;
-                default:
-                    return 1;
-            }
+        try (PreprocessorStream preprocessor = PreprocessorStream.create(in, style)) {
+            Stream<String> stream =
+                    switch (mode) {
+                        case CHECK -> preprocessor.mapToProblems().map(ParseProblem::toString);
+                        case PROCESS -> {
+                            Assignment parsedAssignment = IO.load(
+                                            optionParser
+                                                    .getResult(CONFIGURATION_OPTION)
+                                                    .orElseThrow(),
+                                            new CPPAssignmentFormat())
+                                    .orElseThrow();
+                            yield preprocessor
+                                    .process(
+                                            parsedAssignment,
+                                            optionParser
+                                                    .getResult(MISSING_VARIABLES_OPTION)
+                                                    .orElseThrow())
+                                    .mapToString();
+                        }
+                        case PRINT_VARIABLES -> preprocessor.mapToVariableNames();
+                        case PRINT_ANNOTATIONS -> preprocessor.keepAnnotations().mapToString();
+                        case PRINT_PRESENCE_CONDITIONS -> {
+                            ExpressionSerializer serializer = new ExpressionSerializer();
+                            serializer.setNotation(Notation.INFIX);
+                            serializer.setSymbols(ShortSymbols.INSTANCE);
+                            yield preprocessor.mapToPresenceConditions().map(pc -> Trees.traverse(pc, serializer)
+                                    .get());
+                        }
+                        default -> throw new IllegalStateException(String.valueOf(mode));
+                    };
+            writeStream(optionParser, stream);
         } catch (IOException e) {
             FeatJAR.log().error(e);
-            return 1;
+            return FeatJAR.ERROR_COMPUTING_RESULT;
         }
-
-        if (out != null) {
-            try (BufferedWriter writer = Files.newBufferedWriter(
-                    out, charset, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING)) {
-                stream.forEach(line -> {
-                    try {
-                        writer.write(line);
-                        writer.newLine();
-                        writer.flush();
-                    } catch (IOException e) {
-                        FeatJAR.log().error(e);
-                    }
-                });
-            } catch (IOException e) {
-                FeatJAR.log().error(e);
-                return 1;
-            }
-        } else {
-            stream.forEach(FeatJAR.log()::plainMessage);
-        }
-        return 0;
-    }
-
-    private int checkStructure(Path file, Charset charset, Preprocessor preprocessor) throws IOException {
-        List<Problem> problems;
-        try (Stream<String> lines = Files.lines(file, charset)) {
-            problems = preprocessor.checkStructure(lines);
-        }
-
-        FeatJAR.log().problems(problems);
-        return (problems.isEmpty() ? 0 : 1);
-    }
-
-    private Stream<String> renameFeature(
-            Path in, Charset charset, Preprocessor preprocessor, String oldFeatureName, String newFeatureName)
-            throws IOException {
-
-        return preprocessor.renameFeatureAnnotations(Files.lines(in, charset), oldFeatureName, newFeatureName);
-    }
-
-    private Stream<String> preprocess(
-            Path in,
-            Path out,
-            Path assignmentPath,
-            MissingVariables missingVariables,
-            Charset charset,
-            Preprocessor preprocessor)
-            throws IOException {
-        Result<Assignment> parsedAssignment = IO.load(assignmentPath, new CPPAssignmentFormat());
-        if (parsedAssignment.isEmpty()) {
-            FeatJAR.log().problems(parsedAssignment);
-            return Stream.empty();
-        }
-
-        final Assignment assignment;
-        switch (missingVariables) {
-            case FALSE:
-                assignment = addMissingVariablesToAssignment(
-                        parsedAssignment.get(),
-                        preprocessor.extractVariableNames(Files.lines(in, charset)),
-                        Boolean.FALSE);
-                break;
-            case IGNORE:
-                assignment = addMissingVariablesToAssignment(
-                        parsedAssignment.get(), preprocessor.extractVariableNames(Files.lines(in, charset)), null);
-                break;
-            case TRUE:
-                assignment = addMissingVariablesToAssignment(
-                        parsedAssignment.get(),
-                        preprocessor.extractVariableNames(Files.lines(in, charset)),
-                        Boolean.TRUE);
-                break;
-            default:
-                throw new IllegalStateException(String.valueOf(missingVariables));
-        }
-
-        return preprocessor.preprocess(Files.lines(in, charset), assignment);
-    }
-
-    private Assignment addMissingVariablesToAssignment(
-            Assignment orgAssignment, List<String> extractVariableNames, Object value) throws IOException {
-        LinkedHashMap<String, Object> variableValuePairs = new LinkedHashMap<>(orgAssignment.getAll());
-        for (String variableName : extractVariableNames) {
-            if (!variableValuePairs.containsKey(variableName)) {
-                variableValuePairs.put(variableName, value);
-            }
-        }
-        return new Assignment(variableValuePairs);
-    }
-
-    private Stream<String> printVariableNames(Path in, Charset charset, Preprocessor preprocessor) throws IOException {
-        return preprocessor.extractVariableNames(Files.lines(in, charset)).stream();
-    }
-
-    private Stream<String> printAnnotations(Path in, Charset charset, Preprocessor preprocessor) throws IOException {
-        return preprocessor.extractAnnotations(Files.lines(in, charset)).stream();
-    }
-
-    private Stream<String> printPresenceConditions(Path in, Charset charset, Preprocessor preprocessor)
-            throws IOException {
-        ExpressionSerializer serializer = new ExpressionSerializer();
-        serializer.setSymbols(JavaSymbols.INSTANCE);
-        return preprocessor.computePresenceConditions(Files.lines(in, charset)).stream()
-                .map(formula -> Trees.traverse(formula, serializer).orElseThrow());
-    }
-
-    private Stream<String> detectInvalidSyntax(Path in, Charset charset, Preprocessor preprocessor) throws IOException {
-
-        return preprocessor.checkSyntax(Files.lines(in, charset)).stream()
-                .map(problem -> String.format("Line %d: %s", problem.getLineNumber(), problem.getMessage()));
-    }
-
-    private Stream<String> findUnknownFeatures(
-            Path in, Path featureModelPath, Charset charset, Preprocessor preprocessor) throws IOException {
-        Result<IFormula> featureModel = IO.load(featureModelPath, FormulaFormats.getInstance());
-        if (featureModel.isEmpty()) {
-            FeatJAR.log().problems(featureModel);
-            return Stream.empty();
-        }
-        return preprocessor.findUnknownFeatures(Files.lines(in, charset), featureModel.get()).stream()
-                .map(problem -> String.format("line %d: %s", problem.getLineNumber(), problem.getMessage()));
+        return FeatJAR.EXIT_SUCCESS;
     }
 
     @Override

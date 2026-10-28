@@ -34,6 +34,7 @@ import java.nio.file.OpenOption;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.List;
+import java.util.stream.Stream;
 
 /**
  * The abstract class for any command.
@@ -96,6 +97,16 @@ public abstract class ACommand implements ICommand {
         return writeObject(optionParser, result.get(), ouputFormat);
     }
 
+    protected final int writeStream(OptionParser optionParser, Stream<String> result) {
+        try {
+            write(optionParser, result);
+            return FeatJAR.EXIT_SUCCESS;
+        } catch (IOException e) {
+            FeatJAR.log().error(e);
+            return FeatJAR.ERROR_WRITING_RESULT;
+        }
+    }
+
     protected <T> int writeObject(OptionParser optionParser, T output, IFormat<T> ouputFormat) {
         try {
             write(optionParser, output, ouputFormat);
@@ -147,6 +158,34 @@ public abstract class ACommand implements ICommand {
                                 ? new IOMapperOptions[] {IOMapperOptions.ZIP_COMPRESSION}
                                 : new IOMapperOptions[0];
                 IO.save(output, outputPath, outputFormat, ioOutputOptions);
+            }
+        }
+    }
+
+    private <T> void write(OptionParser optionParser, Stream<String> output) throws IOException {
+        Path outputPath = optionParser.getResult(OUTPUT_OPTION).orElse(null);
+
+        if (outputPath == null) {
+            output.forEach(FeatJAR.log()::plainMessage);
+        } else {
+            if (Files.isDirectory(outputPath)) {
+                throw new IOException(outputPath.toString() + " is a directory");
+            } else {
+                if (Files.exists(outputPath)) {
+                    if (optionParser.getResult(OUTPUT_OVERWRITE_OPTION).get()) {
+                        FeatJAR.log().warning("Overwriting existing file " + outputPath.toString());
+                    } else {
+                        FeatJAR.log()
+                                .warning(outputPath.toString() + " already exists. Use --"
+                                        + OUTPUT_OVERWRITE_OPTION.getName() + " to overwrite existing files.");
+                        throw new IOException(outputPath.toString() + " already exists");
+                    }
+                }
+                OpenOption[] openOptions =
+                        optionParser.getResult(OUTPUT_OVERWRITE_OPTION).get()
+                                ? new OpenOption[] {StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING}
+                                : new OpenOption[] {StandardOpenOption.CREATE_NEW};
+                Files.write(outputPath, (Iterable<String>) output::iterator, StandardCharsets.UTF_8, openOptions);
             }
         }
     }
